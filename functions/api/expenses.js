@@ -1,0 +1,254 @@
+// GET Handler: Retrieve all expenses from Cloudflare D1
+export async function onRequestGet(context) {
+    const db = context.env.DB;
+    if (!db) {
+        return new Response(JSON.stringify({ error: "Database D1 binding 'DB' is missing in Cloudflare settings" }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" }
+        });
+    }
+
+    try {
+        const { results } = await db.prepare("SELECT * FROM expenses ORDER BY date DESC, id DESC").all();
+        return new Response(JSON.stringify(results), {
+            headers: { "Content-Type": "application/json" }
+        });
+    } catch (err) {
+        return new Response(JSON.stringify({ error: "Database read error: " + err.message }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" }
+        });
+    }
+}
+
+// POST Handler: Insert (Create), Update, or Delete expense entries in Cloudflare D1
+export async function onRequestPost(context) {
+    // Check Authorization passcode (defaults to "123456" if not set in Cloudflare environment)
+    const secretPasscode = context.env.AUTH_PASSCODE || "123456";
+    const authHeader = context.request.headers.get("Authorization") || "";
+    const passcode = authHeader.replace(/^Bearer\s+/i, "").trim();
+    if (passcode !== secretPasscode.trim()) {
+        return new Response(JSON.stringify({ error: "Unauthorized: Invalid passcode" }), {
+            status: 401,
+            headers: {
+                "Content-Type": "application/json",
+                "WWW-Authenticate": "Bearer"
+            }
+        });
+    }
+
+    const db = context.env.DB;
+    if (!db) {
+        return new Response(JSON.stringify({ error: "Database D1 binding 'DB' is missing in Cloudflare settings" }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" }
+        });
+    }
+
+    try {
+        const payload = await context.request.json();
+        const { action, expense } = payload;
+
+        if (!action) {
+            return new Response(JSON.stringify({ error: "Missing action field" }), {
+                status: 400,
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+
+        // Action: Reset Database
+        if (action === "reset") {
+            const { initialExpenses } = payload;
+            if (!Array.isArray(initialExpenses)) {
+                return new Response(JSON.stringify({ error: "Missing initialExpenses array for database reset" }), {
+                    status: 400,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            // D1 batch execution runs everything in a single SQLite transaction
+            const statements = [
+                db.prepare("DELETE FROM expenses")
+            ];
+
+            for (const item of initialExpenses) {
+                statements.push(
+                    db.prepare(
+                        `INSERT INTO expenses (id, item, description, location, category, pic, number, unit, priceUnit, total, invNo, date, type, budget) 
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+                    ).bind(
+                        item.id,
+                        item.item,
+                        item.description || "",
+                        item.location,
+                        item.category,
+                        item.pic,
+                        parseFloat(item.number) || 0,
+                        item.unit,
+                        parseFloat(item.priceUnit) || 0,
+                        parseFloat(item.total) || 0,
+                        item.invNo || "",
+                        item.date,
+                        item.type,
+                        item.budget
+                    )
+                );
+            }
+
+            await db.batch(statements);
+
+            return new Response(JSON.stringify({ success: true }), {
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+
+        // Action: Batch Create (Bulk Import)
+        if (action === "batch-create") {
+            const { expenses } = payload;
+            if (!Array.isArray(expenses)) {
+                return new Response(JSON.stringify({ error: "Missing expenses array for batch-create" }), {
+                    status: 400,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            const statements = [];
+            for (const item of expenses) {
+                statements.push(
+                    db.prepare(
+                        `INSERT INTO expenses (id, item, description, location, category, pic, number, unit, priceUnit, total, invNo, date, type, budget) 
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+                    ).bind(
+                        item.id,
+                        item.item,
+                        item.description || "",
+                        item.location || "",
+                        item.category || "",
+                        item.pic || "",
+                        parseFloat(item.number) || 0,
+                        item.unit || "",
+                        parseFloat(item.priceUnit) || 0,
+                        parseFloat(item.total) || 0,
+                        item.invNo || "",
+                        item.date,
+                        item.type,
+                        item.budget
+                    )
+                );
+            }
+
+            await db.batch(statements);
+
+            return new Response(JSON.stringify({ success: true }), {
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+
+        // For other actions, require the expense data object
+        if (!expense) {
+            return new Response(JSON.stringify({ error: "Missing expense data object" }), {
+                status: 400,
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+
+        // Action: Create
+        if (action === "create") {
+            const { id, item, description, location, category, pic, number, unit, priceUnit, total, invNo, date, type, budget } = expense;
+            
+            await db.prepare(
+                `INSERT INTO expenses (id, item, description, location, category, pic, number, unit, priceUnit, total, invNo, date, type, budget) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+            ).bind(
+                id, 
+                item, 
+                description || "", 
+                location, 
+                category, 
+                pic, 
+                parseFloat(number) || 0, 
+                unit, 
+                parseFloat(priceUnit) || 0, 
+                parseFloat(total) || 0, 
+                invNo || "", 
+                date, 
+                type, 
+                budget
+            ).run();
+
+            return new Response(JSON.stringify({ success: true, id }), {
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+
+        // Action: Update
+        if (action === "update") {
+            const { id, item, description, location, category, pic, number, unit, priceUnit, total, invNo, date, type, budget } = expense;
+            
+            await db.prepare(
+                `UPDATE expenses SET 
+                    item = ?, 
+                    description = ?, 
+                    location = ?, 
+                    category = ?, 
+                    pic = ?, 
+                    number = ?, 
+                    unit = ?, 
+                    priceUnit = ?, 
+                    total = ?, 
+                    invNo = ?, 
+                    date = ?, 
+                    type = ?, 
+                    budget = ? 
+                 WHERE id = ?`
+            ).bind(
+                item, 
+                description || "", 
+                location, 
+                category, 
+                pic, 
+                parseFloat(number) || 0, 
+                unit, 
+                parseFloat(priceUnit) || 0, 
+                parseFloat(total) || 0, 
+                invNo || "", 
+                date, 
+                type, 
+                budget,
+                id
+            ).run();
+
+            return new Response(JSON.stringify({ success: true }), {
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+
+        // Action: Delete
+        if (action === "delete") {
+            const { id } = expense;
+            if (!id) {
+                return new Response(JSON.stringify({ error: "Missing expense ID for deletion" }), {
+                    status: 400,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            await db.prepare("DELETE FROM expenses WHERE id = ?").bind(id).run();
+
+            return new Response(JSON.stringify({ success: true }), {
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+
+        return new Response(JSON.stringify({ error: "Invalid action type: " + action }), {
+            status: 400,
+            headers: { "Content-Type": "application/json" }
+        });
+
+    } catch (err) {
+        return new Response(JSON.stringify({ error: "Database transaction error: " + err.message }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" }
+        });
+    }
+}
