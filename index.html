@@ -3599,15 +3599,15 @@
             };
 
             const locationDisplayMap = {
-                'ออฟฟิศ': { prefix: 'ทำ', name: 'ออฟฟิศ' },
-                'คอกไก่ - ที่ทานข้าว': { prefix: 'ทำ', name: 'คอกไก่ & ที่ทานข้าว' },
-                'คอกไก่-ที่ทานข้าว': { prefix: 'ทำ', name: 'คอกไก่ & ที่ทานข้าว' },
-                'คอกไก่ & ที่ทานข้าว': { prefix: 'ทำ', name: 'คอกไก่ & ที่ทานข้าว' },
-                'งานรั้ว': { prefix: 'ทำ', name: 'รั้วกั้น' },
-                'กล้องวงจรปิด': { prefix: 'ติดตั้ง', name: 'กล้องวงจรปิด' },
-                'งานไฟฟ้า-แสงสว่าง': { prefix: 'ทำ', name: 'ระบบไฟฟ้าและแสงสว่าง' },
-                'ห้องน้ำ': { prefix: 'ทำ', name: 'ห้องน้ำ' },
-                'ทางเข้า': { prefix: 'ทำ', name: 'ทางเข้า' }
+                'ออฟฟิศ': 'ออฟฟิศ',
+                'คอกไก่ - ที่ทานข้าว': 'คอกไก่ & ที่ทานข้าว',
+                'คอกไก่-ที่ทานข้าว': 'คอกไก่ & ที่ทานข้าว',
+                'คอกไก่ & ที่ทานข้าว': 'คอกไก่ & ที่ทานข้าว',
+                'งานรั้ว': 'รั้วกั้น',
+                'กล้องวงจรปิด': 'กล้องวงจรปิด',
+                'งานไฟฟ้า-แสงสว่าง': 'ไฟฟ้าและแสงสว่าง',
+                'ห้องน้ำ': 'ห้องน้ำ',
+                'ทางเข้า': 'ทางเข้า'
             };
 
             function getEmoji(locName) {
@@ -3624,11 +3624,7 @@
                 if (locationDisplayMap[key]) {
                     return locationDisplayMap[key];
                 }
-                const isInstall = locName.includes('กล้อง') || locName.includes('ไฟ') || locName.includes('แอร์') || locName.includes('ระบบ');
-                return {
-                    prefix: isInstall ? 'ติดตั้ง' : 'ทำ',
-                    name: locName.replace(/^งาน|^ทำ|^ติดตั้ง/, '').trim()
-                };
+                return locName.replace(/^งาน|^ทำ|^ติดตั้ง/, '').trim();
             }
 
             const sortedLocs = Object.entries(locationsMap).sort((a, b) => b[1] - a[1]);
@@ -3636,19 +3632,19 @@
             let locsText = '';
             sortedLocs.forEach(([locName, locSum]) => {
                 const emoji = getEmoji(locName);
-                const formatInfo = getFormattedLocation(locName);
+                const displayName = getFormattedLocation(locName);
                 const formattedVal = Number(locSum).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                locsText += `${emoji} ${formatInfo.prefix}${formatInfo.name}: ${formattedVal} บาท\n`;
+                locsText += `${emoji} ${displayName}: ฿${formattedVal}\n`;
             });
 
             const formattedTotal = Number(total).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             const formattedBonus = Number(bonusSpent).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             const formattedDad = Number(dadSpent).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-            const summaryText = `💵 ยอดค่าใช้จ่ายลานกางเต็นท์ รวมทั้งหมด: ${formattedTotal} บาท\n\n` +
-                `แบ่งจ่ายจาก 2 ส่วนหลัก: \n` +
-                `🔵 งบโบนัส: ${formattedBonus} บาท \n` +
-                `🟡 งบพ่อ: ${formattedDad} บาท\n\n` +
+            const summaryText = `💵 ค่าใช้จ่ายลานกางเตนท์\n` +
+                `รวมทั้งหมด: ฿${formattedTotal}\n` +
+                `🔵 เงินโบนัส: ฿${formattedBonus}\n` +
+                `🟡 เงินพ่อ: ฿${formattedDad}\n\n` +
                 `แยกตามงานแต่ละส่วน (พื้นที่หน้างาน):\n` +
                 locsText.trim();
 
