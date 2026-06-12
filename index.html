@@ -555,6 +555,18 @@
             border-color: rgba(255, 255, 255, 0.2);
         }
 
+        .btn-line {
+            background: linear-gradient(135deg, #06c755, #05b04b) !important;
+            color: white !important;
+            border: none !important;
+            box-shadow: 0 4px 12px rgba(6, 199, 85, 0.15) !important;
+        }
+
+        .btn-line:hover {
+            transform: translateY(-1px) !important;
+            box-shadow: 0 6px 16px rgba(6, 199, 85, 0.25) !important;
+        }
+
         /* Data table container */
         .table-panel {
             overflow: hidden;
@@ -1184,7 +1196,7 @@
                 width: 100% !important;
                 margin-left: 0 !important;
             }
-            #addExpenseBtn {
+            #addExpenseBtn, #copyLineSummaryBtn {
                 grid-column: span 2 !important;
                 width: 100% !important;
                 justify-content: center !important;
@@ -1553,6 +1565,13 @@
                 <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;">
                 <button class="btn btn-secondary" id="importExcelBtn" onclick="document.getElementById('excelFileInput').click()" title="Import expenses from Excel/CSV">Import Excel</button>
                 <button class="btn btn-secondary" id="exportCsvBtn">Export CSV</button>
+                <button class="btn btn-line" id="copyLineSummaryBtn" onclick="copyLineSummary()" title="คัดลอกสรุปสำหรับส่งใน LINE">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    Copy LINE Summary
+                </button>
                 <button class="btn btn-primary" id="addExpenseBtn">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -3544,6 +3563,102 @@
                 document.getElementById('excelFileInput').value = '';
             }
         }
+
+        // Copy summary in LINE friendly format
+        window.copyLineSummary = function() {
+            const total = filteredExpenses.reduce((sum, item) => sum + (item.total || 0), 0);
+            const dadSpent = filteredExpenses.filter(i => i.budget === 'Dad').reduce((sum, i) => sum + (i.total || 0), 0);
+            const bonusSpent = filteredExpenses.filter(i => i.budget === 'Bonus').reduce((sum, i) => sum + (i.total || 0), 0);
+
+            // Group by location
+            const locationsMap = {};
+            filteredExpenses.forEach(item => {
+                let loc = (item.location || '').trim();
+                if (!loc) return;
+                
+                // Group different spelling variations of chicken coop
+                if (loc.replace(/\s+/g, '') === 'คอกไก่-ที่ทานข้าว') {
+                    loc = 'คอกไก่ & ที่ทานข้าว';
+                }
+                locationsMap[loc] = (locationsMap[loc] || 0) + (item.total || 0);
+            });
+
+            const emojiMap = {
+                'ออฟฟิศ': '🏢',
+                'คอกไก่': '🐔',
+                'ทานข้าว': '🐔',
+                'รั้ว': '🚧',
+                'กล้อง': '📹',
+                'cctv': '📹',
+                'ไฟ': '💡',
+                'แสง': '💡',
+                'ห้องน้ำ': '🚽',
+                'สุขา': '🚽',
+                'ทางเข้า': '🚗',
+                'ถนน': '🚗'
+            };
+
+            const locationDisplayMap = {
+                'ออฟฟิศ': { prefix: 'ทำ', name: 'ออฟฟิศ' },
+                'คอกไก่ - ที่ทานข้าว': { prefix: 'ทำ', name: 'คอกไก่ & ที่ทานข้าว' },
+                'คอกไก่-ที่ทานข้าว': { prefix: 'ทำ', name: 'คอกไก่ & ที่ทานข้าว' },
+                'คอกไก่ & ที่ทานข้าว': { prefix: 'ทำ', name: 'คอกไก่ & ที่ทานข้าว' },
+                'งานรั้ว': { prefix: 'ทำ', name: 'รั้วกั้น' },
+                'กล้องวงจรปิด': { prefix: 'ติดตั้ง', name: 'กล้องวงจรปิด' },
+                'งานไฟฟ้า-แสงสว่าง': { prefix: 'ทำ', name: 'ระบบไฟฟ้าและแสงสว่าง' },
+                'ห้องน้ำ': { prefix: 'ทำ', name: 'ห้องน้ำ' },
+                'ทางเข้า': { prefix: 'ทำ', name: 'ทางเข้า' }
+            };
+
+            function getEmoji(locName) {
+                for (const key in emojiMap) {
+                    if (locName.toLowerCase().includes(key)) {
+                        return emojiMap[key];
+                    }
+                }
+                return '📍';
+            }
+
+            function getFormattedLocation(locName) {
+                const key = locName.trim();
+                if (locationDisplayMap[key]) {
+                    return locationDisplayMap[key];
+                }
+                const isInstall = locName.includes('กล้อง') || locName.includes('ไฟ') || locName.includes('แอร์') || locName.includes('ระบบ');
+                return {
+                    prefix: isInstall ? 'ติดตั้ง' : 'ทำ',
+                    name: locName.replace(/^งาน|^ทำ|^ติดตั้ง/, '').trim()
+                };
+            }
+
+            const sortedLocs = Object.entries(locationsMap).sort((a, b) => b[1] - a[1]);
+            
+            let locsText = '';
+            sortedLocs.forEach(([locName, locSum]) => {
+                const emoji = getEmoji(locName);
+                const formatInfo = getFormattedLocation(locName);
+                const formattedVal = Number(locSum).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                locsText += `${emoji} ${formatInfo.prefix}${formatInfo.name}: ${formattedVal} บาท\n`;
+            });
+
+            const formattedTotal = Number(total).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const formattedBonus = Number(bonusSpent).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const formattedDad = Number(dadSpent).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            const summaryText = `💵 ยอดค่าใช้จ่ายลานกางเต็นท์ รวมทั้งหมด: ${formattedTotal} บาท\n\n` +
+                `แบ่งจ่ายจาก 2 ส่วนหลัก: \n` +
+                `🔵 งบโบนัส: ${formattedBonus} บาท \n` +
+                `🟡 งบพ่อ: ${formattedDad} บาท\n\n` +
+                `แยกตามงานแต่ละส่วน (พื้นที่หน้างาน):\n` +
+                locsText.trim();
+
+            navigator.clipboard.writeText(summaryText).then(() => {
+                showToast('คัดลอกสรุปส่ง LINE สำเร็จแล้ว!', 'success');
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                showToast('ไม่สามารถคัดลอกข้อความได้', 'error');
+            });
+        };
 
         // Theme Helper functions
         function updateThemeIcon() {
