@@ -1298,6 +1298,80 @@
                 height: 220px !important;
                 flex: none !important;
             }
+        /* Campsite Interactive Map Styles */
+        .map-panel {
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .campsite-svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 700px;
+        }
+        .zone {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .zone:hover {
+            filter: drop-shadow(0 0 8px var(--primary)) brightness(1.05);
+            opacity: 0.95;
+        }
+        .zone.selected rect, .zone.selected circle, .zone.selected path {
+            stroke: var(--primary) !important;
+            stroke-width: 4px !important;
+            filter: drop-shadow(0 0 12px var(--primary)) !important;
+            opacity: 1 !important;
+        }
+        .map-icon {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .map-icon:hover {
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 8px var(--primary));
+        }
+        .map-icon.selected circle {
+            stroke: var(--primary) !important;
+            stroke-width: 3px !important;
+            filter: drop-shadow(0 0 12px var(--primary));
+        }
+        .map-text {
+            font-family: var(--font-display);
+            font-weight: 600;
+            fill: #ffffff;
+            pointer-events: none;
+            text-anchor: middle;
+            font-size: 14px;
+        }
+        .map-subtext {
+            font-family: var(--font-sans);
+            font-weight: 500;
+            fill: rgba(255, 255, 255, 0.7);
+            pointer-events: none;
+            text-anchor: middle;
+            font-size: 11px;
+        }
+        .walkway {
+            fill: #fbcfe8;
+            stroke: rgba(255, 255, 255, 0.05);
+        }
+        .walkway-v {
+            fill: #e9d5ff;
+            stroke: rgba(255, 255, 255, 0.05);
+        }
+        
+        body.light-mode .walkway {
+            fill: #f9a8d4;
+        }
+        body.light-mode .walkway-v {
+            fill: #d8b4fe;
+        }
+        body.light-mode .map-text {
+            fill: #0f172a;
+        }
+        body.light-mode .map-subtext {
+            fill: #475569;
         }
 
         /* Responsive Modal & Layout Adjustments */
@@ -1505,6 +1579,153 @@
                     <canvas id="typeSplitChart"></canvas>
                 </div>
             </div>
+    </section>
+
+    <!-- CAMPSITE LAYOUT PLAN -->
+    <section class="glass-panel map-panel">
+        <div class="chart-header">
+            <h3 class="chart-title">Interactive Campsite Map (แผนผังลานกางเต็นท์ - คลิกพื้นที่เพื่อกรองข้อมูล)</h3>
+            <button class="btn btn-secondary" onclick="resetMapSelection()" id="resetMapBtn" style="padding: 6px 12px; font-size: 11px;">Reset Map Filter</button>
+        </div>
+        <div class="map-container" style="position: relative; width: 100%; max-width: 800px; margin: 20px auto 0 auto;">
+            <svg viewBox="0 0 1000 1100" width="100%" height="100%" class="campsite-svg">
+                <!-- Background Border representing the Fence (งานรั้ว) -->
+                <rect x="5" y="5" width="990" height="1090" fill="none" stroke="#ef4444" stroke-width="4" stroke-dasharray="8,8" class="zone" data-location="งานรั้ว" id="zone-fence" style="rx: 12px;" />
+                <text x="500" y="30" class="map-text" style="font-size: 14px; fill: #ef4444; font-weight: bold; letter-spacing: 0.5px;">🚧 รั้วกั้นแคมป์ (เส้นประรอบแผนผัง) - คลิกเพื่อดูค่าใช้จ่าย</text>
+
+                <!-- Left column elements -->
+                <!-- Toilet (ห้องน้ำ) -->
+                <g class="zone" data-location="ห้องน้ำ" id="zone-toilet">
+                    <rect x="50" y="240" width="160" height="100" rx="8" fill="#0ea5e9" stroke="#0284c7" />
+                    <!-- Top border strip in teal -->
+                    <rect x="50" y="240" width="160" height="15" rx="4" fill="#2dd4bf" />
+                    <text x="130" y="285" class="map-text">ห้องน้ำ</text>
+                    <text x="130" y="305" class="map-subtext">5×3 m</text>
+                    <text x="130" y="322" class="map-subtext" style="font-size: 9px; opacity: 0.8;">(2.5×1.5×2)</text>
+                </g>
+
+                <!-- Dining (ที่กินข้าว) -->
+                <g class="zone" data-location="คอกไก่ & ที่ทานข้าว" id="zone-dining">
+                    <rect x="50" y="370" width="112" height="256" rx="8" fill="#2dd4bf" stroke="#0f766e" />
+                    <text x="106" y="490" class="map-text">ที่กินข้าว</text>
+                    <text x="106" y="510" class="map-subtext">3.5×8 m</text>
+                </g>
+
+                <!-- Office (ออฟฟิศ) -->
+                <g class="zone" data-location="ออฟฟิศ" id="zone-office">
+                    <rect x="50" y="650" width="224" height="256" rx="8" fill="#4ade80" stroke="#16a34a" />
+                    <text x="162" y="770" class="map-text">ออฟฟิศ</text>
+                    <text x="162" y="790" class="map-subtext">7×8 m</text>
+                </g>
+
+                <!-- Parking (ที่จอดรถ) -->
+                <g class="zone" data-location="ที่จอดรถ" id="zone-parking">
+                    <rect x="20" y="930" width="288" height="150" rx="8" fill="#ecfeff" stroke="#06b6d4" stroke-dasharray="4,4" opacity="0.8" />
+                    <text x="164" y="1000" class="map-text" style="fill: #0891b2;">ที่จอดรถ</text>
+                    <text x="164" y="1020" class="map-subtext" style="fill: #0891b2;">9×12 m</text>
+                </g>
+
+                <!-- Walkways (ทางเดิน) -->
+                <!-- Horizontal Top Walkway -->
+                <rect x="300" y="300" width="536" height="40" class="walkway" />
+                <text x="568" y="325" class="map-text" style="font-size: 11px; fill: #db2777; font-weight: normal; letter-spacing: 1px;">ทางเดิน</text>
+
+                <!-- Horizontal Bottom Walkway -->
+                <rect x="350" y="760" width="486" height="40" class="walkway" />
+                <text x="593" y="785" class="map-text" style="font-size: 11px; fill: #db2777; font-weight: normal; letter-spacing: 1px;">ทางเดิน</text>
+
+                <!-- Vertical Left Walkway -->
+                <rect x="300" y="340" width="50" height="460" class="walkway-v" />
+                <text x="325" y="570" class="map-text" style="font-size: 11px; fill: #7c3aed; font-weight: normal; transform: rotate(-90deg); transform-origin: 325px 570px; letter-spacing: 1px;">ทางเดิน</text>
+
+                <!-- Vertical Right Walkway -->
+                <rect x="836" y="300" width="50" height="650" class="walkway-v" />
+                <text x="861" y="625" class="map-text" style="font-size: 11px; fill: #7c3aed; font-weight: normal; transform: rotate(90deg); transform-origin: 861px 625px; letter-spacing: 1px;">ทางเดิน</text>
+
+                <!-- Entrance (ทางเข้า) -->
+                <g class="zone" data-location="ทางเข้า" id="zone-entrance">
+                    <rect x="300" y="800" width="50" height="280" rx="4" fill="#b91c1c" stroke="#7f1d1d" />
+                    <text x="325" y="940" class="map-text" style="font-size: 13px; transform: rotate(-90deg); transform-origin: 325px 940px; fill: #ffffff; font-weight: bold; letter-spacing: 1px;">ทางเข้า</text>
+                </g>
+
+                <!-- Tent Pitching Areas (พื้นที่กางเต็นท์) -->
+                <g class="zone" data-location="พื้นที่กางเต็นท์" id="zone-tent-area-1">
+                    <rect x="350" y="340" width="100" height="420" fill="#ffedd5" stroke="#fed7aa" />
+                    <text x="400" y="540" class="map-text" style="fill: #ea580c; font-size: 12px; transform: rotate(-90deg); transform-origin: 400px 540px;">พื้นที่กางเต็นท์</text>
+                </g>
+                
+                <g class="zone" data-location="พื้นที่กางเต็นท์" id="zone-tent-area-2">
+                    <rect x="580" y="340" width="100" height="420" fill="#ffedd5" stroke="#fed7aa" />
+                    <text x="630" y="540" class="map-text" style="fill: #ea580c; font-size: 12px; transform: rotate(-90deg); transform-origin: 630px 540px;">พื้นที่กางเต็นท์</text>
+                </g>
+
+                <!-- Medium Tent Pitches (กลาง) at the top -->
+                <g class="zone" data-location="พื้นที่กางเต็นท์" id="zone-medium-1">
+                    <rect x="350" y="140" width="100" height="160" rx="6" fill="#8b5cf6" stroke="#7c3aed" />
+                    <text x="400" y="210" class="map-text">กลาง</text>
+                    <text x="400" y="235" class="map-subtext">4×6 m</text>
+                </g>
+                <line x1="450" y1="220" x2="580" y2="220" stroke="#f87171" stroke-width="1.5" />
+                <text x="515" y="210" class="map-subtext" style="fill: #f87171; font-size: 10px;">5 m</text>
+
+                <g class="zone" data-location="พื้นที่กางเต็นท์" id="zone-medium-2">
+                    <rect x="580" y="140" width="100" height="160" rx="6" fill="#8b5cf6" stroke="#7c3aed" />
+                    <text x="630" y="210" class="map-text">กลาง</text>
+                    <text x="630" y="235" class="map-subtext">4×6 m</text>
+                </g>
+                <line x1="680" y1="220" x2="836" y2="220" stroke="#f87171" stroke-width="1.5" />
+                <text x="758" y="210" class="map-subtext" style="fill: #f87171; font-size: 10px;">6.5 m</text>
+
+                <g class="zone" data-location="พื้นที่กางเต็นท์" id="zone-medium-3">
+                    <rect x="836" y="140" width="100" height="160" rx="6" fill="#8b5cf6" stroke="#7c3aed" />
+                    <text x="886" y="210" class="map-text">กลาง</text>
+                    <text x="886" y="235" class="map-subtext">4×6 m</text>
+                </g>
+
+                <!-- Small Tent Pitches (เล็ก) on the right -->
+                <g class="zone" data-location="พื้นที่กางเต็นท์" id="zone-small-1">
+                    <rect x="886" y="370" width="90" height="80" rx="6" fill="#ec4899" stroke="#db2777" />
+                    <text x="931" y="410" class="map-text">เล็ก</text>
+                    <text x="931" y="430" class="map-subtext">4×3.5 m</text>
+                </g>
+                <line x1="931" y1="450" x2="931" y2="550" stroke="#f87171" stroke-width="1.5" />
+                <text x="955" y="505" class="map-subtext" style="fill: #f87171; font-size: 10px;">5 m</text>
+
+                <g class="zone" data-location="พื้นที่กางเต็นท์" id="zone-small-2">
+                    <rect x="886" y="550" width="90" height="80" rx="6" fill="#ec4899" stroke="#db2777" />
+                    <text x="931" y="590" class="map-text">เล็ก</text>
+                    <text x="931" y="610" class="map-subtext">4×3.5 m</text>
+                </g>
+                <line x1="931" y1="630" x2="931" y2="730" stroke="#f87171" stroke-width="1.5" />
+                <text x="955" y="685" class="map-subtext" style="fill: #f87171; font-size: 10px;">5 m</text>
+
+                <g class="zone" data-location="พื้นที่กางเต็นท์" id="zone-small-3">
+                    <rect x="886" y="730" width="90" height="80" rx="6" fill="#ec4899" stroke="#db2777" />
+                    <text x="931" y="770" class="map-text">เล็ก</text>
+                    <text x="931" y="790" class="map-subtext">4×3.5 m</text>
+                </g>
+
+                <!-- Interactive Infrastructure Icons -->
+                <!-- CCTV Camera Icons (กล้องวงจรปิด) -->
+                <g class="map-icon zone" data-location="กล้องวงจรปิด" id="icon-cctv-1" title="กล้องวงจรปิด">
+                    <circle cx="325" cy="320" r="15" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2" />
+                    <path d="M320 316h10v8h-10z M330 318l3-2v6z" fill="#fff" />
+                </g>
+                <g class="map-icon zone" data-location="กล้องวงจรปิด" id="icon-cctv-2" title="กล้องวงจรปิด">
+                    <circle cx="861" cy="780" r="15" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2" />
+                    <path d="M856 776h10v8h-10z M866 778l3-2v6z" fill="#fff" />
+                </g>
+
+                <!-- Electrical Light Pole Icons (งานไฟฟ้า-แสงสว่าง) -->
+                <g class="map-icon zone" data-location="งานไฟฟ้า-แสงสว่าง" id="icon-electric-1" title="ไฟฟ้าและแสงสว่าง">
+                    <circle cx="568" cy="285" r="15" fill="#eab308" stroke="#a16207" stroke-width="2" />
+                    <path d="M568 277a5 5 0 0 0-4 8.2v1.8h8v-1.8a5 5 0 0 0-4-8.2z M566 289h4" fill="#fff" stroke="#fff" stroke-width="1"/>
+                </g>
+                <g class="map-icon zone" data-location="งานไฟฟ้า-แสงสว่าง" id="icon-electric-2" title="ไฟฟ้าและแสงสว่าง">
+                    <circle cx="593" cy="815" r="15" fill="#eab308" stroke="#a16207" stroke-width="2" />
+                    <path d="M593 807a5 5 0 0 0-4 8.2v1.8h8v-1.8a5 5 0 0 0-4-8.2z M591 819h4" fill="#fff" stroke="#fff" stroke-width="1"/>
+                </g>
+            </svg>
         </div>
     </section>
 
@@ -2041,9 +2262,61 @@
             }
         }
 
+        // Map Interactions
+        function initMapInteractions() {
+            const zones = document.querySelectorAll('.campsite-svg .zone');
+            zones.forEach(zone => {
+                zone.addEventListener('click', () => {
+                    const locName = zone.getAttribute('data-location');
+                    const isSelected = zone.classList.contains('selected');
+                    if (isSelected) {
+                        resetFilters();
+                    } else {
+                        selectMapLocation(locName);
+                    }
+                });
+            });
+        }
+
+        function selectMapLocation(locName) {
+            if (!locName) return;
+            const filterLoc = document.getElementById('filterLocation');
+            const tableSearch = document.getElementById('tableSearch');
+            
+            // Try to find exact or partial match in location dropdown
+            let matchedOption = null;
+            for (let i = 0; i < filterLoc.options.length; i++) {
+                const optVal = filterLoc.options[i].value;
+                if (optVal && (
+                    optVal.toLowerCase() === locName.toLowerCase() || 
+                    optVal.toLowerCase().includes(locName.toLowerCase()) || 
+                    locName.toLowerCase().includes(optVal.toLowerCase())
+                )) {
+                    matchedOption = optVal;
+                    break;
+                }
+            }
+            
+            if (matchedOption) {
+                tableSearch.value = '';
+                filterLoc.value = matchedOption;
+                filterLoc.dispatchEvent(new Event('change'));
+            } else {
+                filterLoc.value = '';
+                tableSearch.value = locName;
+                tableSearch.dispatchEvent(new Event('input'));
+            }
+        }
+
+        window.resetMapSelection = function() {
+            document.querySelectorAll('.campsite-svg .zone').forEach(z => z.classList.remove('selected'));
+            resetFilters();
+        };
+
         // Load startup data
         async function initApp() {
             updateThemeIcon();
+            initMapInteractions();
             await fetchExpenses();
         }
 
@@ -2128,6 +2401,33 @@
             // Recalculate KPIs and rebuild charts
             updateKPIs();
             renderCharts();
+
+            // Sync map highlights
+            const mapZones = document.querySelectorAll('.campsite-svg .zone');
+            mapZones.forEach(z => z.classList.remove('selected'));
+            
+            if (location) {
+                mapZones.forEach(z => {
+                    const mapLoc = z.getAttribute('data-location');
+                    if (mapLoc && (
+                        mapLoc.toLowerCase() === location.toLowerCase() ||
+                        location.toLowerCase().includes(mapLoc.toLowerCase()) ||
+                        mapLoc.toLowerCase().includes(location.toLowerCase())
+                    )) {
+                        z.classList.add('selected');
+                    }
+                });
+            } else if (search) {
+                mapZones.forEach(z => {
+                    const mapLoc = z.getAttribute('data-location');
+                    if (mapLoc && (
+                        mapLoc.toLowerCase().includes(search) ||
+                        search.includes(mapLoc.toLowerCase())
+                    )) {
+                        z.classList.add('selected');
+                    }
+                });
+            }
 
             // Reset pagination and redraw Table
             currentPage = 1;
