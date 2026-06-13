@@ -3631,13 +3631,13 @@
             sortedLocs.forEach(([locName, locSum]) => {
                 const emoji = getEmoji(locName);
                 const displayName = getFormattedLocation(locName);
-                const formattedVal = Number(locSum).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const formattedVal = Number(locSum).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
                 locsText += `${emoji} ${displayName}: ฿${formattedVal}\n`;
             });
 
-            const formattedTotal = Number(total).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            const formattedBonus = Number(bonusSpent).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            const formattedDad = Number(dadSpent).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const formattedTotal = Number(total).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+            const formattedBonus = Number(bonusSpent).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+            const formattedDad = Number(dadSpent).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 
             const summaryText = `💵 ค่าใช้จ่ายลานกางเตนท์\n` +
                 `รวมทั้งหมด: ฿${formattedTotal}\n` +
