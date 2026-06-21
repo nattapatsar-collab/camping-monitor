@@ -1,4 +1,4 @@
-﻿-- Camping Project D1 Database Schema
+-- Camping Project D1 Database Schema
 -- Run this in your Cloudflare D1 Database console to initialize the table and populate initial data.
 
 DROP TABLE IF EXISTS expenses;
@@ -81,3 +81,11 @@ INSERT INTO expenses VALUES ('f78d8f18', 'ค่าแรงงานฟุต�
 INSERT INTO expenses VALUES ('1e9ea274', 'อิฐบล็อก ร้าน', '', 'ออฟฟิศ', 'งานก่อเสา', '79 วัสดุก่อสร้าง', 100, 'ก้อน', 6.3, 630, 'IV202606010008', '2026-06-01', 'ค่าวัสดุ/อุปกรณ์', 'Dad');
 INSERT INTO expenses VALUES ('f7ea6c42', 'ปูนเสือ', '', 'ออฟฟิศ', 'งานก่อเสา', '79 วัสดุก่อสร้าง', 10, 'กระสอบ', 168, 1680, 'IV202606010008', '2026-06-01', 'ค่าวัสดุ/อุปกรณ์', 'Dad');
 INSERT INTO expenses VALUES ('f5a4d6c7', 'ค่าส่งวัสดุงานก่อเสา', '', 'ออฟฟิศ', 'งานก่อเสา', '79 วัสดุก่อสร้าง', 1, 'งาน', 150, 150, 'IV202606010008', '2026-06-01', 'ค่าขนส่ง', 'Dad');
+
+-- Location Budgets settings table definition
+DROP TABLE IF EXISTS location_budgets;
+CREATE TABLE location_budgets (
+    location TEXT PRIMARY KEY,
+    dad_budget REAL NOT NULL DEFAULT 0,
+    bonus_budget REAL NOT NULL DEFAULT 0
+);

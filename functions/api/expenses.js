@@ -1,4 +1,4 @@
-// GET Handler: Retrieve all expenses from Cloudflare D1
+// GET Handler: Retrieve all expenses or budgets from Cloudflare D1
 export async function onRequestGet(context) {
     const db = context.env.DB;
     if (!db) {
@@ -9,6 +9,23 @@ export async function onRequestGet(context) {
     }
 
     try {
+        // Ensure location_budgets table exists
+        await db.prepare(`
+            CREATE TABLE IF NOT EXISTS location_budgets (
+                location TEXT PRIMARY KEY,
+                dad_budget REAL NOT NULL DEFAULT 0,
+                bonus_budget REAL NOT NULL DEFAULT 0
+            )
+        `).run();
+
+        const url = new URL(context.request.url);
+        if (url.searchParams.get("type") === "budgets") {
+            const { results } = await db.prepare("SELECT * FROM location_budgets").all();
+            return new Response(JSON.stringify(results), {
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+
         const { results } = await db.prepare("SELECT * FROM expenses ORDER BY date DESC, id DESC").all();
         return new Response(JSON.stringify(results), {
             headers: { "Content-Type": "application/json" }
@@ -133,6 +150,40 @@ export async function onRequestPost(context) {
                         item.date,
                         item.type,
                         item.budget
+                    )
+                );
+            }
+
+            await db.batch(statements);
+
+            return new Response(JSON.stringify({ success: true }), {
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+
+        // Action: Save Budgets
+        if (action === "save-budgets") {
+            const { budgets } = payload;
+            if (!Array.isArray(budgets)) {
+                return new Response(JSON.stringify({ error: "Missing budgets array for save-budgets" }), {
+                    status: 400,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            const statements = [];
+            for (const b of budgets) {
+                statements.push(
+                    db.prepare(
+                        `INSERT INTO location_budgets (location, dad_budget, bonus_budget) 
+                         VALUES (?, ?, ?)
+                         ON CONFLICT(location) DO UPDATE SET 
+                            dad_budget = excluded.dad_budget,
+                            bonus_budget = excluded.bonus_budget`
+                    ).bind(
+                        b.location,
+                        parseFloat(b.dad_budget) || 0,
+                        parseFloat(b.bonus_budget) || 0
                     )
                 );
             }

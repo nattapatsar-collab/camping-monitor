@@ -1354,6 +1354,97 @@
                 text-align: center !important;
             }
         }
+
+        /* Location Budgets Styles */
+        .budget-panel {
+            margin-bottom: 24px;
+        }
+        .budget-table-wrapper {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 5px;
+        }
+        body.light-mode .budget-table-wrapper {
+            background: rgba(0, 0, 0, 0.01);
+            border-color: rgba(0, 0, 0, 0.05);
+        }
+        .budget-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .budget-table th {
+            font-family: var(--font-display);
+            font-weight: 600;
+            padding: 12px 10px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        body.light-mode .budget-table th {
+            color: rgba(15, 23, 42, 0.7);
+            border-bottom-color: rgba(0, 0, 0, 0.1);
+        }
+        .budget-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 13px;
+            color: #ffffff;
+            vertical-align: middle;
+        }
+        body.light-mode .budget-table td {
+            color: #0f172a;
+            border-bottom-color: rgba(0, 0, 0, 0.05);
+        }
+        .budget-table tr:last-child td {
+            border-bottom: none;
+        }
+        .budget-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        body.light-mode .budget-table tr:hover {
+            background: rgba(0, 0, 0, 0.01);
+        }
+        .budget-table input[type="number"] {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #ffffff;
+            padding: 6px 10px;
+            font-family: var(--font-sans);
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+        .budget-table input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.2);
+        }
+        body.light-mode .budget-table input[type="number"] {
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #0f172a;
+        }
+        body.light-mode .budget-table input[type="number"]:focus {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: var(--primary);
+        }
+        .remaining-positive {
+            color: #4ade80 !important;
+            font-weight: 600;
+        }
+        body.light-mode .remaining-positive {
+            color: #16a34a !important;
+        }
+        .remaining-negative {
+            color: #f87171 !important;
+            font-weight: 600;
+        }
+        body.light-mode .remaining-negative {
+            color: #dc2626 !important;
+        }
     </style>
 </head>
 <body>
@@ -1504,6 +1595,45 @@
                     <canvas id="typeSplitChart"></canvas>
                 </div>
             </div>
+    <!-- LOCATION BUDGETS PANEL (COLLAPSIBLE) -->
+    <section class="glass-panel budget-panel collapsed" id="locationBudgetsPanel">
+        <div class="panel-header" onclick="toggleLocationBudgets()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
+            <h3 class="chart-title" style="margin: 0; display: flex; align-items: center; gap: 8px;">
+                🎯 กำหนดงบประมาณตามสถานที่ (Location Budgets)
+            </h3>
+            <span id="budgetPanelToggleIcon" style="font-size: 18px; transition: transform 0.3s; transform: rotate(0deg);">▼</span>
+        </div>
+        <div class="panel-content" id="budgetPanelContent" style="display: none; padding: 0 20px 20px 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+            <p style="font-size: 13px; color: rgba(255, 255, 255, 0.7); margin: 15px 0 20px 0;">
+                กำหนดงบประมาณ (งบพ่อ / งบโบนัส) ของแต่ละสถานที่ก่อสร้าง ระบบจะนำรายการใช้จ่ายจริงมาหักลบเพื่อแสดงงบประมาณคงเหลือแบบเรียลไทม์
+            </p>
+            <div class="budget-table-wrapper" style="overflow-x: auto; margin-bottom: 20px;">
+                <table class="budget-table">
+                    <thead>
+                        <tr style="border-bottom: 2px solid rgba(255, 255, 255, 0.1); text-align: left; font-size: 13px; color: rgba(255, 255, 255, 0.6);">
+                            <th style="padding: 10px 5px;">สถานที่ (Location)</th>
+                            <th style="padding: 10px 5px; width: 150px;">งบพ่อที่ตั้งไว้ (฿)</th>
+                            <th style="padding: 10px 5px; width: 120px;">ใช้จริง (งบพ่อ)</th>
+                            <th style="padding: 10px 5px; width: 120px;">คงเหลือ (งบพ่อ)</th>
+                            <th style="padding: 10px 5px; width: 150px;">งบโบนัสที่ตั้งไว้ (฿)</th>
+                            <th style="padding: 10px 5px; width: 120px;">ใช้จริง (โบนัส)</th>
+                            <th style="padding: 10px 5px; width: 120px;">คงเหลือ (โบนัส)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="locationBudgetsBody">
+                        <!-- Dynamic rows inserted by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn btn-secondary" onclick="renderLocationBudgets()" style="padding: 8px 16px;">
+                    🔄 โหลดข้อมูลใหม่ (Reset)
+                </button>
+                <button class="btn btn-primary" onclick="saveLocationBudgets()" style="padding: 8px 16px;">
+                    💾 บันทึกงบประมาณ (Save)
+                </button>
+            </div>
+        </div>
     </section>
 
     <!-- CONTROLS & FILTER ROW -->
@@ -1842,6 +1972,7 @@
         // Active State
         let expenses = [];
         let filteredExpenses = [];
+        let locationBudgets = [];
         let fileHandle = null;
 
         // Sorting configuration
@@ -1917,7 +2048,7 @@
             }
         }
 
-        // Fetch all expenses from Cloud D1 Database
+        // Fetch all expenses and budgets from Cloud D1 Database
         async function fetchExpenses() {
             try {
                 updateSyncStatus("loading");
@@ -1929,12 +2060,22 @@
 
                 const data = await res.json();
                 expenses = data;
-                
-                // Backup locally in localStorage for offline reference
                 saveToLocalStorage(expenses);
+
+                // Fetch budgets from D1
+                try {
+                    const budgetRes = await fetch("/api/expenses?type=budgets");
+                    if (budgetRes.ok) {
+                        locationBudgets = await budgetRes.json();
+                        localStorage.setItem('camping_location_budgets', JSON.stringify(locationBudgets));
+                    }
+                } catch (bErr) {
+                    console.error("Failed to fetch location budgets:", bErr);
+                }
                 
                 updateSyncStatus("connected");
                 populateSuggestions();
+                renderLocationBudgets();
                 applyFilters();
             } catch (err) {
                 console.error("Fetch error:", err);
@@ -1950,7 +2091,17 @@
                     expenses = JSON.parse(JSON.stringify(initialExpenses));
                     showToast("Cloud offline: Displaying default demo dataset", "info");
                 }
+
+                // Fallback location budgets offline
+                const localBudgets = localStorage.getItem('camping_location_budgets');
+                if (localBudgets) {
+                    locationBudgets = JSON.parse(localBudgets);
+                } else {
+                    locationBudgets = [];
+                }
+
                 populateSuggestions();
+                renderLocationBudgets();
                 applyFilters();
             }
         }
@@ -1983,6 +2134,8 @@
                 const requestBody = { action, expense };
                 if (action === "batch-create") {
                     requestBody.expenses = dataOverride;
+                } else if (action === "save-budgets") {
+                    requestBody.budgets = dataOverride;
                 } else {
                     requestBody.initialExpenses = dataOverride || initialExpenses;
                 }
@@ -2013,6 +2166,10 @@
                         expenses.unshift(expense);
                     } else if (action === "batch-create" && Array.isArray(dataOverride)) {
                         expenses.unshift(...dataOverride);
+                    } else if (action === "save-budgets" && Array.isArray(dataOverride)) {
+                        locationBudgets = dataOverride;
+                        localStorage.setItem('camping_location_budgets', JSON.stringify(locationBudgets));
+                        renderLocationBudgets();
                     } else if (action === "update") {
                         const idx = expenses.findIndex(i => i.id === expense.id);
                         if (idx !== -1) {
@@ -2038,6 +2195,142 @@
                 return false;
             }
         }
+
+        // Toggle location budgets panel collapse state
+        window.toggleLocationBudgets = function() {
+            const panel = document.getElementById('locationBudgetsPanel');
+            const content = document.getElementById('budgetPanelContent');
+            const icon = document.getElementById('budgetPanelToggleIcon');
+            
+            const isCollapsed = panel.classList.contains('collapsed');
+            if (isCollapsed) {
+                panel.classList.remove('collapsed');
+                content.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+                renderLocationBudgets(); // Always refresh calculations when opening
+            } else {
+                panel.classList.add('collapsed');
+                content.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        };
+
+        // Render the locations budget table with spent and remaining amounts
+        window.renderLocationBudgets = function() {
+            const body = document.getElementById('locationBudgetsBody');
+            if (!body) return;
+
+            // Extract unique locations from current expenses
+            const currentLocations = [...new Set(expenses.map(item => (item.location || '').trim()))].filter(Boolean);
+            
+            // Extract locations from defined budgets
+            const budgetLocations = locationBudgets.map(b => (b.location || '').trim()).filter(Boolean);
+            
+            // Combine and get unique locations
+            const allLocations = [...new Set([...currentLocations, ...budgetLocations])].sort();
+
+            body.innerHTML = '';
+
+            if (allLocations.length === 0) {
+                body.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: rgba(255, 255, 255, 0.4); padding: 20px;">
+                            ไม่มีข้อมูลสถานที่ในระบบ (กรุณาเพิ่มรายการค่าใช้จ่ายก่อน)
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            allLocations.forEach(loc => {
+                // Find existing budget limits
+                const budgetObj = locationBudgets.find(b => (b.location || '').trim() === loc) || { dad_budget: 0, bonus_budget: 0 };
+                
+                // Calculate spent amounts
+                const spentDad = expenses.filter(e => (e.location || '').trim() === loc && e.budget === 'Dad').reduce((sum, e) => sum + (e.total || 0), 0);
+                const spentBonus = expenses.filter(e => (e.location || '').trim() === loc && e.budget === 'Bonus').reduce((sum, e) => sum + (e.total || 0), 0);
+                
+                // Calculate remaining amounts
+                const remainingDad = (budgetObj.dad_budget || 0) - spentDad;
+                const remainingBonus = (budgetObj.bonus_budget || 0) - spentBonus;
+
+                const tr = document.createElement('tr');
+                tr.className = 'budget-row';
+                tr.setAttribute('data-location', loc);
+
+                // Format values for rendering
+                const formatVal = (v) => Number(v).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
+                tr.innerHTML = `
+                    <td style="font-weight: 500; font-family: var(--font-display);">${loc}</td>
+                    <td>
+                        <input type="number" class="input-dad-limit" value="${budgetObj.dad_budget || 0}" min="0" step="any" oninput="recalculateBudgetRow(this)">
+                    </td>
+                    <td class="spent-dad-cell" data-value="${spentDad}">฿${formatVal(spentDad)}</td>
+                    <td class="remaining-dad-cell ${remainingDad >= 0 ? 'remaining-positive' : 'remaining-negative'}">
+                        ฿${formatVal(remainingDad)}
+                    </td>
+                    <td>
+                        <input type="number" class="input-bonus-limit" value="${budgetObj.bonus_budget || 0}" min="0" step="any" oninput="recalculateBudgetRow(this)">
+                    </td>
+                    <td class="spent-bonus-cell" data-value="${spentBonus}">฿${formatVal(spentBonus)}</td>
+                    <td class="remaining-bonus-cell ${remainingBonus >= 0 ? 'remaining-positive' : 'remaining-negative'}">
+                        ฿${formatVal(remainingBonus)}
+                    </td>
+                `;
+
+                body.appendChild(tr);
+            });
+        };
+
+        // Recalculate remaining budget on row in real-time
+        window.recalculateBudgetRow = function(input) {
+            const tr = input.closest('tr');
+            if (!tr) return;
+
+            const formatVal = (v) => Number(v).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
+            // Dad Budget calculations
+            const dadLimit = parseFloat(tr.querySelector('.input-dad-limit').value) || 0;
+            const spentDad = parseFloat(tr.querySelector('.spent-dad-cell').getAttribute('data-value')) || 0;
+            const remainingDad = dadLimit - spentDad;
+            const remainingDadCell = tr.querySelector('.remaining-dad-cell');
+            remainingDadCell.textContent = '฿' + formatVal(remainingDad);
+            remainingDadCell.className = 'remaining-dad-cell ' + (remainingDad >= 0 ? 'remaining-positive' : 'remaining-negative');
+
+            // Bonus Budget calculations
+            const bonusLimit = parseFloat(tr.querySelector('.input-bonus-limit').value) || 0;
+            const spentBonus = parseFloat(tr.querySelector('.spent-bonus-cell').getAttribute('data-value')) || 0;
+            const remainingBonus = bonusLimit - spentBonus;
+            const remainingBonusCell = tr.querySelector('.remaining-bonus-cell');
+            remainingBonusCell.textContent = '฿' + formatVal(remainingBonus);
+            remainingBonusCell.className = 'remaining-bonus-cell ' + (remainingBonus >= 0 ? 'remaining-positive' : 'remaining-negative');
+        };
+
+        // Save custom budgets to Cloudflare D1
+        window.saveLocationBudgets = async function() {
+            const budgetsToSave = [];
+            document.querySelectorAll('.budget-row').forEach(tr => {
+                const loc = tr.getAttribute('data-location');
+                const dadLimit = parseFloat(tr.querySelector('.input-dad-limit').value) || 0;
+                const bonusLimit = parseFloat(tr.querySelector('.input-bonus-limit').value) || 0;
+                budgetsToSave.push({
+                    location: loc,
+                    dad_budget: dadLimit,
+                    bonus_budget: bonusLimit
+                });
+            });
+
+            if (budgetsToSave.length === 0) {
+                showToast("ไม่มีข้อมูลการตั้งงบประมาณที่สามารถบันทึกได้", "warning");
+                return;
+            }
+
+            const success = await saveExpenseToCloud("save-budgets", null, budgetsToSave);
+            if (success) {
+                showToast("บันทึกการกำหนดงบประมาณตามสถานที่สำเร็จแล้ว!", "success");
+            }
+        };
 
         // Load startup data
         async function initApp() {
