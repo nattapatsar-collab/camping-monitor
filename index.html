@@ -1445,6 +1445,17 @@
         body.light-mode .remaining-negative {
             color: #dc2626 !important;
         }
+        .overall-budget-settings-box {
+            margin-bottom: 20px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        body.light-mode .overall-budget-settings-box {
+            background: rgba(0, 0, 0, 0.02);
+            border-color: rgba(15, 23, 42, 0.08);
+        }
     </style>
 </head>
 <body>
@@ -1515,7 +1526,7 @@
                 <div class="kpi-progress-fill" id="kpiDadProgressFill" style="width: 0%; background-color: var(--dad);"></div>
             </div>
             <div class="kpi-subtext">
-                <span>Limit: ฿100,000.00</span>
+                <span id="kpiDadLimitLabel">Limit: ฿100,000.00</span>
                 <span id="kpiDadRemaining">Rem: ฿100,000.00</span>
             </div>
         </div>
@@ -1531,8 +1542,8 @@
                 <div class="kpi-progress-fill" id="kpiBonusProgressFill" style="width: 0%; background-color: var(--bonus);"></div>
             </div>
             <div class="kpi-subtext">
-                <span>Limit: ฿300,000.00</span>
-                <span id="kpiBonusRemaining">Rem: ฿300,000.00</span>
+                <span id="kpiBonusLimitLabel">Limit: ฿200,000.00</span>
+                <span id="kpiBonusRemaining">Rem: ฿200,000.00</span>
             </div>
         </div>
 
@@ -1605,8 +1616,30 @@
         </div>
         <div class="panel-content" id="budgetPanelContent" style="display: none; padding: 0 20px 20px 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
             <p style="font-size: 13px; color: rgba(255, 255, 255, 0.7); margin: 15px 0 20px 0;">
-                กำหนดงบประมาณ (งบพ่อ / งบโบนัส) ของแต่ละสถานที่ก่อสร้าง ระบบจะนำรายการใช้จ่ายจริงมาหักลบเพื่อแสดงงบประมาณคงเหลือแบบเรียลไทม์
+                กำหนดงบประมาณ (งบพ่อ / งบโบนัส) ทั้งแบบรวมทั้งหมดและแยกตามสถานที่ก่อสร้าง ระบบจะนำรายการใช้จ่ายจริงมาหักลบเพื่อแสดงงบประมาณคงเหลือแบบเรียลไทม์
             </p>
+            
+            <!-- ตั้งค่างบประมาณรวม (Overall Budgets Settings) -->
+            <div class="overall-budget-settings-box">
+                <h4 style="font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 12px; font-family: var(--font-display); display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
+                    💰 ตั้งค่างบประมาณรวมทั้งหมด (Overall Budgets Settings)
+                </h4>
+                <div style="display: flex; flex-wrap: wrap; gap: 16px;">
+                    <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 11px; color: var(--text-muted); font-weight: 500; text-transform: uppercase;">
+                            🟡 งบพ่อรวม (Dad Budget Limit) (฿)
+                        </label>
+                        <input type="number" id="inputOverallDadLimit" class="form-input" style="padding: 8px 12px;" min="0" step="any">
+                    </div>
+                    <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 11px; color: var(--text-muted); font-weight: 500; text-transform: uppercase;">
+                            🔵 งบโบนัสรวม (Bonus Budget Limit) (฿)
+                        </label>
+                        <input type="number" id="inputOverallBonusLimit" class="form-input" style="padding: 8px 12px;" min="0" step="any">
+                    </div>
+                </div>
+            </div>
+
             <div class="budget-table-wrapper" style="overflow-x: auto; margin-bottom: 20px;">
                 <table class="budget-table">
                     <thead>
@@ -1964,7 +1997,7 @@
         Chart.register(ChartDataLabels);
 
         // Limits constant
-        const BUDGET_LIMITS = {
+        let BUDGET_LIMITS = {
             Dad: 100000.00,
             Bonus: 200000.00
         };
@@ -2048,6 +2081,17 @@
             }
         }
 
+        function applyLoadedBudgets() {
+            const overall = locationBudgets.find(b => b.location === '__overall__');
+            if (overall) {
+                BUDGET_LIMITS.Dad = parseFloat(overall.dad_budget) || 100000.00;
+                BUDGET_LIMITS.Bonus = parseFloat(overall.bonus_budget) || 200000.00;
+            } else {
+                BUDGET_LIMITS.Dad = 100000.00;
+                BUDGET_LIMITS.Bonus = 200000.00;
+            }
+        }
+
         // Fetch all expenses and budgets from Cloud D1 Database
         async function fetchExpenses() {
             try {
@@ -2068,6 +2112,7 @@
                     if (budgetRes.ok) {
                         locationBudgets = await budgetRes.json();
                         localStorage.setItem('camping_location_budgets', JSON.stringify(locationBudgets));
+                        applyLoadedBudgets();
                     }
                 } catch (bErr) {
                     console.error("Failed to fetch location budgets:", bErr);
@@ -2099,6 +2144,7 @@
                 } else {
                     locationBudgets = [];
                 }
+                applyLoadedBudgets();
 
                 populateSuggestions();
                 renderLocationBudgets();
@@ -2169,6 +2215,7 @@
                     } else if (action === "save-budgets" && Array.isArray(dataOverride)) {
                         locationBudgets = dataOverride;
                         localStorage.setItem('camping_location_budgets', JSON.stringify(locationBudgets));
+                        applyLoadedBudgets();
                         renderLocationBudgets();
                     } else if (action === "update") {
                         const idx = expenses.findIndex(i => i.id === expense.id);
@@ -2220,14 +2267,20 @@
             const body = document.getElementById('locationBudgetsBody');
             if (!body) return;
 
+            // Populate overall budgets inputs
+            const overallDadInput = document.getElementById('inputOverallDadLimit');
+            const overallBonusInput = document.getElementById('inputOverallBonusLimit');
+            if (overallDadInput) overallDadInput.value = BUDGET_LIMITS.Dad;
+            if (overallBonusInput) overallBonusInput.value = BUDGET_LIMITS.Bonus;
+
             // Extract unique locations from current expenses
             const currentLocations = [...new Set(expenses.map(item => (item.location || '').trim()))].filter(Boolean);
             
             // Extract locations from defined budgets
             const budgetLocations = locationBudgets.map(b => (b.location || '').trim()).filter(Boolean);
             
-            // Combine and get unique locations
-            const allLocations = [...new Set([...currentLocations, ...budgetLocations])].sort();
+            // Combine and get unique locations (excluding special reserved name __overall__)
+            const allLocations = [...new Set([...currentLocations, ...budgetLocations])].filter(loc => loc !== '__overall__').sort();
 
             body.innerHTML = '';
 
@@ -2310,8 +2363,21 @@
         // Save custom budgets to Cloudflare D1
         window.saveLocationBudgets = async function() {
             const budgetsToSave = [];
+            
+            // Gather overall limits
+            const overallDadVal = parseFloat(document.getElementById('inputOverallDadLimit').value) || 0;
+            const overallBonusVal = parseFloat(document.getElementById('inputOverallBonusLimit').value) || 0;
+            
+            budgetsToSave.push({
+                location: '__overall__',
+                dad_budget: overallDadVal,
+                bonus_budget: overallBonusVal
+            });
+
+            // Gather location budgets
             document.querySelectorAll('.budget-row').forEach(tr => {
                 const loc = tr.getAttribute('data-location');
+                if (loc === '__overall__') return; // Skip if present in table
                 const dadLimit = parseFloat(tr.querySelector('.input-dad-limit').value) || 0;
                 const bonusLimit = parseFloat(tr.querySelector('.input-bonus-limit').value) || 0;
                 budgetsToSave.push({
@@ -2321,14 +2387,9 @@
                 });
             });
 
-            if (budgetsToSave.length === 0) {
-                showToast("ไม่มีข้อมูลการตั้งงบประมาณที่สามารถบันทึกได้", "warning");
-                return;
-            }
-
             const success = await saveExpenseToCloud("save-budgets", null, budgetsToSave);
             if (success) {
-                showToast("บันทึกการกำหนดงบประมาณตามสถานที่สำเร็จแล้ว!", "success");
+                showToast("บันทึกการกำหนดงบประมาณสำเร็จแล้ว!", "success");
             }
         };
 
@@ -2461,6 +2522,7 @@
 
             // Dad budget card UI updates
             const dadPct = Math.min((dadSpent / BUDGET_LIMITS.Dad) * 100, 100);
+            document.getElementById('kpiDadLimitLabel').textContent = `Limit: ${formatBaht(BUDGET_LIMITS.Dad)}`;
             document.getElementById('kpiDadSpent').textContent = formatBaht(dadSpent);
             document.getElementById('kpiDadPercentBadge').textContent = `${(dadSpent / BUDGET_LIMITS.Dad * 100).toFixed(1)}%`;
             document.getElementById('kpiDadProgressFill').style.width = `${dadPct}%`;
@@ -2477,6 +2539,7 @@
 
             // Bonus budget card UI updates
             const bonusPct = Math.min((bonusSpent / BUDGET_LIMITS.Bonus) * 100, 100);
+            document.getElementById('kpiBonusLimitLabel').textContent = `Limit: ${formatBaht(BUDGET_LIMITS.Bonus)}`;
             document.getElementById('kpiBonusSpent').textContent = formatBaht(bonusSpent);
             document.getElementById('kpiBonusPercentBadge').textContent = `${(bonusSpent / BUDGET_LIMITS.Bonus * 100).toFixed(1)}%`;
             document.getElementById('kpiBonusProgressFill').style.width = `${bonusPct}%`;
