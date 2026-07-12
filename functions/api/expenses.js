@@ -134,7 +134,21 @@ export async function onRequestPost(context) {
                 statements.push(
                     db.prepare(
                         `INSERT INTO expenses (id, item, description, location, category, pic, number, unit, priceUnit, total, invNo, date, type, budget) 
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                         ON CONFLICT(id) DO UPDATE SET 
+                            item = excluded.item,
+                            description = excluded.description,
+                            location = excluded.location,
+                            category = excluded.category,
+                            pic = excluded.pic,
+                            number = excluded.number,
+                            unit = excluded.unit,
+                            priceUnit = excluded.priceUnit,
+                            total = excluded.total,
+                            invNo = excluded.invNo,
+                            date = excluded.date,
+                            type = excluded.type,
+                            budget = excluded.budget`
                     ).bind(
                         item.id,
                         item.item,

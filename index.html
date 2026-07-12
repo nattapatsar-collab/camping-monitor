@@ -1725,7 +1725,7 @@
                 <button class="btn btn-secondary" id="downloadTemplateBtn" onclick="downloadExcelTemplate()" title="Download Excel Template for Import">Template</button>
                 <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;">
                 <button class="btn btn-secondary" id="importExcelBtn" onclick="document.getElementById('excelFileInput').click()" title="Import expenses from Excel/CSV">Import Excel</button>
-                <button class="btn btn-secondary" id="exportCsvBtn">Export CSV</button>
+                <button class="btn btn-secondary" id="exportExcelBtn" onclick="exportExcelData()" title="Export current filtered data to Excel">Export Excel</button>
                 <button class="btn btn-line" id="copyLineSummaryBtn" onclick="copyLineSummary()" title="คัดลอกสรุปสำหรับส่งใน LINE">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -2211,7 +2211,14 @@
                     if (action === "create") {
                         expenses.unshift(expense);
                     } else if (action === "batch-create" && Array.isArray(dataOverride)) {
-                        expenses.unshift(...dataOverride);
+                        for (const item of dataOverride) {
+                            const idx = expenses.findIndex(x => x.id === item.id);
+                            if (idx !== -1) {
+                                expenses[idx] = item;
+                            } else {
+                                expenses.unshift(item);
+                            }
+                        }
                     } else if (action === "save-budgets" && Array.isArray(dataOverride)) {
                         locationBudgets = dataOverride;
                         localStorage.setItem('camping_location_budgets', JSON.stringify(locationBudgets));
@@ -3695,8 +3702,21 @@
         // EXCEL TEMPLATE DOWNLOAD & EXCEL DATA IMPORT LOGIC
         window.downloadExcelTemplate = function() {
             try {
+                // Gather unique options from current database
+                const locations = [...new Set(expenses.map(i => (i.location || '').trim()).filter(Boolean))].sort();
+                const categories = [...new Set(expenses.map(i => (i.category || '').trim()).filter(Boolean))].sort();
+                const pics = [...new Set(expenses.map(i => (i.pic || '').trim()).filter(Boolean))].sort();
+
+                // Ensure non-empty lists
+                const finalLocs = locations.length ? locations : ['ออฟฟิศ', 'ห้องน้ำ', 'ทางเข้า', 'คอกไก่ & ที่ทานข้าว'];
+                const finalCats = categories.length ? categories : ['งานฉาบผนัง', 'งานหลังคา', 'งานเทพื้น'];
+                const finalPics = pics.length ? pics : ['79 วัสดุก่อสร้าง', 'TP วัสดุ'];
+                const finalTypes = ['ค่าวัสดุ/อุปกรณ์', 'ค่าแรง', 'ค่าขนส่ง'];
+                const finalBudgets = ['Bonus', 'Dad'];
+
                 const headers = [
                     [
+                        'รหัสรายการ (ID) *เว้นว่างไว้เพื่อสร้างรายการใหม่*',
                         'รายการ (Item) *', 
                         'รายละเอียด (Description)', 
                         'วันที่ (Date YYYY-MM-DD) *', 
@@ -3711,6 +3731,7 @@
                         'เลขที่ใบเสร็จ (Inv No.)'
                     ],
                     [
+                        '', // ID blank
                         'ปูน TOA', 
                         'ขนาด 50 กก.', 
                         '2026-06-06', 
@@ -3725,9 +3746,69 @@
                         'IV-001'
                     ]
                 ];
+
                 const wb = XLSX.utils.book_new();
                 const ws = XLSX.utils.aoa_to_sheet(headers);
+
+                // Build Lists sheet
+                const listsData = [
+                    ["Locations", "Categories", "PICs", "Types", "Budgets"]
+                ];
+                const maxLen = Math.max(finalLocs.length, finalCats.length, finalPics.length, finalTypes.length, finalBudgets.length);
+                for (let idx = 0; idx < maxLen; idx++) {
+                    listsData.push([
+                        finalLocs[idx] || "",
+                        finalCats[idx] || "",
+                        finalPics[idx] || "",
+                        finalTypes[idx] || "",
+                        finalBudgets[idx] || ""
+                    ]);
+                }
+                const wsLists = XLSX.utils.aoa_to_sheet(listsData);
+                
+                // Add validation lists sheet to workbook
                 XLSX.utils.book_append_sheet(wb, ws, "Template");
+                XLSX.utils.book_append_sheet(wb, wsLists, "Lists");
+
+                // Assign data validations to Template sheet
+                ws['!dataValidation'] = [
+                    {
+                        sqref: 'E2:E1000', // Location is column E
+                        formulae: [`Lists!\$A\$2:\$A\$${finalLocs.length + 1}`],
+                        type: 'list',
+                        showDropDown: true,
+                        showErrorMessage: false
+                    },
+                    {
+                        sqref: 'F2:F1000', // Category is column F
+                        formulae: [`Lists!\$B\$2:\$B\$${finalCats.length + 1}`],
+                        type: 'list',
+                        showDropDown: true,
+                        showErrorMessage: false
+                    },
+                    {
+                        sqref: 'G2:G1000', // PIC is column G
+                        formulae: [`Lists!\$C\$2:\$C\$${finalPics.length + 1}`],
+                        type: 'list',
+                        showDropDown: true,
+                        showErrorMessage: false
+                    },
+                    {
+                        sqref: 'K2:K1000', // Type is column K
+                        formulae: [`Lists!\$D\$2:\$D\$4`],
+                        type: 'list',
+                        showDropDown: true,
+                        showErrorMessage: false
+                    },
+                    {
+                        sqref: 'L2:L1000', // Budget is column L
+                        formulae: [`Lists!\$E\$2:\$E\$3`],
+                        type: 'list',
+                        showDropDown: true,
+                        showErrorMessage: false
+                    }
+                ];
+
                 XLSX.writeFile(wb, "camping_expense_template.xlsx");
                 showToast("ดาวน์โหลดเทมเพลตสำเร็จ!", "success");
             } catch (err) {
@@ -3803,6 +3884,7 @@
                         };
 
                         const colIdx = {
+                            id: findColIndex(['รหัสรายการ', 'id', 'key', 'code', 'รหัส']),
                             item: findColIndex(['รายการ', 'item', 'product', 'name']),
                             description: findColIndex(['รายละเอียด', 'description', 'desc', 'spec']),
                             date: findColIndex(['วันที่', 'date', 'time']),
@@ -3831,12 +3913,14 @@
                         }
 
                         const parsedExpenses = [];
+                        const uploadedIds = new Set();
                         
                         for (let i = 0; i < dataRows.length; i++) {
                             const row = dataRows[i];
                             // Skip empty rows
                             if (!row || row.length === 0 || !row[colIdx.item]) continue;
 
+                            let idVal = colIdx.id !== -1 ? (row[colIdx.id] || '').toString().trim() : '';
                             const itemVal = row[colIdx.item];
                             const descVal = colIdx.description !== -1 ? row[colIdx.description] : '';
                             const dateRaw = colIdx.date !== -1 ? row[colIdx.date] : '';
@@ -3871,12 +3955,25 @@
                                 budgetVal = 'Bonus';
                             }
 
-                            // Build final object
-                            const id = 'A' + (nextNum++).toString().padStart(3, '0');
+                            // ID check / assign
+                            if (!idVal) {
+                                let newId = 'A' + (nextNum++).toString().padStart(3, '0');
+                                while (expenses.some(x => x.id === newId) || uploadedIds.has(newId)) {
+                                    newId = 'A' + (nextNum++).toString().padStart(3, '0');
+                                }
+                                idVal = newId;
+                            } else {
+                                if (uploadedIds.has(idVal)) {
+                                    showToast(`พบรหัสรายการซ้ำในไฟล์ Excel: ${idVal}`, "error");
+                                    return;
+                                }
+                            }
+                            uploadedIds.add(idVal);
+
                             const total = parseFloat((qtyVal * priceVal).toFixed(2));
 
                             parsedExpenses.push({
-                                id,
+                                id: idVal,
                                 item: itemVal.toString().trim(),
                                 description: descVal ? descVal.toString().trim() : '',
                                 date: dateVal,
@@ -4052,60 +4149,130 @@
 
 
 
-        // Export CSV Function
-        document.getElementById('exportCsvBtn').addEventListener('click', () => {
+        // Export Excel Function with validation lists
+        window.exportExcelData = function() {
             if (!filteredExpenses.length) {
-                showToast("No data to export", "warning");
+                showToast("ไม่มีข้อมูลที่สามารถส่งออกได้", "warning");
                 return;
             }
 
-            // Headers
-            const headers = ['ID', 'Date', 'Item', 'Description', 'Location', 'Category', 'Vendor/PIC', 'Qty', 'Unit', 'Price/Unit', 'Total', 'Type', 'Budget', 'INV No.'];
-            
-            // Helper to escape CSV cell values
-            const escapeCsv = (str) => {
-                if (str === null || str === undefined) return '';
-                const text = str.toString();
-                if (text.includes(',') || text.includes('"') || text.includes('\n')) {
-                    return `"${text.replace(/"/g, '""')}"`;
+            try {
+                // Gather unique options from current database for dropdown validation
+                const locations = [...new Set(expenses.map(i => (i.location || '').trim()).filter(Boolean))].sort();
+                const categories = [...new Set(expenses.map(i => (i.category || '').trim()).filter(Boolean))].sort();
+                const pics = [...new Set(expenses.map(i => (i.pic || '').trim()).filter(Boolean))].sort();
+
+                const finalLocs = locations.length ? locations : ['ออฟฟิศ', 'ห้องน้ำ', 'ทางเข้า', 'คอกไก่ & ที่ทานข้าว'];
+                const finalCats = categories.length ? categories : ['งานฉาบผนัง', 'งานหลังคา', 'งานเทพื้น'];
+                const finalPics = pics.length ? pics : ['79 วัสดุก่อสร้าง', 'TP วัสดุ'];
+                const finalTypes = ['ค่าวัสดุ/อุปกรณ์', 'ค่าแรง', 'ค่าขนส่ง'];
+                const finalBudgets = ['Bonus', 'Dad'];
+
+                const headers = [
+                    [
+                        'รหัสรายการ (ID) *เว้นว่างไว้เพื่อสร้างรายการใหม่*',
+                        'รายการ (Item) *', 
+                        'รายละเอียด (Description)', 
+                        'วันที่ (Date YYYY-MM-DD) *', 
+                        'สถานที่ (Location) *', 
+                        'หมวดหมู่ (Category) *', 
+                        'ร้านค้า/ช่าง (Vendor/PIC) *', 
+                        'จำนวน (Qty) *', 
+                        'หน่วยนับ (Unit) *', 
+                        'ราคาต่อหน่วย (Price/Unit) *', 
+                        'ประเภทค่าใช้จ่าย (Type: ค่าวัสดุ/ค่าแรง/ค่าขนส่ง) *', 
+                        'งบประมาณ (Budget: Bonus/Dad) *', 
+                        'เลขที่ใบเสร็จ (Inv No.)'
+                    ]
+                ];
+
+                // Append all rows from filteredExpenses
+                filteredExpenses.forEach(item => {
+                    headers.push([
+                        item.id,
+                        item.item || '',
+                        item.description || '',
+                        item.date || '',
+                        item.location || '',
+                        item.category || '',
+                        item.pic || '',
+                        item.number || 0,
+                        item.unit || '',
+                        item.priceUnit || 0,
+                        item.type || '',
+                        item.budget || '',
+                        item.invNo || ''
+                    ]);
+                });
+
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(headers);
+
+                // Build Lists sheet for dropdowns
+                const listsData = [
+                    ["Locations", "Categories", "PICs", "Types", "Budgets"]
+                ];
+                const maxLen = Math.max(finalLocs.length, finalCats.length, finalPics.length, finalTypes.length, finalBudgets.length);
+                for (let idx = 0; idx < maxLen; idx++) {
+                    listsData.push([
+                        finalLocs[idx] || "",
+                        finalCats[idx] || "",
+                        finalPics[idx] || "",
+                        finalTypes[idx] || "",
+                        finalBudgets[idx] || ""
+                    ]);
                 }
-                return text;
-            };
+                const wsLists = XLSX.utils.aoa_to_sheet(listsData);
+                
+                XLSX.utils.book_append_sheet(wb, ws, "Expenses");
+                XLSX.utils.book_append_sheet(wb, wsLists, "Lists");
 
-            // Rows
-            const csvRows = [
-                headers.join(','),
-                ...filteredExpenses.map(item => [
-                    escapeCsv(item.id),
-                    escapeCsv(item.date),
-                    escapeCsv(item.item),
-                    escapeCsv(item.description),
-                    escapeCsv(item.location),
-                    escapeCsv(item.category),
-                    escapeCsv(item.pic),
-                    item.number || 0,
-                    escapeCsv(item.unit),
-                    item.priceUnit || 0,
-                    item.total || 0,
-                    escapeCsv(item.type),
-                    escapeCsv(item.budget),
-                    escapeCsv(item.invNo)
-                ].join(','))
-            ];
+                // Assign data validations to Template sheet
+                ws['!dataValidation'] = [
+                    {
+                        sqref: `E2:E${headers.length + 100}`,
+                        formulae: [`Lists!\$A\$2:\$A\$${finalLocs.length + 1}`],
+                        type: 'list',
+                        showDropDown: true,
+                        showErrorMessage: false
+                    },
+                    {
+                        sqref: `F2:F${headers.length + 100}`,
+                        formulae: [`Lists!\$B\$2:\$B\$${finalCats.length + 1}`],
+                        type: 'list',
+                        showDropDown: true,
+                        showErrorMessage: false
+                    },
+                    {
+                        sqref: `G2:G${headers.length + 100}`,
+                        formulae: [`Lists!\$C\$2:\$C\$${finalPics.length + 1}`],
+                        type: 'list',
+                        showDropDown: true,
+                        showErrorMessage: false
+                    },
+                    {
+                        sqref: `K2:K${headers.length + 100}`,
+                        formulae: [`Lists!\$D\$2:\$D\$4`],
+                        type: 'list',
+                        showDropDown: true,
+                        showErrorMessage: false
+                    },
+                    {
+                        sqref: `L2:L${headers.length + 100}`,
+                        formulae: [`Lists!\$E\$2:\$E\$3`],
+                        type: 'list',
+                        showDropDown: true,
+                        showErrorMessage: false
+                    }
+                ];
 
-            // Trigger download
-            // Include BOM for UTF-8 compatibility with Excel Thai character sets
-            const blob = new Blob(['\ufeff' + csvRows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `camping_expenses_export_${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showToast("Exported CSV successfully!", "success");
-        });
+                XLSX.writeFile(wb, `camping_expenses_export_${new Date().toISOString().split('T')[0]}.xlsx`);
+                showToast("ส่งออกไฟล์ Excel สำเร็จ!", "success");
+            } catch (err) {
+                console.error("Export Excel failed:", err);
+                showToast("ส่งออกไฟล์ Excel ล้มเหลว: " + err.message, "error");
+            }
+        };
 
         // Initialize App
         window.addEventListener('DOMContentLoaded', () => {
