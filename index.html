@@ -1768,11 +1768,7 @@
                         <th id="th-category" data-col="category">Category</th>
                         <th id="th-pic" data-col="pic">Vendor/PIC</th>
                         <th id="th-number" class="text-right" data-col="number">Qty</th>
-                        <th id="th-unit" data-col="unit">Unit</th>
-                        <th id="th-priceUnit" class="text-right" data-col="priceUnit">Price/Unit</th>
                         <th id="th-total" class="text-right" data-col="total">Total</th>
-                        <th id="th-type" data-col="type">Type</th>
-                        <th id="th-budget" data-col="budget">Budget</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -2635,21 +2631,6 @@
                     openDetailsModal(item);
                 });
                 
-                // Formatted type badge
-                let typeBadge = '';
-                if (item.type === 'ค่าแรง') {
-                    typeBadge = `<span class="badge badge-type-labor">ค่าแรง</span>`;
-                } else if (item.type === 'ค่าขนส่ง') {
-                    typeBadge = `<span class="badge badge-type-trans">ค่าขนส่ง</span>`;
-                } else {
-                    typeBadge = `<span class="badge badge-type-mat">ค่าวัสดุ</span>`;
-                }
-
-                // Formatted budget badge
-                const budgetBadge = item.budget === 'Bonus' 
-                    ? `<span class="badge badge-budget-bonus">Bonus</span>` 
-                    : `<span class="badge badge-budget-dad">Dad</span>`;
-
                 tr.innerHTML = `
                     <td data-label="ID" class="bold" style="color: var(--primary); font-family: var(--font-display);">${item.id || ''}</td>
                     <td data-label="Date" style="white-space: nowrap;">${item.date || ''}</td>
@@ -2660,12 +2641,11 @@
                     <td data-label="Location">${item.location || ''}</td>
                     <td data-label="Category">${item.category || ''}</td>
                     <td data-label="PIC">${item.pic || ''}</td>
-                    <td data-label="Qty" class="text-right bold">${item.number || 0}</td>
-                    <td data-label="Unit">${item.unit || ''}</td>
-                    <td data-label="Price/Unit" class="text-right">${formatBaht(item.priceUnit || 0)}</td>
+                    <td data-label="Qty" class="text-right" style="white-space: nowrap;">
+                        <span class="bold">${item.number || 0}</span> ${item.unit || ''} 
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">@ ${formatBaht(item.priceUnit || 0)}</div>
+                    </td>
                     <td data-label="Total" class="text-right bold total-cell">${formatBaht(item.total || 0)}</td>
-                    <td data-label="Type">${typeBadge}</td>
-                    <td data-label="Budget">${budgetBadge}</td>
                     <td data-label="Actions">
                         <div class="action-cell">
                             <button class="icon-btn icon-btn-edit" onclick="editRow('${item.id}')" title="Edit row">
