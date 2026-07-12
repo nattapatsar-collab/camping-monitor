@@ -335,6 +335,10 @@
             flex-direction: column;
         }
 
+        .chart-card-full {
+            grid-column: span 2;
+        }
+
         .chart-header {
             display: flex;
             justify-content: space-between;
@@ -1564,12 +1568,22 @@
     <!-- CHARTS GRID -->
     <section class="charts-grid">
         <!-- Monthly Expense & Budget Split -->
-        <div class="glass-panel chart-card">
+        <div class="glass-panel chart-card chart-card-full">
             <div class="chart-header">
                 <h3 class="chart-title">Timeline Expense Trend</h3>
             </div>
-            <div class="chart-container">
+            <div class="chart-container" style="height: 320px;">
                 <canvas id="timelineChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Location breakdown -->
+        <div class="glass-panel chart-card chart-card-full">
+            <div class="chart-header">
+                <h3 class="chart-title">Expense by Location</h3>
+            </div>
+            <div class="chart-container" style="height: 380px;">
+                <canvas id="locationChart"></canvas>
             </div>
         </div>
 
@@ -1583,18 +1597,8 @@
             </div>
         </div>
 
-        <!-- Location breakdown -->
-        <div class="glass-panel chart-card">
-            <div class="chart-header">
-                <h3 class="chart-title">Expense by Location</h3>
-            </div>
-            <div class="chart-container">
-                <canvas id="locationChart"></canvas>
-            </div>
-        </div>
-
         <!-- Budget source / Type split -->
-        <div class="glass-panel chart-card chart-card-double">
+        <div class="glass-panel chart-card">
             <div class="chart-header">
                 <h3 class="chart-title">Budget Split & Expense Types</h3>
             </div>
@@ -1606,6 +1610,8 @@
                     <canvas id="typeSplitChart"></canvas>
                 </div>
             </div>
+        </div>
+    </section>
     <!-- LOCATION BUDGETS PANEL (COLLAPSIBLE) -->
     <section class="glass-panel budget-panel collapsed" id="locationBudgetsPanel">
         <div class="panel-header" onclick="toggleLocationBudgets()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;">
