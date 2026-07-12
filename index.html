@@ -3872,26 +3872,31 @@
                         const headers = rawRows[0].map(h => (h || '').toString().trim().toLowerCase());
                         const dataRows = rawRows.slice(1);
 
-                        // Find column index based on keywords (bilingual mapping)
-                        const findColIndex = (keywords) => {
-                            return headers.findIndex(h => keywords.some(k => h.includes(k)));
-                        };
-
-                        const colIdx = {
-                            id: findColIndex(['รหัสรายการ', 'id', 'key', 'code', 'รหัส']),
-                            item: findColIndex(['รายการ', 'item', 'product', 'name']),
-                            description: findColIndex(['รายละเอียด', 'description', 'desc', 'spec']),
-                            date: findColIndex(['วันที่', 'date', 'time']),
-                            location: findColIndex(['สถานที่', 'location', 'zone', 'area']),
-                            category: findColIndex(['หมวดหมู่', 'category', 'group']),
-                            pic: findColIndex(['ร้านค้า', 'ช่าง', 'ผู้รับเงิน', 'ผู้รับผิดชอบ', 'vendor', 'pic']),
-                            number: findColIndex(['จำนวน', 'qty', 'quantity', 'amount', 'number']),
-                            unit: findColIndex(['หน่วย', 'unit']),
-                            priceUnit: findColIndex(['ราคาต่อหน่วย', 'ราคา', 'price_unit', 'price/unit', 'rate']),
-                            type: findColIndex(['ประเภท', 'type']),
-                            budget: findColIndex(['งบประมาณ', 'งบ', 'budget']),
-                            invNo: findColIndex(['เลขใบเสร็จ', 'เลขที่ใบเสร็จ', 'inv', 'invoice', 'inv_no'])
-                        };
+                         // Find column index based on keywords (bilingual mapping) with exclusion list
+                         const findColIndex = (keywords, excludeKeywords = []) => {
+                             return headers.findIndex(h => {
+                                 const matched = keywords.some(k => h.includes(k));
+                                 if (!matched) return false;
+                                 const excluded = excludeKeywords.some(ek => h.includes(ek));
+                                 return !excluded;
+                             });
+                         };
+ 
+                         const colIdx = {
+                             id: findColIndex(['รหัสรายการ', 'id', 'key', 'code', 'รหัส']),
+                             item: findColIndex(['รายการ', 'item', 'product', 'name'], ['รหัส', 'id', 'รายละเอียด', 'description']),
+                             description: findColIndex(['รายละเอียด', 'description', 'desc', 'spec']),
+                             date: findColIndex(['วันที่', 'date', 'time']),
+                             location: findColIndex(['สถานที่', 'location', 'zone', 'area']),
+                             category: findColIndex(['หมวดหมู่', 'category', 'group']),
+                             pic: findColIndex(['ร้านค้า', 'ช่าง', 'ผู้รับเงิน', 'ผู้รับผิดชอบ', 'vendor', 'pic']),
+                             number: findColIndex(['จำนวน', 'qty', 'quantity', 'amount', 'number']),
+                             unit: findColIndex(['หน่วย', 'unit']),
+                             priceUnit: findColIndex(['ราคาต่อหน่วย', 'ราคา', 'price_unit', 'price/unit', 'rate']),
+                             type: findColIndex(['ประเภท', 'type']),
+                             budget: findColIndex(['งบประมาณ', 'งบ', 'budget']),
+                             invNo: findColIndex(['เลขใบเสร็จ', 'เลขที่ใบเสร็จ', 'inv', 'invoice', 'inv_no'])
+                         };
 
                         // Verify required fields
                         if (colIdx.item === -1 || colIdx.date === -1) {
