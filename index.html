@@ -4057,20 +4057,9 @@
                             return;
                         }
 
-                        const success = await saveExpenseToCloud("batch-create", null, parsedExpenses);
-                        if (success) {
-                            const updatedCount = parsedExpenses.filter(p => expenses.some(e => e.id === p.id)).length;
-                            const createdCount = parsedExpenses.length - updatedCount;
-                            let msg = `นำเข้าข้อมูลจาก Excel สำเร็จ ${parsedExpenses.length} รายการ!`;
-                            if (updatedCount > 0 && createdCount > 0) {
-                                msg += ` (แก้ไขรายการเดิม ${updatedCount} รายการ, เพิ่มใหม่ ${createdCount} รายการ)`;
-                            } else if (updatedCount > 0) {
-                                msg += ` (แก้ไขรายการเดิม ${updatedCount} รายการ)`;
-                            } else if (createdCount > 0) {
-                                msg += ` (เพิ่มรายการใหม่ ${createdCount} รายการ)`;
-                            }
-                            showToast(msg, "success");
-                        }
+                        // Save parsed data to pending state and open preview modal
+                        pendingImportExpenses = parsedExpenses;
+                        openImportPreviewModal(parsedExpenses);
                     } catch (err) {
                         console.error("Excel parse processing failed:", err);
                         showToast("เกิดข้อผิดพลาดในการประมวลผลข้อมูล Excel: " + err.message, "error");
@@ -4086,6 +4075,99 @@
                 document.getElementById('excelFileInput').value = '';
             }
         }
+
+        // EXCEL IMPORT PREVIEW MODAL CONTROLLER
+        let pendingImportExpenses = [];
+        const importPreviewModal = document.getElementById('importPreviewModal');
+
+        window.openImportPreviewModal = function(items) {
+            const updatedCount = items.filter(p => expenses.some(e => e.id === p.id)).length;
+            const createdCount = items.length - updatedCount;
+            const totalSum = items.reduce((sum, item) => sum + (item.total || 0), 0);
+
+            document.getElementById('previewTotalCount').textContent = `${items.length} รายการ`;
+            document.getElementById('previewUpdateCount').textContent = `${updatedCount} รายการ`;
+            document.getElementById('previewCreateCount').textContent = `${createdCount} รายการ`;
+            document.getElementById('previewTotalAmount').textContent = formatBaht(totalSum);
+
+            const tbody = document.getElementById('importPreviewTableBody');
+            tbody.innerHTML = '';
+
+            items.forEach(item => {
+                const isUpdate = expenses.some(e => e.id === item.id);
+                const statusBadge = isUpdate 
+                    ? `<span style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 11px;">[แก้ไข]</span>`
+                    : `<span style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 11px;">[สร้างใหม่]</span>`;
+
+                const budgetBadge = item.budget === 'Bonus'
+                    ? `<span class="badge badge-budget-bonus">Bonus</span>`
+                    : `<span class="badge badge-budget-dad">Dad</span>`;
+
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid rgba(255, 255, 255, 0.05)';
+                tr.innerHTML = `
+                    <td style="padding: 8px 10px; font-family: var(--font-display); color: var(--primary); font-weight: 600;">${item.id}</td>
+                    <td style="padding: 8px 10px; text-align: center;">${statusBadge}</td>
+                    <td style="padding: 8px 10px; white-space: nowrap;">${item.date || '-'}</td>
+                    <td style="padding: 8px 10px;">
+                        <div style="font-weight: 600; color: #fff;">${item.item || '-'}</div>
+                        ${item.description ? `<div style="font-size: 11px; color: var(--text-muted);">${item.description}</div>` : ''}
+                    </td>
+                    <td style="padding: 8px 10px;">${item.location || '-'}</td>
+                    <td style="padding: 8px 10px;">${item.category || '-'}</td>
+                    <td style="padding: 8px 10px;">${item.pic || '-'}</td>
+                    <td style="padding: 8px 10px; text-align: right; white-space: nowrap;">
+                        ${item.number || 0} ${item.unit || ''} <span style="font-size: 11px; color: var(--text-muted);">@ ${formatBaht(item.priceUnit || 0)}</span>
+                    </td>
+                    <td style="padding: 8px 10px; text-align: right; font-weight: 700; color: #fff;">${formatBaht(item.total || 0)}</td>
+                    <td style="padding: 8px 10px; text-align: center;">${budgetBadge}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            importPreviewModal.classList.add('active');
+        };
+
+        window.closeImportPreviewModal = function() {
+            importPreviewModal.classList.remove('active');
+            pendingImportExpenses = [];
+        };
+
+        document.getElementById('closeImportPreviewBtn').addEventListener('click', closeImportPreviewModal);
+        document.getElementById('cancelImportBtn').addEventListener('click', closeImportPreviewModal);
+
+        document.getElementById('confirmImportBtn').addEventListener('click', async () => {
+            if (!pendingImportExpenses || pendingImportExpenses.length === 0) return;
+            const confirmBtn = document.getElementById('confirmImportBtn');
+            const originalText = confirmBtn.innerHTML;
+
+            try {
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '⌛ กำลังบันทึกข้อมูลลงระบบ...';
+
+                const success = await saveExpenseToCloud("batch-create", null, pendingImportExpenses);
+                if (success) {
+                    const updatedCount = pendingImportExpenses.filter(p => expenses.some(e => e.id === p.id)).length;
+                    const createdCount = pendingImportExpenses.length - updatedCount;
+                    let msg = `นำเข้าข้อมูลจาก Excel สำเร็จ ${pendingImportExpenses.length} รายการ!`;
+                    if (updatedCount > 0 && createdCount > 0) {
+                        msg += ` (แก้ไขรายการเดิม ${updatedCount} รายการ, เพิ่มใหม่ ${createdCount} รายการ)`;
+                    } else if (updatedCount > 0) {
+                        msg += ` (แก้ไขรายการเดิม ${updatedCount} รายการ)`;
+                    } else if (createdCount > 0) {
+                        msg += ` (เพิ่มรายการใหม่ ${createdCount} รายการ)`;
+                    }
+                    showToast(msg, "success");
+                    closeImportPreviewModal();
+                }
+            } catch (err) {
+                console.error("Confirm import failed:", err);
+                showToast("บันทึกข้อมูลนำเข้าล้มเหลว: " + err.message, "error");
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = originalText;
+            }
+        });
 
         // Copy summary in LINE friendly format
         window.copyLineSummary = function() {
