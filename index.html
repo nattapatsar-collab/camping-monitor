@@ -1736,10 +1736,10 @@
             <!-- Export / Add Actions -->
             <div class="action-btns">
                 <button class="btn btn-secondary" id="clearFiltersBtn">Reset</button>
-                <button class="btn btn-secondary" id="downloadTemplateBtn" onclick="downloadExcelTemplate()" title="Download Excel Template for Import">Template</button>
+                <button class="btn btn-secondary" id="downloadTemplateBtn" onclick="downloadExcelTemplate()" title="ดาวน์โหลด Template Excel (มีแผ่นสำหรับเพิ่มรายการใหม่ และแผ่นสำหรับแก้ไขรายการเดิม)">📥 โหลด Template</button>
                 <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;">
-                <button class="btn btn-secondary" id="importExcelBtn" onclick="document.getElementById('excelFileInput').click()" title="Import expenses from Excel/CSV">Import Excel</button>
-                <button class="btn btn-secondary" id="exportExcelBtn" onclick="exportExcelData()" title="Export current filtered data to Excel">Export Excel</button>
+                <button class="btn btn-secondary" id="importExcelBtn" onclick="document.getElementById('excelFileInput').click()" title="นำเข้าไฟล์ Excel เพื่อเพิ่มหรือแก้ไขหลายรายการตาม ID">📤 Import Excel</button>
+                <button class="btn btn-secondary" id="exportExcelBtn" onclick="exportExcelData()" title="ส่งออกข้อมูลตามตัวกรองปัจจุบันเป็น Excel (พร้อม ID)">📊 Export Excel</button>
                 <button class="btn btn-line" id="copyLineSummaryBtn" onclick="copyLineSummary()" title="คัดลอกสรุปสำหรับส่งใน LINE">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -3697,6 +3697,10 @@
         window.downloadExcelTemplate = function() {
             try {
                 // Gather unique options from current database
+        // Download Excel Template for import/bulk edit
+        window.downloadExcelTemplate = function() {
+            try {
+                // Gather unique options from current database for dropdown validation
                 const locations = [...new Set(expenses.map(i => (i.location || '').trim()).filter(Boolean))].sort();
                 const categories = [...new Set(expenses.map(i => (i.category || '').trim()).filter(Boolean))].sort();
                 const pics = [...new Set(expenses.map(i => (i.pic || '').trim()).filter(Boolean))].sort();
@@ -3708,30 +3712,33 @@
                 const finalTypes = ['ค่าวัสดุ/อุปกรณ์', 'ค่าแรง', 'ค่าขนส่ง'];
                 const finalBudgets = ['Bonus', 'Dad'];
 
-                const headers = [
+                const headersText = [
+                    'รหัสรายการ (ID) *เว้นว่างไว้เพื่อสร้างรายการใหม่*',
+                    'รายการ (Item) *', 
+                    'รายละเอียด (Description)', 
+                    'วันที่ (Date YYYY-MM-DD) *', 
+                    'สถานที่ (Location) *', 
+                    'หมวดหมู่ (Category) *', 
+                    'ร้านค้า/ช่าง (Vendor/PIC) *', 
+                    'จำนวน (Qty) *', 
+                    'หน่วยนับ (Unit) *', 
+                    'ราคาต่อหน่วย (Price/Unit) *', 
+                    'ประเภทค่าใช้จ่าย (Type: ค่าวัสดุ/ค่าแรง/ค่าขนส่ง) *', 
+                    'งบประมาณ (Budget: Bonus/Dad) *', 
+                    'เลขที่ใบเสร็จ (Inv No.)'
+                ];
+
+                // Sheet 1: Blank Template for adding new items
+                const blankData = [
+                    headersText,
                     [
-                        'รหัสรายการ (ID) *เว้นว่างไว้เพื่อสร้างรายการใหม่*',
-                        'รายการ (Item) *', 
-                        'รายละเอียด (Description)', 
-                        'วันที่ (Date YYYY-MM-DD) *', 
-                        'สถานที่ (Location) *', 
-                        'หมวดหมู่ (Category) *', 
-                        'ร้านค้า/ช่าง (Vendor/PIC) *', 
-                        'จำนวน (Qty) *', 
-                        'หน่วยนับ (Unit) *', 
-                        'ราคาต่อหน่วย (Price/Unit) *', 
-                        'ประเภทค่าใช้จ่าย (Type: ค่าวัสดุ/ค่าแรง/ค่าขนส่ง) *', 
-                        'งบประมาณ (Budget: Bonus/Dad) *', 
-                        'เลขที่ใบเสร็จ (Inv No.)'
-                    ],
-                    [
-                        '', // ID blank
+                        '', // ID blank for auto-generate ID
                         'ปูน TOA', 
                         'ขนาด 50 กก.', 
-                        '2026-06-06', 
-                        'ออฟฟิศ', 
-                        'งานเทพื้น', 
-                        '79 วัสดุก่อสร้าง', 
+                        new Date().toISOString().split('T')[0], 
+                        finalLocs[0] || 'ออฟฟิศ', 
+                        finalCats[0] || 'งานเทพื้น', 
+                        finalPics[0] || '79 วัสดุก่อสร้าง', 
                         10, 
                         'กระสอบ', 
                         235.00, 
@@ -3740,11 +3747,30 @@
                         'IV-001'
                     ]
                 ];
+                const wsBlank = XLSX.utils.aoa_to_sheet(blankData);
 
-                const wb = XLSX.utils.book_new();
-                const ws = XLSX.utils.aoa_to_sheet(headers);
+                // Sheet 2: Bulk edit sheet populated with existing expenses
+                const editData = [headersText];
+                expenses.forEach(item => {
+                    editData.push([
+                        item.id || '',
+                        item.item || '',
+                        item.description || '',
+                        item.date || '',
+                        item.location || '',
+                        item.category || '',
+                        item.pic || '',
+                        item.number || 0,
+                        item.unit || '',
+                        item.priceUnit || 0,
+                        item.type || '',
+                        item.budget || '',
+                        item.invNo || ''
+                    ]);
+                });
+                const wsEdit = XLSX.utils.aoa_to_sheet(editData);
 
-                // Build Lists sheet
+                // Sheet 3: Reference lists for dropdown validations
                 const listsData = [
                     ["Locations", "Categories", "PICs", "Types", "Budgets"]
                 ];
@@ -3760,51 +3786,54 @@
                 }
                 const wsLists = XLSX.utils.aoa_to_sheet(listsData);
                 
-                // Add validation lists sheet to workbook
-                XLSX.utils.book_append_sheet(wb, ws, "Template");
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, wsBlank, "เพิ่มรายการใหม่");
+                XLSX.utils.book_append_sheet(wb, wsEdit, "แก้ไขรายการเดิม");
                 XLSX.utils.book_append_sheet(wb, wsLists, "Lists");
 
-                // Assign data validations to Template sheet
-                ws['!dataValidation'] = [
+                // Assign data validation dropdowns to both data sheets
+                const validationRules = [
                     {
-                        sqref: 'E2:E1000', // Location is column E
+                        sqref: 'E2:E10000', // Location
                         formulae: [`Lists!\$A\$2:\$A\$${finalLocs.length + 1}`],
                         type: 'list',
                         showDropDown: true,
                         showErrorMessage: false
                     },
                     {
-                        sqref: 'F2:F1000', // Category is column F
+                        sqref: 'F2:F10000', // Category
                         formulae: [`Lists!\$B\$2:\$B\$${finalCats.length + 1}`],
                         type: 'list',
                         showDropDown: true,
                         showErrorMessage: false
                     },
                     {
-                        sqref: 'G2:G1000', // PIC is column G
+                        sqref: 'G2:G10000', // PIC
                         formulae: [`Lists!\$C\$2:\$C\$${finalPics.length + 1}`],
                         type: 'list',
                         showDropDown: true,
                         showErrorMessage: false
                     },
                     {
-                        sqref: 'K2:K1000', // Type is column K
+                        sqref: 'K2:K10000', // Type
                         formulae: [`Lists!\$D\$2:\$D\$4`],
                         type: 'list',
                         showDropDown: true,
                         showErrorMessage: false
                     },
                     {
-                        sqref: 'L2:L1000', // Budget is column L
+                        sqref: 'L2:L10000', // Budget
                         formulae: [`Lists!\$E\$2:\$E\$3`],
                         type: 'list',
                         showDropDown: true,
                         showErrorMessage: false
                     }
                 ];
+                wsBlank['!dataValidation'] = validationRules;
+                wsEdit['!dataValidation'] = validationRules;
 
-                XLSX.writeFile(wb, "camping_expense_template.xlsx");
-                showToast("ดาวน์โหลดเทมเพลตสำเร็จ!", "success");
+                XLSX.writeFile(wb, `camping_expenses_template_${new Date().toISOString().split('T')[0]}.xlsx`);
+                showToast("ดาวน์โหลด Template Excel สำหรับเพิ่ม/แก้ไขเรียบร้อย!", "success");
             } catch (err) {
                 console.error("Download template failed:", err);
                 showToast("ดาวน์โหลดเทมเพลตล้มเหลว: " + err.message, "error");
@@ -3837,16 +3866,15 @@
             // Parse other formats (e.g. DD/MM/YYYY)
             const parts = str.split(/[\/\-]/);
             if (parts.length === 3) {
-                // Guess if DD/MM/YYYY
                 let d = parseInt(parts[0]);
                 let m = parseInt(parts[1]);
                 let y = parseInt(parts[2]);
-                if (d > 12 && m <= 12) { // Clearly DD/MM/YYYY
-                    // Do nothing, variables map correctly
-                } else if (m > 12 && d <= 12) { // MM/DD/YYYY
+                if (d > 12 && m <= 12) {
+                    // DD/MM/YYYY
+                } else if (m > 12 && d <= 12) {
                     const tmp = d; d = m; m = tmp;
                 }
-                if (y < 2000) y += 2000; // Guess year
+                if (y < 2000) y += 2000;
                 return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
             }
             return str;
@@ -3860,143 +3888,149 @@
                     try {
                         const data = new Uint8Array(e.target.result);
                         const workbook = XLSX.read(data, { type: 'array' });
-                        const firstSheetName = workbook.SheetNames[0];
-                        const worksheet = workbook.Sheets[firstSheetName];
-                        
-                        const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                        if (rawRows.length <= 1) {
-                            showToast("ไม่มีข้อมูลในไฟล์ Excel ที่นำเข้า", "warning");
-                            return;
-                        }
 
-                        const headers = rawRows[0].map(h => (h || '').toString().trim().toLowerCase());
-                        const dataRows = rawRows.slice(1);
+                        const parsedExpenses = [];
+                        const uploadedIds = new Set();
 
-                         // Find column index based on keywords (bilingual mapping) with exclusion list
-                         const findColIndex = (keywords, excludeKeywords = []) => {
-                             return headers.findIndex(h => {
-                                 const matched = keywords.some(k => h.includes(k));
-                                 if (!matched) return false;
-                                 const excluded = excludeKeywords.some(ek => h.includes(ek));
-                                 return !excluded;
-                             });
-                         };
- 
-                         const colIdx = {
-                             id: findColIndex(['รหัสรายการ', 'id', 'key', 'code', 'รหัส']),
-                             item: findColIndex(['รายการ', 'item', 'product', 'name'], ['รหัส', 'id', 'รายละเอียด', 'description']),
-                             description: findColIndex(['รายละเอียด', 'description', 'desc', 'spec']),
-                             date: findColIndex(['วันที่', 'date', 'time']),
-                             location: findColIndex(['สถานที่', 'location', 'zone', 'area']),
-                             category: findColIndex(['หมวดหมู่', 'category', 'group']),
-                             pic: findColIndex(['ร้านค้า', 'ช่าง', 'ผู้รับเงิน', 'ผู้รับผิดชอบ', 'vendor', 'pic']),
-                             number: findColIndex(['จำนวน', 'qty', 'quantity', 'amount', 'number']),
-                             unit: findColIndex(['หน่วย', 'unit']),
-                             priceUnit: findColIndex(['ราคาต่อหน่วย', 'ราคา', 'price_unit', 'price/unit', 'rate']),
-                             type: findColIndex(['ประเภท', 'type']),
-                             budget: findColIndex(['งบประมาณ', 'งบ', 'budget']),
-                             invNo: findColIndex(['เลขใบเสร็จ', 'เลขที่ใบเสร็จ', 'inv', 'invoice', 'inv_no'])
-                         };
-
-                        // Verify required fields
-                        if (colIdx.item === -1 || colIdx.date === -1) {
-                            showToast("ไฟล์ Excel ต้องมีคอลัมน์ รายการ (Item) และ วันที่ (Date)", "error");
-                            return;
-                        }
-
-                        // Generate sequential ID starting from max Axxx series
+                        // Determine next sequential ID for new items
                         let nextNum = 1;
-                        const aSeries = expenses.filter(i => i.id.startsWith('A') && !isNaN(i.id.substring(1)));
+                        const aSeries = expenses.filter(i => i.id && i.id.startsWith('A') && !isNaN(i.id.substring(1)));
                         if (aSeries.length > 0) {
                             nextNum = Math.max(...aSeries.map(i => parseInt(i.id.substring(1)))) + 1;
                         }
 
-                        const parsedExpenses = [];
-                        const uploadedIds = new Set();
-                        
-                        for (let i = 0; i < dataRows.length; i++) {
-                            const row = dataRows[i];
-                            // Skip empty rows
-                            if (!row || row.length === 0 || !row[colIdx.item]) continue;
+                        // Process all non-reference sheets
+                        for (const sheetName of workbook.SheetNames) {
+                            if (sheetName.toLowerCase().trim().includes('list')) continue;
 
-                            let idVal = colIdx.id !== -1 ? (row[colIdx.id] || '').toString().trim() : '';
-                            const itemVal = row[colIdx.item];
-                            const descVal = colIdx.description !== -1 ? row[colIdx.description] : '';
-                            const dateRaw = colIdx.date !== -1 ? row[colIdx.date] : '';
-                            const locVal = colIdx.location !== -1 ? row[colIdx.location] : '-';
-                            const catVal = colIdx.category !== -1 ? row[colIdx.category] : '-';
-                            const picVal = colIdx.pic !== -1 ? row[colIdx.pic] : '-';
-                            const qtyVal = colIdx.number !== -1 ? parseFloat(row[colIdx.number]) : 1;
-                            const unitVal = colIdx.unit !== -1 ? row[colIdx.unit] : 'ชิ้น';
-                            const priceVal = colIdx.priceUnit !== -1 ? parseFloat(row[colIdx.priceUnit]) : 0;
-                            const invVal = colIdx.invNo !== -1 ? row[colIdx.invNo] : '';
-                            let typeVal = colIdx.type !== -1 ? row[colIdx.type] : 'ค่าวัสดุ/อุปกรณ์';
-                            let budgetVal = colIdx.budget !== -1 ? row[colIdx.budget] : 'Bonus';
+                            const worksheet = workbook.Sheets[sheetName];
+                            const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                            if (!rawRows || rawRows.length <= 1) continue;
 
-                            // Normalize Date
-                            const dateVal = parseExcelDate(dateRaw);
-                            
-                            // Normalize Type
-                            typeVal = typeVal.toString().trim();
-                            if (typeVal.includes('แรง') || typeVal.toLowerCase().includes('labor')) {
-                                typeVal = 'ค่าแรง';
-                            } else if (typeVal.includes('ขนส่ง') || typeVal.toLowerCase().includes('trans') || typeVal.toLowerCase().includes('ship')) {
-                                typeVal = 'ค่าขนส่ง';
-                            } else {
-                                typeVal = 'ค่าวัสดุ/อุปกรณ์';
+                            const headers = rawRows[0].map(h => (h || '').toString().trim().toLowerCase());
+                            const dataRows = rawRows.slice(1);
+
+                            // Find column index based on keywords (bilingual mapping) with exclusion list
+                            const findColIndex = (keywords, excludeKeywords = []) => {
+                                return headers.findIndex(h => {
+                                    const matched = keywords.some(k => h.includes(k));
+                                    if (!matched) return false;
+                                    const excluded = excludeKeywords.some(ek => h.includes(ek));
+                                    return !excluded;
+                                });
+                            };
+
+                            const colIdx = {
+                                id: findColIndex(['รหัสรายการ', 'id', 'key', 'code', 'รหัส']),
+                                item: findColIndex(['รายการ', 'item', 'product', 'name'], ['รหัส', 'id', 'รายละเอียด', 'description']),
+                                description: findColIndex(['รายละเอียด', 'description', 'desc', 'spec']),
+                                date: findColIndex(['วันที่', 'date', 'time']),
+                                location: findColIndex(['สถานที่', 'location', 'zone', 'area']),
+                                category: findColIndex(['หมวดหมู่', 'category', 'group']),
+                                pic: findColIndex(['ร้านค้า', 'ช่าง', 'ผู้รับเงิน', 'ผู้รับผิดชอบ', 'vendor', 'pic']),
+                                number: findColIndex(['จำนวน', 'qty', 'quantity', 'amount', 'number']),
+                                unit: findColIndex(['หน่วย', 'unit']),
+                                priceUnit: findColIndex(['ราคาต่อหน่วย', 'ราคา', 'price_unit', 'price/unit', 'rate']),
+                                type: findColIndex(['ประเภท', 'type']),
+                                budget: findColIndex(['งบประมาณ', 'งบ', 'budget']),
+                                invNo: findColIndex(['เลขใบเสร็จ', 'เลขที่ใบเสร็จ', 'inv', 'invoice', 'inv_no'])
+                            };
+
+                            // Verify required fields
+                            if (colIdx.item === -1 || colIdx.date === -1) {
+                                continue;
                             }
 
-                            // Normalize Budget
-                            budgetVal = budgetVal.toString().trim().toLowerCase();
-                            if (budgetVal.includes('dad') || budgetVal.includes('พ่อ')) {
-                                budgetVal = 'Dad';
-                            } else {
-                                budgetVal = 'Bonus';
-                            }
+                            for (let i = 0; i < dataRows.length; i++) {
+                                const row = dataRows[i];
+                                if (!row || row.length === 0 || !row[colIdx.item]) continue;
 
-                            // ID check / assign
-                            if (!idVal) {
-                                let newId = 'A' + (nextNum++).toString().padStart(3, '0');
-                                while (expenses.some(x => x.id === newId) || uploadedIds.has(newId)) {
-                                    newId = 'A' + (nextNum++).toString().padStart(3, '0');
+                                let idVal = colIdx.id !== -1 ? (row[colIdx.id] || '').toString().trim() : '';
+                                const itemVal = row[colIdx.item];
+                                const descVal = colIdx.description !== -1 ? row[colIdx.description] : '';
+                                const dateRaw = colIdx.date !== -1 ? row[colIdx.date] : '';
+                                const locVal = colIdx.location !== -1 ? row[colIdx.location] : '-';
+                                const catVal = colIdx.category !== -1 ? row[colIdx.category] : '-';
+                                const picVal = colIdx.pic !== -1 ? row[colIdx.pic] : '-';
+                                const qtyVal = colIdx.number !== -1 ? parseFloat(row[colIdx.number]) : 1;
+                                const unitVal = colIdx.unit !== -1 ? row[colIdx.unit] : 'ชิ้น';
+                                const priceVal = colIdx.priceUnit !== -1 ? parseFloat(row[colIdx.priceUnit]) : 0;
+                                const invVal = colIdx.invNo !== -1 ? row[colIdx.invNo] : '';
+                                let typeVal = colIdx.type !== -1 ? row[colIdx.type] : 'ค่าวัสดุ/อุปกรณ์';
+                                let budgetVal = colIdx.budget !== -1 ? row[colIdx.budget] : 'Bonus';
+
+                                const dateVal = parseExcelDate(dateRaw);
+
+                                typeVal = (typeVal || '').toString().trim();
+                                if (typeVal.includes('แรง') || typeVal.toLowerCase().includes('labor')) {
+                                    typeVal = 'ค่าแรง';
+                                } else if (typeVal.includes('ขนส่ง') || typeVal.toLowerCase().includes('trans') || typeVal.toLowerCase().includes('ship')) {
+                                    typeVal = 'ค่าขนส่ง';
+                                } else {
+                                    typeVal = 'ค่าวัสดุ/อุปกรณ์';
                                 }
-                                idVal = newId;
-                            } else {
-                                if (uploadedIds.has(idVal)) {
-                                    showToast(`พบรหัสรายการซ้ำในไฟล์ Excel: ${idVal}`, "error");
-                                    return;
+
+                                budgetVal = (budgetVal || '').toString().trim().toLowerCase();
+                                if (budgetVal.includes('dad') || budgetVal.includes('พ่อ')) {
+                                    budgetVal = 'Dad';
+                                } else {
+                                    budgetVal = 'Bonus';
                                 }
+
+                                // ID check / assign
+                                if (!idVal) {
+                                    let newId = 'A' + (nextNum++).toString().padStart(3, '0');
+                                    while (expenses.some(x => x.id === newId) || uploadedIds.has(newId)) {
+                                        newId = 'A' + (nextNum++).toString().padStart(3, '0');
+                                    }
+                                    idVal = newId;
+                                } else {
+                                    if (uploadedIds.has(idVal)) {
+                                        showToast(`พบรหัสรายการซ้ำในไฟล์ Excel: ${idVal}`, "error");
+                                        return;
+                                    }
+                                }
+                                uploadedIds.add(idVal);
+
+                                const total = parseFloat(((isNaN(qtyVal) ? 1 : qtyVal) * (isNaN(priceVal) ? 0 : priceVal)).toFixed(2));
+
+                                parsedExpenses.push({
+                                    id: idVal,
+                                    item: itemVal.toString().trim(),
+                                    description: descVal ? descVal.toString().trim() : '',
+                                    date: dateVal,
+                                    location: locVal ? locVal.toString().trim() : '-',
+                                    category: catVal ? catVal.toString().trim() : '-',
+                                    pic: picVal ? picVal.toString().trim() : '-',
+                                    number: isNaN(qtyVal) ? 1 : qtyVal,
+                                    unit: unitVal ? unitVal.toString().trim() : 'ชิ้น',
+                                    priceUnit: isNaN(priceVal) ? 0 : priceVal,
+                                    total,
+                                    type: typeVal,
+                                    budget: budgetVal,
+                                    invNo: invVal ? invVal.toString().trim() : ''
+                                });
                             }
-                            uploadedIds.add(idVal);
-
-                            const total = parseFloat((qtyVal * priceVal).toFixed(2));
-
-                            parsedExpenses.push({
-                                id: idVal,
-                                item: itemVal.toString().trim(),
-                                description: descVal ? descVal.toString().trim() : '',
-                                date: dateVal,
-                                location: locVal ? locVal.toString().trim() : '-',
-                                category: catVal ? catVal.toString().trim() : '-',
-                                pic: picVal ? picVal.toString().trim() : '-',
-                                number: isNaN(qtyVal) ? 1 : qtyVal,
-                                unit: unitVal ? unitVal.toString().trim() : 'ชิ้น',
-                                priceUnit: isNaN(priceVal) ? 0 : priceVal,
-                                total,
-                                type: typeVal,
-                                budget: budgetVal,
-                                invNo: invVal ? invVal.toString().trim() : ''
-                            });
                         }
 
                         if (parsedExpenses.length === 0) {
-                            showToast("ไม่พบแถวข้อมูลที่สามารถนำเข้าได้", "warning");
+                            showToast("ไม่พบข้อมูลที่สามารถนำเข้าได้ (โปรดตรวจสอบคอลัมน์ รายการ และ วันที่)", "warning");
                             return;
                         }
 
                         const success = await saveExpenseToCloud("batch-create", null, parsedExpenses);
                         if (success) {
-                            showToast(`นำเข้าข้อมูลจาก Excel สำเร็จ ${parsedExpenses.length} รายการ!`, "success");
+                            const updatedCount = parsedExpenses.filter(p => expenses.some(e => e.id === p.id)).length;
+                            const createdCount = parsedExpenses.length - updatedCount;
+                            let msg = `นำเข้าข้อมูลจาก Excel สำเร็จ ${parsedExpenses.length} รายการ!`;
+                            if (updatedCount > 0 && createdCount > 0) {
+                                msg += ` (แก้ไขรายการเดิม ${updatedCount} รายการ, เพิ่มใหม่ ${createdCount} รายการ)`;
+                            } else if (updatedCount > 0) {
+                                msg += ` (แก้ไขรายการเดิม ${updatedCount} รายการ)`;
+                            } else if (createdCount > 0) {
+                                msg += ` (เพิ่มรายการใหม่ ${createdCount} รายการ)`;
+                            }
+                            showToast(msg, "success");
                         }
                     } catch (err) {
                         console.error("Excel parse processing failed:", err);
