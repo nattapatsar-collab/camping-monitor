@@ -579,6 +579,39 @@
             box-shadow: 0 6px 16px rgba(6, 199, 85, 0.25) !important;
         }
 
+        .btn-excel-template {
+            background: rgba(16, 185, 129, 0.12) !important;
+            border: 1px solid rgba(16, 185, 129, 0.35) !important;
+            color: #34d399 !important;
+        }
+        .btn-excel-template:hover {
+            background: rgba(16, 185, 129, 0.25) !important;
+            border-color: rgba(16, 185, 129, 0.6) !important;
+            transform: translateY(-1px);
+        }
+
+        .btn-excel-import {
+            background: rgba(59, 130, 246, 0.12) !important;
+            border: 1px solid rgba(59, 130, 246, 0.35) !important;
+            color: #60a5fa !important;
+        }
+        .btn-excel-import:hover {
+            background: rgba(59, 130, 246, 0.25) !important;
+            border-color: rgba(59, 130, 246, 0.6) !important;
+            transform: translateY(-1px);
+        }
+
+        body.light-mode .btn-excel-template {
+            background: #ecfdf5 !important;
+            border-color: #a7f3d0 !important;
+            color: #047857 !important;
+        }
+        body.light-mode .btn-excel-import {
+            background: #eff6ff !important;
+            border-color: #bfdbfe !important;
+            color: #1d4ed8 !important;
+        }
+
         /* Data table container */
         .table-panel {
             overflow: hidden;
@@ -1736,9 +1769,9 @@
             <!-- Export / Add Actions -->
             <div class="action-btns">
                 <button class="btn btn-secondary" id="clearFiltersBtn">Reset</button>
-                <button class="btn btn-secondary" id="downloadTemplateBtn" onclick="downloadExcelTemplate()" title="ดาวน์โหลด Template Excel (มีแผ่นสำหรับเพิ่มรายการใหม่ และแผ่นสำหรับแก้ไขรายการเดิม)">📥 โหลด Template</button>
+                <button class="btn btn-excel-template" id="downloadTemplateBtn" onclick="downloadExcelTemplate()" title="ดาวน์โหลด Template Excel (มีแผ่นสำหรับเพิ่มรายการใหม่ และแผ่นสำหรับแก้ไขรายการเดิม)">📥 โหลด Template</button>
                 <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;">
-                <button class="btn btn-secondary" id="importExcelBtn" onclick="document.getElementById('excelFileInput').click()" title="นำเข้าไฟล์ Excel เพื่อเพิ่มหรือแก้ไขหลายรายการตาม ID">📤 Import Excel</button>
+                <button class="btn btn-excel-import" id="importExcelBtn" onclick="document.getElementById('excelFileInput').click()" title="นำเข้าไฟล์ Excel เพื่อเพิ่มหรือแก้ไขหลายรายการตาม ID">📤 Import Excel</button>
                 <button class="btn btn-secondary" id="exportExcelBtn" onclick="exportExcelData()" title="ส่งออกข้อมูลตามตัวกรองปัจจุบันเป็น Excel (พร้อม ID)">📊 Export Excel</button>
                 <button class="btn btn-line" id="copyLineSummaryBtn" onclick="copyLineSummary()" title="คัดลอกสรุปสำหรับส่งใน LINE">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -1760,9 +1793,15 @@
 
     <!-- DATA TABLE CONTAINER -->
     <section class="glass-panel table-panel">
-        <div class="table-header-row">
-            <h3 class="table-title">Expenses Records</h3>
-            <span class="row-count" id="tableRowCount">Showing 0 of 0 entries</span>
+        <div class="table-header-row" style="flex-wrap: wrap; gap: 12px; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <h3 class="table-title" style="margin: 0;">Expenses Records</h3>
+                <span class="row-count" id="tableRowCount">Showing 0 of 0 entries</span>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; margin-left: auto; flex-wrap: wrap;">
+                <button class="btn btn-excel-template" onclick="downloadExcelTemplate()" title="ดาวน์โหลด Template Excel">📥 โหลด Template Excel</button>
+                <button class="btn btn-excel-import" onclick="document.getElementById('excelFileInput').click()" title="นำเข้าไฟล์ Excel">📤 Import Excel</button>
+            </div>
         </div>
 
         <div class="table-responsive">
