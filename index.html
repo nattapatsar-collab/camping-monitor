@@ -1534,6 +1534,10 @@
                 <div class="status-dot" id="syncStatusDot"></div>
                 <span id="syncStatusText">Connecting to Cloud...</span>
             </div>
+            <!-- Quick Budget Settings Button -->
+            <button class="btn" onclick="openOverallBudgetModal()" title="ตั้งค่างบพ่อ & งบโบนัส" style="padding: 6px 12px; font-size: 12px; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600;">
+                ⚙️ ตั้งค่างบประมาณ
+            </button>
             <!-- Theme Toggle Button -->
             <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Theme">
                 <svg id="themeToggleIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1561,10 +1565,13 @@
         </div>
 
         <!-- Dad Budget -->
-        <div class="glass-panel kpi-card dad-card" onclick="filterByBudgetKpi('Dad')" style="cursor: pointer;">
+        <div class="glass-panel kpi-card dad-card" onclick="filterByBudgetKpi('Dad')" style="cursor: pointer; position: relative;">
             <div class="kpi-title">
                 <span>Dad Budget</span>
-                <span class="percentage-badge" id="kpiDadPercentBadge" style="background-color: var(--dad-glow); color: var(--dad);">0%</span>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="percentage-badge" id="kpiDadPercentBadge" style="background-color: var(--dad-glow); color: var(--dad);">0%</span>
+                    <button onclick="event.stopPropagation(); openOverallBudgetModal('Dad')" title="ตั้งค่างบพ่อ" style="background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.4); color: var(--dad); border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;">⚙️ แก้ไข</button>
+                </div>
             </div>
             <div class="kpi-value" id="kpiDadSpent">฿0.00</div>
             <div class="kpi-progress-bar">
@@ -1577,10 +1584,13 @@
         </div>
 
         <!-- Bonus Budget -->
-        <div class="glass-panel kpi-card bonus-card" onclick="filterByBudgetKpi('Bonus')" style="cursor: pointer;">
+        <div class="glass-panel kpi-card bonus-card" onclick="filterByBudgetKpi('Bonus')" style="cursor: pointer; position: relative;">
             <div class="kpi-title">
                 <span>Bonus Budget</span>
-                <span class="percentage-badge" id="kpiBonusPercentBadge" style="background-color: var(--bonus-glow); color: var(--bonus);">0%</span>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span class="percentage-badge" id="kpiBonusPercentBadge" style="background-color: var(--bonus-glow); color: var(--bonus);">0%</span>
+                    <button onclick="event.stopPropagation(); openOverallBudgetModal('Bonus')" title="ตั้งค่างบโบนัส" style="background: rgba(59, 130, 246, 0.18); border: 1px solid rgba(59, 130, 246, 0.4); color: var(--bonus); border-radius: 4px; padding: 2px 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s;">⚙️ แก้ไข</button>
+                </div>
             </div>
             <div class="kpi-value" id="kpiBonusSpent">฿0.00</div>
             <div class="kpi-progress-bar">
@@ -2031,6 +2041,62 @@
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                         </svg>
                         Delete Item
+                    </button>
+    <!-- OVERALL BUDGET SETTINGS MODAL -->
+    <div class="modal-overlay" id="overallBudgetModal">
+        <div class="glass-panel modal-container" style="max-width: 620px; width: 95%;">
+            <div class="modal-header">
+                <h3 class="modal-title" style="display: flex; align-items: center; gap: 8px;">
+                    💰 ตั้งค่างบประมาณ (Bonus & Dad Budget Settings)
+                </h3>
+                <button class="modal-close" id="closeOverallBudgetBtn">&times;</button>
+            </div>
+            <div class="modal-body" style="display: flex; flex-direction: column; gap: 20px;">
+                <p style="font-size: 13px; color: var(--text-muted); margin: 0;">
+                    กำหนดวงเงินงบประมาณรวม (งบพ่อ & งบโบนัส) ระบบจะนำไปคำนวณ % การใช้จ่ายและยอดเงินคงเหลือแบบเรียลไทม์
+                </p>
+
+                <!-- Dad Budget Setting Box -->
+                <div style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); padding: 16px; border-radius: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label for="modalOverallDadLimit" style="font-size: 14px; font-weight: 700; color: var(--dad); display: flex; align-items: center; gap: 6px;">
+                            🟡 งบพ่อรวม (Dad Budget Limit)
+                        </label>
+                        <span id="modalDadSpentInfo" style="font-size: 12px; color: var(--text-muted);">ใช้ไปแล้ว: ฿0.00</span>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <input type="number" id="modalOverallDadLimit" class="form-input" style="flex: 1; min-width: 180px; font-size: 16px; font-weight: 700; padding: 10px 14px;" min="0" step="any" placeholder="100000">
+                        <div style="display: flex; gap: 6px;">
+                            <button type="button" class="btn btn-secondary" onclick="setPresetDad(100000)" style="padding: 6px 10px; font-size: 11px;">100k</button>
+                            <button type="button" class="btn btn-secondary" onclick="setPresetDad(150000)" style="padding: 6px 10px; font-size: 11px;">150k</button>
+                            <button type="button" class="btn btn-secondary" onclick="setPresetDad(200000)" style="padding: 6px 10px; font-size: 11px;">200k</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bonus Budget Setting Box -->
+                <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); padding: 16px; border-radius: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label for="modalOverallBonusLimit" style="font-size: 14px; font-weight: 700; color: var(--bonus); display: flex; align-items: center; gap: 6px;">
+                            🔵 งบโบนัสรวม (Bonus Budget Limit)
+                        </label>
+                        <span id="modalBonusSpentInfo" style="font-size: 12px; color: var(--text-muted);">ใช้ไปแล้ว: ฿0.00</span>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <input type="number" id="modalOverallBonusLimit" class="form-input" style="flex: 1; min-width: 180px; font-size: 16px; font-weight: 700; padding: 10px 14px;" min="0" step="any" placeholder="200000">
+                        <div style="display: flex; gap: 6px;">
+                            <button type="button" class="btn btn-secondary" onclick="setPresetBonus(150000)" style="padding: 6px 10px; font-size: 11px;">150k</button>
+                            <button type="button" class="btn btn-secondary" onclick="setPresetBonus(200000)" style="padding: 6px 10px; font-size: 11px;">200k</button>
+                            <button type="button" class="btn btn-secondary" onclick="setPresetBonus(300000)" style="padding: 6px 10px; font-size: 11px;">300k</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Action Buttons -->
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 10px;">
+                    <button class="btn btn-secondary" id="cancelOverallBudgetBtn">❌ ยกเลิก (Cancel)</button>
+                    <button class="btn btn-primary" id="saveOverallBudgetBtn" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        💾 บันทึกงบประมาณ (Save Settings)
                     </button>
                 </div>
             </div>
@@ -4166,6 +4232,107 @@
             } finally {
                 confirmBtn.disabled = false;
                 confirmBtn.innerHTML = originalText;
+            }
+        });
+
+        // OVERALL BUDGET SETTINGS MODAL CONTROLLER
+        const overallBudgetModal = document.getElementById('overallBudgetModal');
+
+        window.openOverallBudgetModal = function(focusField) {
+            const dadSpent = expenses.filter(i => i.budget === 'Dad').reduce((sum, i) => sum + (i.total || 0), 0);
+            const bonusSpent = expenses.filter(i => i.budget === 'Bonus').reduce((sum, i) => sum + (i.total || 0), 0);
+
+            const dadInput = document.getElementById('modalOverallDadLimit');
+            const bonusInput = document.getElementById('modalOverallBonusLimit');
+
+            dadInput.value = BUDGET_LIMITS.Dad || 100000;
+            bonusInput.value = BUDGET_LIMITS.Bonus || 200000;
+
+            document.getElementById('modalDadSpentInfo').textContent = `ใช้ไปแล้ว: ${formatBaht(dadSpent)}`;
+            document.getElementById('modalBonusSpentInfo').textContent = `ใช้ไปแล้ว: ${formatBaht(bonusSpent)}`;
+
+            overallBudgetModal.classList.add('active');
+
+            if (focusField === 'Dad') {
+                setTimeout(() => dadInput.focus(), 100);
+            } else if (focusField === 'Bonus') {
+                setTimeout(() => bonusInput.focus(), 100);
+            }
+        };
+
+        window.closeOverallBudgetModal = function() {
+            overallBudgetModal.classList.remove('active');
+        };
+
+        window.setPresetDad = function(val) {
+            document.getElementById('modalOverallDadLimit').value = val;
+        };
+
+        window.setPresetBonus = function(val) {
+            document.getElementById('modalOverallBonusLimit').value = val;
+        };
+
+        document.getElementById('closeOverallBudgetBtn').addEventListener('click', closeOverallBudgetModal);
+        document.getElementById('cancelOverallBudgetBtn').addEventListener('click', closeOverallBudgetModal);
+
+        document.getElementById('saveOverallBudgetBtn').addEventListener('click', async () => {
+            const dadVal = parseFloat(document.getElementById('modalOverallDadLimit').value);
+            const bonusVal = parseFloat(document.getElementById('modalOverallBonusLimit').value);
+
+            if (isNaN(dadVal) || dadVal < 0 || isNaN(bonusVal) || bonusVal < 0) {
+                showToast("กรุณากรอกตัวเลขงบประมาณที่ถูกต้อง", "warning");
+                return;
+            }
+
+            BUDGET_LIMITS.Dad = dadVal;
+            BUDGET_LIMITS.Bonus = bonusVal;
+
+            // Sync with input elements inside collapsible section if present
+            const oldDadInput = document.getElementById('inputOverallDadLimit');
+            const oldBonusInput = document.getElementById('inputOverallBonusLimit');
+            if (oldDadInput) oldDadInput.value = dadVal;
+            if (oldBonusInput) oldBonusInput.value = bonusVal;
+
+            const saveBtn = document.getElementById('saveOverallBudgetBtn');
+            const origText = saveBtn.innerHTML;
+
+            try {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '⌛ กำลังบันทึก...';
+
+                const budgetsToSave = [
+                    {
+                        location: '__overall__',
+                        dad_budget: dadVal,
+                        bonus_budget: bonusVal
+                    }
+                ];
+
+                // Gather location row budgets if available
+                document.querySelectorAll('.budget-row').forEach(tr => {
+                    const loc = tr.getAttribute('data-location');
+                    if (loc === '__overall__') return;
+                    const dadLimit = parseFloat(tr.querySelector('.input-dad-limit').value) || 0;
+                    const bonusLimit = parseFloat(tr.querySelector('.input-bonus-limit').value) || 0;
+                    budgetsToSave.push({
+                        location: loc,
+                        dad_budget: dadLimit,
+                        bonus_budget: bonusLimit
+                    });
+                });
+
+                const success = await saveExpenseToCloud("save-budgets", null, budgetsToSave);
+                if (success) {
+                    showToast(`อัปเดตตั้งค่างบประมาณสำเร็จ! (งบพ่อ: ฿${dadVal.toLocaleString()}, งบโบนัส: ฿${bonusVal.toLocaleString()})`, "success");
+                    renderDashboard();
+                    closeOverallBudgetModal();
+                }
+            } catch (err) {
+                console.error("Save overall budget failed:", err);
+                showToast("บันทึกงบประมาณล้มเหลว: " + err.message, "error");
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = origText;
             }
         });
 
