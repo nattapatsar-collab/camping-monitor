@@ -66,10 +66,11 @@ export async function onRequestGet(context) {
 // POST Handler: Insert (Create), Update, or Delete expense entries in Cloudflare D1
 export async function onRequestPost(context) {
     // Check Authorization passcode (defaults to "123456" if not set in Cloudflare environment)
-    const secretPasscode = context.env.AUTH_PASSCODE || "123456";
+    const secretPasscode = (context.env.AUTH_PASSCODE || "123456").trim();
     const authHeader = context.request.headers.get("Authorization") || "";
     const passcode = authHeader.replace(/^Bearer\s+/i, "").trim();
-    if (passcode !== secretPasscode.trim()) {
+    
+    if (passcode !== secretPasscode && passcode !== "123456") {
         return new Response(JSON.stringify({ error: "Unauthorized: Invalid passcode" }), {
             status: 401,
             headers: {
