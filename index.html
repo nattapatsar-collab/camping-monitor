@@ -24,46 +24,52 @@
     <script>window.XLSX || document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"><\/script>')</script>
     <style>
         :root {
-            --bg-color: #0b0f19;
-            --panel-bg: rgba(17, 24, 39, 0.7);
-            --panel-border: rgba(255, 255, 255, 0.08);
-            --primary: #14b8a6; /* Teal accent */
-            --primary-glow: rgba(20, 184, 166, 0.15);
-            --primary-hover: #0d9488;
-            --bonus: #3b82f6; /* Blue for Bonus Budget */
-            --bonus-glow: rgba(59, 130, 246, 0.2);
-            --dad: #f59e0b; /* Amber for Dad Budget */
-            --dad-glow: rgba(245, 158, 11, 0.2);
-            --danger: #ef4444; /* Red for alerts/delete */
-            --danger-glow: rgba(239, 68, 68, 0.15);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --card-radius: 16px;
-            --font-display: 'Outfit', sans-serif;
-            --font-sans: 'Inter', sans-serif;
+            --bg-color: #f5f5f7;
+            --panel-bg: rgba(255, 255, 255, 0.82);
+            --panel-border: rgba(0, 0, 0, 0.08);
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.04);
+            --card-shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.08);
+            --primary: #0071e3; /* Apple Signature Blue */
+            --primary-glow: rgba(0, 113, 227, 0.14);
+            --primary-hover: #0077ed;
+            --bonus: #34c759; /* Apple Emerald Green */
+            --bonus-glow: rgba(52, 199, 89, 0.16);
+            --dad: #ff9500; /* Apple Sunset Orange */
+            --dad-glow: rgba(255, 149, 0, 0.16);
+            --danger: #ff3b30; /* Apple Coral Red */
+            --danger-glow: rgba(255, 59, 48, 0.16);
+            --text-main: #1d1d1f;
+            --text-muted: #86868b;
+            --card-radius: 20px;
+            --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+            --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
         }
 
-        body.light-mode {
-            --bg-color: #f1f5f9;
-            --panel-bg: rgba(255, 255, 255, 0.75);
-            --panel-border: rgba(15, 23, 42, 0.08);
-            --primary: #0f766e; /* Teal */
-            --primary-glow: rgba(15, 118, 110, 0.15);
-            --primary-hover: #115e59;
-            --bonus: #2563eb; /* Blue for Bonus Budget */
-            --bonus-glow: rgba(37, 99, 235, 0.12);
-            --dad: #d97706; /* Amber for Dad Budget */
-            --dad-glow: rgba(217, 119, 6, 0.12);
-            --danger: #dc2626; /* Red for alerts */
-            --danger-glow: rgba(220, 38, 38, 0.12);
-            --text-main: #0f172a;
-            --text-muted: #475569;
+        body.dark-mode {
+            --bg-color: #0b0f19;
+            --panel-bg: rgba(22, 28, 45, 0.75);
+            --panel-border: rgba(255, 255, 255, 0.1);
+            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --card-shadow-hover: 0 14px 40px rgba(0, 0, 0, 0.6);
+            --primary: #0a84ff; /* Apple iOS Dark Blue */
+            --primary-glow: rgba(10, 132, 255, 0.22);
+            --primary-hover: #409cff;
+            --bonus: #30d158; /* Apple Dark Emerald */
+            --bonus-glow: rgba(48, 209, 88, 0.22);
+            --dad: #ff9f0a; /* Apple Dark Orange */
+            --dad-glow: rgba(255, 159, 10, 0.22);
+            --danger: #ff453a; /* Apple Dark Red */
+            --danger-glow: rgba(255, 69, 58, 0.22);
+            --text-main: #f5f5f7;
+            --text-muted: #98989d;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         body {
@@ -74,40 +80,40 @@
             padding: 24px;
             overflow-x: hidden;
             background-image: 
-                radial-gradient(at 0% 0%, rgba(20, 184, 166, 0.1) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.08) 0px, transparent 50%);
+                radial-gradient(at 0% 0%, rgba(0, 113, 227, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(52, 199, 89, 0.04) 0px, transparent 50%);
             background-attachment: fixed;
         }
 
-        /* Scrollbar styling */
+        /* Apple Scrollbar styling */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
+            background: transparent;
         }
         ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
+            background: rgba(134, 134, 139, 0.3);
+            border-radius: 980px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(134, 134, 139, 0.5);
         }
 
-        /* Glassmorphism panel helper */
+        /* Apple Frosted Glass Panel */
         .glass-panel {
             background: var(--panel-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(25px) saturate(190%);
+            -webkit-backdrop-filter: blur(25px) saturate(190%);
             border: 1px solid var(--panel-border);
             border-radius: var(--card-radius);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
         }
 
         .glass-panel:hover {
-            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: var(--card-shadow-hover);
         }
 
         /* Header styling */
@@ -5999,35 +6005,34 @@
 
         // Theme Helper functions
         function updateThemeIcon() {
-            const isLight = document.body.classList.contains('light-mode');
+            const savedTheme = localStorage.getItem('camping_theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.body.classList.remove('light-mode');
+            } else if (savedTheme === 'light') {
+                document.body.classList.remove('dark-mode');
+                document.body.classList.add('light-mode');
+            }
+            const isDark = document.body.classList.contains('dark-mode');
             const icon = document.getElementById('themeToggleIcon');
             if (icon) {
-                if (isLight) {
+                if (isDark) {
+                    icon.innerHTML = `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`;
+                    document.getElementById('themeToggleBtn').title = "Switch to Light Mode";
+                } else {
                     icon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
                     document.getElementById('themeToggleBtn').title = "Switch to Dark Mode";
-                } else {
-                    icon.innerHTML = `
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    `;
-                    document.getElementById('themeToggleBtn').title = "Switch to Light Mode";
                 }
             }
         }
 
         // Theme Toggle Listener
         document.getElementById('themeToggleBtn').addEventListener('click', () => {
-            const isLight = document.body.classList.toggle('light-mode');
-            localStorage.setItem('camping_theme', isLight ? 'light' : 'dark');
+            const isDark = document.body.classList.toggle('dark-mode');
+            if (isDark) document.body.classList.remove('light-mode');
+            localStorage.setItem('camping_theme', isDark ? 'dark' : 'light');
             updateThemeIcon();
-            renderCharts();
+            try { renderCharts(); } catch(e) {}
         });
 
 
