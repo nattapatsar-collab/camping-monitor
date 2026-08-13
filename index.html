@@ -2119,6 +2119,35 @@
             }, 3000);
         }
 
+        // Self-Healing Encoding Auto-repair (decodes Win-1252 / ISO-8859-1 double-encoded UTF-8 strings)
+        function fixEncoding(str) {
+            if (!str || typeof str !== 'string') return str;
+            if (str.includes('à¸') || str.includes('à¹') || str.includes('à¸„')) {
+                try {
+                    const bytes = new Uint8Array([...str].map(c => c.charCodeAt(0)));
+                    const decoded = new TextDecoder('utf-8').decode(bytes);
+                    if (decoded && !decoded.includes('')) return decoded;
+                } catch(e) {}
+            }
+            return str;
+        }
+
+        function fixExpenseRecord(item) {
+            if (!item || typeof item !== 'object') return item;
+            return {
+                ...item,
+                item: fixEncoding(item.item || ''),
+                description: fixEncoding(item.description || ''),
+                location: fixEncoding(item.location || ''),
+                category: fixEncoding(item.category || ''),
+                pic: fixEncoding(item.pic || ''),
+                unit: fixEncoding(item.unit || ''),
+                invNo: fixEncoding(item.invNo || ''),
+                type: fixEncoding(item.type || ''),
+                budget: fixEncoding(item.budget || '')
+            };
+        }
+
         // API Sync Status Helper
         function updateSyncStatus(state, extra = "") {
             const dot = document.getElementById('syncStatusDot');
@@ -2159,7 +2188,7 @@
 
                 const data = await res.json();
                 if (Array.isArray(data) && data.length > 0) {
-                    expenses = data;
+                    expenses = data.map(fixExpenseRecord);
                     saveToLocalStorage(expenses);
                 }
 
@@ -2464,23 +2493,23 @@
                 try {
                     const parsed = JSON.parse(localData);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        expenses = parsed;
+                        expenses = parsed.map(fixExpenseRecord);
                     } else if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
-                        expenses = JSON.parse(JSON.stringify(initialExpenses));
+                        expenses = JSON.parse(JSON.stringify(initialExpenses)).map(fixExpenseRecord);
                     }
                 } catch (e) {
                     if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
-                        expenses = JSON.parse(JSON.stringify(initialExpenses));
+                        expenses = JSON.parse(JSON.stringify(initialExpenses)).map(fixExpenseRecord);
                     }
                 }
             } else if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
-                expenses = JSON.parse(JSON.stringify(initialExpenses));
+                expenses = JSON.parse(JSON.stringify(initialExpenses)).map(fixExpenseRecord);
             }
 
             // Guarantee expenses array is NEVER empty
             if (!expenses || !Array.isArray(expenses) || expenses.length === 0) {
                 if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
-                    expenses = JSON.parse(JSON.stringify(initialExpenses));
+                    expenses = JSON.parse(JSON.stringify(initialExpenses)).map(fixExpenseRecord);
                     saveToLocalStorage(expenses);
                 }
             }
