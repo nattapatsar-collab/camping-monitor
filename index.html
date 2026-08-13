@@ -11,12 +11,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Chart.js CDN -->
+    <!-- Chart.js CDN with cdnjs fallback -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Chart.js Datalabels Plugin CDN -->
+    <script>window.Chart || document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>')</script>
+
+    <!-- Chart.js Datalabels Plugin CDN with fallback -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
-    <!-- SheetJS (Excel) CDN -->
+    <script>window.ChartDataLabels || document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"><\/script>')</script>
+
+    <!-- SheetJS (Excel) CDN with fallback -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>window.XLSX || document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"><\/script>')</script>
     <style>
         :root {
             --bg-color: #0b0f19;
@@ -2813,7 +2818,9 @@
 
         // Render all analytical Chart.js graphs
         function renderCharts() {
-            const isLight = document.body.classList.contains('light-mode');
+            if (typeof Chart === 'undefined') return;
+            try {
+                const isLight = document.body.classList.contains('light-mode');
             const gridColor = isLight ? 'rgba(15, 23, 42, 0.06)' : 'rgba(255, 255, 255, 0.03)';
             const tickColor = isLight ? '#475569' : '#94a3b8';
             const legendColor = isLight ? '#1e293b' : '#94a3b8';
@@ -3309,6 +3316,9 @@
                     }
                 }
             });
+            } catch (chartErr) {
+                console.error("renderCharts non-fatal error:", chartErr);
+            }
         }
 
         // Sort toggle when clicking headers
