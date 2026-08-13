@@ -1,3 +1,14 @@
+const corsHeaders = {
+    "Content-Type": "application/json; charset=utf-8",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization"
+};
+
+export async function onRequestOptions() {
+    return new Response(null, { headers: corsHeaders });
+}
+
 function fixEncoding(str) {
     if (!str || typeof str !== 'string') return str;
     if (str.includes('à') || str.includes('¸') || str.includes('¹')) {
@@ -16,7 +27,7 @@ export async function onRequestGet(context) {
     if (!db) {
         return new Response(JSON.stringify({ error: "Database D1 binding 'DB' is missing in Cloudflare settings" }), {
             status: 500,
-            headers: { "Content-Type": "application/json" }
+            headers: corsHeaders
         });
     }
 
@@ -34,7 +45,7 @@ export async function onRequestGet(context) {
         if (url.searchParams.get("type") === "budgets") {
             const { results } = await db.prepare("SELECT * FROM location_budgets").all();
             return new Response(JSON.stringify(results), {
-                headers: { "Content-Type": "application/json" }
+                headers: corsHeaders
             });
         }
 
@@ -53,12 +64,12 @@ export async function onRequestGet(context) {
         }));
 
         return new Response(JSON.stringify(cleanResults), {
-            headers: { "Content-Type": "application/json; charset=utf-8" }
+            headers: corsHeaders
         });
     } catch (err) {
         return new Response(JSON.stringify({ error: "Database read error: " + err.message }), {
             status: 500,
-            headers: { "Content-Type": "application/json" }
+            headers: corsHeaders
         });
     }
 }
