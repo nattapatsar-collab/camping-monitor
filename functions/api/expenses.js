@@ -1,33 +1,10 @@
-const corsHeaders = {
-    "Content-Type": "application/json; charset=utf-8",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization"
-};
-
-export async function onRequestOptions() {
-    return new Response(null, { headers: corsHeaders });
-}
-
-function fixEncoding(str) {
-    if (!str || typeof str !== 'string') return str;
-    if (str.includes('à') || str.includes('¸') || str.includes('¹')) {
-        try {
-            const bytes = new Uint8Array([...str].map(c => c.charCodeAt(0) & 0xFF));
-            const decoded = new TextDecoder('utf-8').decode(bytes);
-            if (decoded && !decoded.includes('\uFFFD')) return decoded;
-        } catch(e) {}
-    }
-    return str;
-}
-
 // GET Handler: Retrieve all expenses or budgets from Cloudflare D1
 export async function onRequestGet(context) {
     const db = context.env.DB;
     if (!db) {
         return new Response(JSON.stringify({ error: "Database D1 binding 'DB' is missing in Cloudflare settings" }), {
             status: 500,
-            headers: corsHeaders
+            headers: { "Content-Type": "application/json" }
         });
     }
 
@@ -45,31 +22,18 @@ export async function onRequestGet(context) {
         if (url.searchParams.get("type") === "budgets") {
             const { results } = await db.prepare("SELECT * FROM location_budgets").all();
             return new Response(JSON.stringify(results), {
-                headers: corsHeaders
+                headers: { "Content-Type": "application/json" }
             });
         }
 
         const { results } = await db.prepare("SELECT * FROM expenses ORDER BY date DESC, id DESC").all();
-        const cleanResults = (results || []).map(row => ({
-            ...row,
-            item: fixEncoding(row.item),
-            description: fixEncoding(row.description),
-            location: fixEncoding(row.location),
-            category: fixEncoding(row.category),
-            pic: fixEncoding(row.pic),
-            unit: fixEncoding(row.unit),
-            invNo: fixEncoding(row.invNo),
-            type: fixEncoding(row.type),
-            budget: fixEncoding(row.budget)
-        }));
-
-        return new Response(JSON.stringify(cleanResults), {
-            headers: corsHeaders
+        return new Response(JSON.stringify(results), {
+            headers: { "Content-Type": "application/json" }
         });
     } catch (err) {
         return new Response(JSON.stringify({ error: "Database read error: " + err.message }), {
             status: 500,
-            headers: corsHeaders
+            headers: { "Content-Type": "application/json" }
         });
     }
 }
@@ -77,11 +41,10 @@ export async function onRequestGet(context) {
 // POST Handler: Insert (Create), Update, or Delete expense entries in Cloudflare D1
 export async function onRequestPost(context) {
     // Check Authorization passcode (defaults to "123456" if not set in Cloudflare environment)
-    const secretPasscode = (context.env.AUTH_PASSCODE || "123456").trim();
+    const secretPasscode = context.env.AUTH_PASSCODE || "123456";
     const authHeader = context.request.headers.get("Authorization") || "";
     const passcode = authHeader.replace(/^Bearer\s+/i, "").trim();
-    
-    if (passcode !== secretPasscode && passcode !== "123456") {
+    if (passcode !== secretPasscode.trim()) {
         return new Response(JSON.stringify({ error: "Unauthorized: Invalid passcode" }), {
             status: 401,
             headers: {
