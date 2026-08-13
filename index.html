@@ -1809,6 +1809,7 @@
                 <span class="row-count" id="tableRowCount">Showing 0 of 0 entries</span>
             </div>
             <div style="display: flex; gap: 8px; align-items: center; margin-left: auto; flex-wrap: wrap;">
+                <button class="btn btn-secondary" onclick="restoreDefaultExpenses()" title="กู้คืนข้อมูลรายการใช้จ่ายเริ่มต้นทั้งหมด 87 รายการ">🔄 กู้คืน 87 รายการ</button>
                 <button class="btn btn-excel-template" onclick="downloadExcelTemplate()" title="ดาวน์โหลด Template Excel">📥 โหลด Template Excel</button>
                 <button class="btn btn-excel-import" onclick="document.getElementById('excelFileInput').click()" title="นำเข้าไฟล์ Excel">📤 Import Excel</button>
             </div>
@@ -2218,8 +2219,19 @@
                 }
 
                 const data = await res.json();
-                expenses = data;
-                saveToLocalStorage(expenses);
+                if (Array.isArray(data) && data.length > 0) {
+                    expenses = data;
+                    saveToLocalStorage(expenses);
+                } else {
+                    // Cloud D1 returned empty or unseeded array; fallback to local cache or initialExpenses
+                    const localData = localStorage.getItem('camping_expenses');
+                    if (localData && JSON.parse(localData).length > 0) {
+                        expenses = JSON.parse(localData);
+                    } else if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
+                        expenses = JSON.parse(JSON.stringify(initialExpenses));
+                        saveToLocalStorage(expenses);
+                    }
+                }
 
                 // Fetch budgets from D1
                 try {
@@ -2240,16 +2252,15 @@
             } catch (err) {
                 console.error("Fetch error:", err);
                 updateSyncStatus("error", err.message);
-                showToast("Failed to connect to cloud database: " + err.message, "error");
                 
                 // Fallback to localStorage offline copy, or default to initialExpenses (demo mode)
                 const localData = localStorage.getItem('camping_expenses');
-                if (localData) {
+                if (localData && JSON.parse(localData).length > 0) {
                     expenses = JSON.parse(localData);
                     showToast("Viewing offline local cached copy", "warning");
-                } else {
+                } else if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
                     expenses = JSON.parse(JSON.stringify(initialExpenses));
-                    showToast("Cloud offline: Displaying default demo dataset", "info");
+                    showToast("Cloud offline: Displaying default dataset", "info");
                 }
 
                 // Fallback location budgets offline
@@ -2265,6 +2276,7 @@
                 renderLocationBudgets();
                 applyFilters();
             }
+        }
         }
 
         // Save a single expense or trigger batch reset on Cloud D1
@@ -4335,6 +4347,32 @@
                 saveBtn.innerHTML = origText;
             }
         });
+
+        // Restore default 87 expenses dataset
+        window.restoreDefaultExpenses = async function() {
+            if (!confirm("คุณต้องการกู้คืนข้อมูลรายการใช้จ่ายเริ่มต้นทั้งหมด (87 รายการ) กลับมาใช่หรือไม่?")) {
+                return;
+            }
+            try {
+                if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
+                    expenses = JSON.parse(JSON.stringify(initialExpenses));
+                    saveToLocalStorage(expenses);
+                    showToast("กำลังส่งข้อมูล 87 รายการไปยัง Cloud Database...", "info");
+                    const success = await saveExpenseToCloud("reset", null, initialExpenses);
+                    if (success) {
+                        showToast("กู้คืนข้อมูลรายการใช้จ่ายเริ่มต้นสำเร็จ 87 รายการ!", "success");
+                    } else {
+                        showToast("กู้คืนข้อมูลในเบราว์เซอร์สำเร็จ!", "warning");
+                    }
+                    renderDashboard();
+                } else {
+                    showToast("ไม่พบชุดข้อมูลเริ่มต้น", "error");
+                }
+            } catch (err) {
+                console.error("Restore failed:", err);
+                showToast("กู้คืนข้อมูลล้มเหลว: " + err.message, "error");
+            }
+        };
 
         // Copy summary in LINE friendly format
         window.copyLineSummary = function() {
