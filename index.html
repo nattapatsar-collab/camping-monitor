@@ -1554,8 +1554,8 @@
                 <div class="kpi-progress-fill" id="kpiBonusProgressFill" style="width: 0%; background-color: var(--bonus);"></div>
             </div>
             <div class="kpi-subtext">
-                <span id="kpiBonusLimitLabel">Limit: ฿200,000.00</span>
-                <span id="kpiBonusRemaining">Rem: ฿200,000.00</span>
+                <span id="kpiBonusLimitLabel">Limit: ฿500,000.00</span>
+                <span id="kpiBonusRemaining">Rem: ฿500,000.00</span>
             </div>
         </div>
 
@@ -2009,7 +2009,7 @@
         // Limits constant
         let BUDGET_LIMITS = {
             Dad: 100000.00,
-            Bonus: 200000.00
+            Bonus: 500000.00
         };
 
         // Active State
@@ -2095,10 +2095,10 @@
             const overall = locationBudgets.find(b => b.location === '__overall__');
             if (overall) {
                 BUDGET_LIMITS.Dad = parseFloat(overall.dad_budget) || 100000.00;
-                BUDGET_LIMITS.Bonus = parseFloat(overall.bonus_budget) || 200000.00;
+                BUDGET_LIMITS.Bonus = parseFloat(overall.bonus_budget) || 500000.00;
             } else {
                 BUDGET_LIMITS.Dad = 100000.00;
-                BUDGET_LIMITS.Bonus = 200000.00;
+                BUDGET_LIMITS.Bonus = 500000.00;
             }
         }
 
