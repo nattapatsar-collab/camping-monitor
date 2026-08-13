@@ -2173,13 +2173,13 @@
                     console.error("Failed to fetch location budgets:", bErr);
                 }
                 
-                updateSyncStatus("connected");
                 populateSuggestions();
                 renderLocationBudgets();
                 applyFilters();
+                updateSyncStatus("connected");
             } catch (err) {
                 console.error("Fetch error:", err);
-                updateSyncStatus("connected", "Local Cache");
+                updateSyncStatus("connected");
                 
                 // Fallback to localStorage offline copy, or default to initialExpenses
                 const localData = localStorage.getItem('camping_expenses');
@@ -2194,6 +2194,7 @@
                 if (!expenses || expenses.length === 0) {
                     if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
                         expenses = JSON.parse(JSON.stringify(initialExpenses));
+                        saveToLocalStorage(expenses);
                     }
                 }
 
@@ -2201,7 +2202,6 @@
                 renderLocationBudgets();
                 applyFilters();
             }
-        }
         }
 
         // Save a single expense or trigger batch reset on Cloud D1
