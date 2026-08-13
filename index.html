@@ -1530,7 +1530,7 @@
         <!-- Dad Budget -->
         <div class="glass-panel kpi-card dad-card" onclick="filterByBudgetKpi('Dad')" style="cursor: pointer;">
             <div class="kpi-title">
-                <span>Dad Budget</span>
+                <span>Dad Budget <button class="preset-btn" onclick="event.stopPropagation(); openQuickBudgetModal('Dad')" style="padding: 1px 6px; font-size: 10px; margin-left: 4px;" title="ปรับเพิ่มวงเงินงบประมาณรายเดือน">⚙️ ปรับงบ</button></span>
                 <span class="percentage-badge" id="kpiDadPercentBadge" style="background-color: var(--dad-glow); color: var(--dad);">0%</span>
             </div>
             <div class="kpi-value" id="kpiDadSpent">฿0.00</div>
@@ -1546,7 +1546,7 @@
         <!-- Bonus Budget -->
         <div class="glass-panel kpi-card bonus-card" onclick="filterByBudgetKpi('Bonus')" style="cursor: pointer;">
             <div class="kpi-title">
-                <span>Bonus Budget</span>
+                <span>Bonus Budget <button class="preset-btn" onclick="event.stopPropagation(); openQuickBudgetModal('Bonus')" style="padding: 1px 6px; font-size: 10px; margin-left: 4px;" title="ปรับเพิ่มวงเงินงบประมาณรายเดือน">⚙️ ปรับงบ</button></span>
                 <span class="percentage-badge" id="kpiBonusPercentBadge" style="background-color: var(--bonus-glow); color: var(--bonus);">0%</span>
             </div>
             <div class="kpi-value" id="kpiBonusSpent">฿0.00</div>
@@ -1998,6 +1998,40 @@
         </div>
     </div>
 
+    <!-- QUICK BUDGET ADJUSTER MODAL -->
+    <div class="modal-overlay" id="quickBudgetModal">
+        <div class="modal-card" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="quickBudgetModalTitle">⚙️ ปรับวงเงินงบประมาณรายเดือน</h3>
+                <button class="modal-close" onclick="closeQuickBudgetModal()">&times;</button>
+            </div>
+            <div style="margin-bottom: 16px; background: rgba(0,0,0,0.15); padding: 14px; border-radius: 12px;">
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">วงเงินเดิมในระบบปัจจุบัน:</div>
+                <div style="font-size: 22px; font-weight: 700; color: var(--primary);" id="quickBudgetOriginalLimitDisplay">฿500,000.00</div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label class="form-label">กดปุ่มเพิ่มวงเงินงบประจำเดือนด่วน (+ Top-up):</label>
+                <div class="date-presets" style="gap: 8px; margin-top: 6px;">
+                    <button class="preset-btn" onclick="addQuickBudgetAmount(50000)">+ ฿50,000</button>
+                    <button class="preset-btn" onclick="addQuickBudgetAmount(100000)">+ ฿100,000</button>
+                    <button class="preset-btn" onclick="addQuickBudgetAmount(200000)">+ ฿200,000</button>
+                    <button class="preset-btn" onclick="addQuickBudgetAmount(500000)">+ ฿500,000</button>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label class="form-label" id="quickBudgetInputLabel">กำหนดวงเงินรวมใหม่ (บาท):</label>
+                <input type="number" class="form-input" id="quickBudgetNewLimitInput" step="1000" min="0" placeholder="ระบุจำนวนเงินรวม">
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                <button class="btn btn-secondary" onclick="closeQuickBudgetModal()">ยกเลิก</button>
+                <button class="btn btn-primary" onclick="saveQuickBudgetLimit()">💾 บันทึกวงเงินงบประมาณทันที</button>
+            </div>
+        </div>
+    </div>
+
     <!-- CLIENT APP LOGIC -->
     <script>
         // Placeholder for initial dataset from backend JSON generator
@@ -2389,16 +2423,19 @@
             const overallDadVal = parseFloat(document.getElementById('inputOverallDadLimit').value) || 0;
             const overallBonusVal = parseFloat(document.getElementById('inputOverallBonusLimit').value) || 0;
             
+            if (overallDadVal > 0) BUDGET_LIMITS.Dad = overallDadVal;
+            if (overallBonusVal > 0) BUDGET_LIMITS.Bonus = overallBonusVal;
+
             budgetsToSave.push({
                 location: '__overall__',
-                dad_budget: overallDadVal,
-                bonus_budget: overallBonusVal
+                dad_budget: BUDGET_LIMITS.Dad,
+                bonus_budget: BUDGET_LIMITS.Bonus
             });
 
             // Gather location budgets
             document.querySelectorAll('.budget-row').forEach(tr => {
                 const loc = tr.getAttribute('data-location');
-                if (loc === '__overall__') return; // Skip if present in table
+                if (loc === '__overall__') return;
                 const dadLimit = parseFloat(tr.querySelector('.input-dad-limit').value) || 0;
                 const bonusLimit = parseFloat(tr.querySelector('.input-bonus-limit').value) || 0;
                 budgetsToSave.push({
@@ -2408,10 +2445,79 @@
                 });
             });
 
+            // Update local memory and UI instantly (0ms response time!)
+            localStorage.setItem('camping_location_budgets', JSON.stringify(budgetsToSave));
+            updateKPIs();
+
             const success = await saveExpenseToCloud("save-budgets", null, budgetsToSave);
             if (success) {
-                showToast("บันทึกการกำหนดงบประมาณสำเร็จแล้ว!", "success");
+                showToast("บันทึกการกำหนดงบประมาณสำเร็จเรียบร้อยแล้ว!", "success");
             }
+        };
+
+        // Quick Monthly Budget Adjuster Handlers
+        let activeQuickBudgetTarget = 'Bonus';
+
+        window.openQuickBudgetModal = function(target) {
+            activeQuickBudgetTarget = target;
+            const titleEl = document.getElementById('quickBudgetModalTitle');
+            const origEl = document.getElementById('quickBudgetOriginalLimitDisplay');
+            const labelEl = document.getElementById('quickBudgetInputLabel');
+            const inputEl = document.getElementById('quickBudgetNewLimitInput');
+            const modal = document.getElementById('quickBudgetModal');
+
+            const currentLimit = (target === 'Dad') ? BUDGET_LIMITS.Dad : BUDGET_LIMITS.Bonus;
+            const budgetNameThai = (target === 'Dad') ? 'งบพ่อ (Dad Budget)' : 'งบโบนัส (Bonus Budget)';
+
+            if (titleEl) titleEl.textContent = `⚙️ ปรับวงเงิน ${budgetNameThai}`;
+            if (origEl) origEl.textContent = formatBaht(currentLimit);
+            if (labelEl) labelEl.textContent = `กำหนดวงเงินรวมใหม่ของ ${budgetNameThai} (บาท):`;
+            if (inputEl) inputEl.value = currentLimit;
+
+            if (modal) modal.classList.add('active');
+        };
+
+        window.closeQuickBudgetModal = function() {
+            const modal = document.getElementById('quickBudgetModal');
+            if (modal) modal.classList.remove('active');
+        };
+
+        window.addQuickBudgetAmount = function(amount) {
+            const inputEl = document.getElementById('quickBudgetNewLimitInput');
+            if (inputEl) {
+                const currentVal = parseFloat(inputEl.value) || 0;
+                inputEl.value = (currentVal + amount).toFixed(2);
+            }
+        };
+
+        window.saveQuickBudgetLimit = async function() {
+            const inputEl = document.getElementById('quickBudgetNewLimitInput');
+            const newLimit = parseFloat(inputEl.value);
+
+            if (isNaN(newLimit) || newLimit <= 0) {
+                showToast("กรุณาระบุจำนวนเงินงบประมาณให้ถูกต้อง", "error");
+                return;
+            }
+
+            if (activeQuickBudgetTarget === 'Dad') {
+                BUDGET_LIMITS.Dad = newLimit;
+                const dadInput = document.getElementById('inputOverallDadLimit');
+                if (dadInput) dadInput.value = newLimit;
+            } else {
+                BUDGET_LIMITS.Bonus = newLimit;
+                const bonusInput = document.getElementById('inputOverallBonusLimit');
+                if (bonusInput) bonusInput.value = newLimit;
+            }
+
+            updateKPIs();
+            closeQuickBudgetModal();
+            showToast(`ปรับอัปเดตวงเงินงบประมาณเป็น ${formatBaht(newLimit)} สำเร็จเรียบร้อยแล้ว!`, "success");
+
+            try {
+                if (typeof window.saveLocationBudgets === 'function') {
+                    window.saveLocationBudgets();
+                }
+            } catch(e) {}
         };
 
         // Load startup data
