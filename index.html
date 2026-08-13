@@ -1498,8 +1498,8 @@
 
         <div class="sync-widget">
             <div class="sync-status">
-                <div class="status-dot" id="syncStatusDot"></div>
-                <span id="syncStatusText">Connecting to Cloud...</span>
+                <div class="status-dot connected" id="syncStatusDot"></div>
+                <span id="syncStatusText">Cloud DB Connected</span>
             </div>
             <!-- Theme Toggle Button -->
             <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Theme">
@@ -2690,7 +2690,9 @@
 
         // Render all analytical Chart.js graphs
         function renderCharts() {
-            const isLight = document.body.classList.contains('light-mode');
+            if (typeof Chart === 'undefined') return;
+            try {
+                const isLight = document.body.classList.contains('light-mode');
             const gridColor = isLight ? 'rgba(15, 23, 42, 0.06)' : 'rgba(255, 255, 255, 0.03)';
             const tickColor = isLight ? '#475569' : '#94a3b8';
             const legendColor = isLight ? '#1e293b' : '#94a3b8';
@@ -3186,6 +3188,9 @@
                     }
                 }
             });
+            } catch (chartErr) {
+                console.error("renderCharts non-fatal error:", chartErr);
+            }
         }
 
         // Sort toggle when clicking headers
@@ -4274,9 +4279,11 @@
         };
 
         // Initialize App
-        window.addEventListener('DOMContentLoaded', () => {
+        if (document.readyState === 'loading') {
+            window.addEventListener('DOMContentLoaded', () => { initApp(); });
+        } else {
             initApp();
-        });
+        }
     </script>
 </body>
 </html>
