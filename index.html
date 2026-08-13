@@ -4369,7 +4369,8 @@
                 const success = await saveExpenseToCloud("save-budgets", null, budgetsToSave);
                 if (success) {
                     showToast(`อัปเดตตั้งค่างบประมาณสำเร็จ! (งบพ่อ: ฿${dadVal.toLocaleString()}, งบโบนัส: ฿${bonusVal.toLocaleString()})`, "success");
-                    renderDashboard();
+                    renderLocationBudgets();
+                    applyFilters();
                     closeOverallBudgetModal();
                 }
             } catch (err) {
@@ -4397,7 +4398,8 @@
                     } else {
                         showToast("กู้คืนข้อมูลในเบราว์เซอร์สำเร็จ!", "warning");
                     }
-                    renderDashboard();
+                    renderLocationBudgets();
+                    applyFilters();
                 } else {
                     showToast("ไม่พบชุดข้อมูลเริ่มต้น", "error");
                 }
