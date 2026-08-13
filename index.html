@@ -3,73 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <title>Camping Project Expense Dashboard</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Chart.js CDN with cdnjs fallback -->
+    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>window.Chart || document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"><\/script>')</script>
-
-    <!-- Chart.js Datalabels Plugin CDN with fallback -->
+    <!-- Chart.js Datalabels Plugin CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
-    <script>window.ChartDataLabels || document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"><\/script>')</script>
-
-    <!-- SheetJS (Excel) CDN with fallback -->
+    <!-- SheetJS (Excel) CDN -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script>window.XLSX || document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"><\/script>')</script>
     <style>
         :root {
-            --bg-color: #f5f5f7;
-            --panel-bg: rgba(255, 255, 255, 0.82);
-            --panel-border: rgba(0, 0, 0, 0.08);
-            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.04);
-            --card-shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.08);
-            --primary: #0071e3; /* Apple Signature Blue */
-            --primary-glow: rgba(0, 113, 227, 0.14);
-            --primary-hover: #0077ed;
-            --bonus: #34c759; /* Apple Emerald Green */
-            --bonus-glow: rgba(52, 199, 89, 0.16);
-            --dad: #ff9500; /* Apple Sunset Orange */
-            --dad-glow: rgba(255, 149, 0, 0.16);
-            --danger: #ff3b30; /* Apple Coral Red */
-            --danger-glow: rgba(255, 59, 48, 0.16);
-            --text-main: #1d1d1f;
-            --text-muted: #86868b;
-            --card-radius: 20px;
-            --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
-            --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+            --bg-color: #0b0f19;
+            --panel-bg: rgba(17, 24, 39, 0.7);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --primary: #14b8a6; /* Teal accent */
+            --primary-glow: rgba(20, 184, 166, 0.15);
+            --primary-hover: #0d9488;
+            --bonus: #3b82f6; /* Blue for Bonus Budget */
+            --bonus-glow: rgba(59, 130, 246, 0.2);
+            --dad: #f59e0b; /* Amber for Dad Budget */
+            --dad-glow: rgba(245, 158, 11, 0.2);
+            --danger: #ef4444; /* Red for alerts/delete */
+            --danger-glow: rgba(239, 68, 68, 0.15);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --card-radius: 16px;
+            --font-display: 'Outfit', sans-serif;
+            --font-sans: 'Inter', sans-serif;
         }
 
-        body.dark-mode {
-            --bg-color: #0b0f19;
-            --panel-bg: rgba(22, 28, 45, 0.75);
-            --panel-border: rgba(255, 255, 255, 0.1);
-            --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            --card-shadow-hover: 0 14px 40px rgba(0, 0, 0, 0.6);
-            --primary: #0a84ff; /* Apple iOS Dark Blue */
-            --primary-glow: rgba(10, 132, 255, 0.22);
-            --primary-hover: #409cff;
-            --bonus: #30d158; /* Apple Dark Emerald */
-            --bonus-glow: rgba(48, 209, 88, 0.22);
-            --dad: #ff9f0a; /* Apple Dark Orange */
-            --dad-glow: rgba(255, 159, 10, 0.22);
-            --danger: #ff453a; /* Apple Dark Red */
-            --danger-glow: rgba(255, 69, 58, 0.22);
-            --text-main: #f5f5f7;
-            --text-muted: #98989d;
+        body.light-mode {
+            --bg-color: #f1f5f9;
+            --panel-bg: rgba(255, 255, 255, 0.75);
+            --panel-border: rgba(15, 23, 42, 0.08);
+            --primary: #0f766e; /* Teal */
+            --primary-glow: rgba(15, 118, 110, 0.15);
+            --primary-hover: #115e59;
+            --bonus: #2563eb; /* Blue for Bonus Budget */
+            --bonus-glow: rgba(37, 99, 235, 0.12);
+            --dad: #d97706; /* Amber for Dad Budget */
+            --dad-glow: rgba(217, 119, 6, 0.12);
+            --danger: #dc2626; /* Red for alerts */
+            --danger-glow: rgba(220, 38, 38, 0.12);
+            --text-main: #0f172a;
+            --text-muted: #475569;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
         body {
@@ -80,40 +66,40 @@
             padding: 24px;
             overflow-x: hidden;
             background-image: 
-                radial-gradient(at 0% 0%, rgba(0, 113, 227, 0.05) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(52, 199, 89, 0.04) 0px, transparent 50%);
+                radial-gradient(at 0% 0%, rgba(20, 184, 166, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.08) 0px, transparent 50%);
             background-attachment: fixed;
         }
 
-        /* Apple Scrollbar styling */
+        /* Scrollbar styling */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: transparent;
+            background: rgba(0, 0, 0, 0.2);
         }
         ::-webkit-scrollbar-thumb {
-            background: rgba(134, 134, 139, 0.3);
-            border-radius: 980px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(134, 134, 139, 0.5);
+            background: rgba(255, 255, 255, 0.2);
         }
 
-        /* Apple Frosted Glass Panel */
+        /* Glassmorphism panel helper */
         .glass-panel {
             background: var(--panel-bg);
-            backdrop-filter: blur(25px) saturate(190%);
-            -webkit-backdrop-filter: blur(25px) saturate(190%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--panel-border);
             border-radius: var(--card-radius);
-            box-shadow: var(--card-shadow);
-            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
         }
 
         .glass-panel:hover {
-            box-shadow: var(--card-shadow-hover);
+            border-color: rgba(255, 255, 255, 0.12);
         }
 
         /* Header styling */
@@ -591,39 +577,6 @@
         .btn-line:hover {
             transform: translateY(-1px) !important;
             box-shadow: 0 6px 16px rgba(6, 199, 85, 0.25) !important;
-        }
-
-        .btn-excel-template {
-            background: rgba(16, 185, 129, 0.12) !important;
-            border: 1px solid rgba(16, 185, 129, 0.35) !important;
-            color: #34d399 !important;
-        }
-        .btn-excel-template:hover {
-            background: rgba(16, 185, 129, 0.25) !important;
-            border-color: rgba(16, 185, 129, 0.6) !important;
-            transform: translateY(-1px);
-        }
-
-        .btn-excel-import {
-            background: rgba(59, 130, 246, 0.12) !important;
-            border: 1px solid rgba(59, 130, 246, 0.35) !important;
-            color: #60a5fa !important;
-        }
-        .btn-excel-import:hover {
-            background: rgba(59, 130, 246, 0.25) !important;
-            border-color: rgba(59, 130, 246, 0.6) !important;
-            transform: translateY(-1px);
-        }
-
-        body.light-mode .btn-excel-template {
-            background: #ecfdf5 !important;
-            border-color: #a7f3d0 !important;
-            color: #047857 !important;
-        }
-        body.light-mode .btn-excel-import {
-            background: #eff6ff !important;
-            border-color: #bfdbfe !important;
-            color: #1d4ed8 !important;
         }
 
         /* Data table container */
@@ -1545,8 +1498,8 @@
 
         <div class="sync-widget">
             <div class="sync-status">
-                <div class="status-dot connected" id="syncStatusDot"></div>
-                <span id="syncStatusText">Cloud DB Connected</span>
+                <div class="status-dot" id="syncStatusDot"></div>
+                <span id="syncStatusText">Connecting to Cloud...</span>
             </div>
             <!-- Theme Toggle Button -->
             <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Theme">
@@ -1554,6 +1507,8 @@
                     <!-- Icon path dynamically generated -->
                 </svg>
             </button>
+
+
         </div>
     </header>
 
@@ -1781,10 +1736,10 @@
             <!-- Export / Add Actions -->
             <div class="action-btns">
                 <button class="btn btn-secondary" id="clearFiltersBtn">Reset</button>
-                <button class="btn btn-excel-template" id="downloadTemplateBtn" onclick="downloadExcelTemplate()" title="ดาวน์โหลด Template Excel (มีแผ่นสำหรับเพิ่มรายการใหม่ และแผ่นสำหรับแก้ไขรายการเดิม)">📥 โหลด Template</button>
+                <button class="btn btn-secondary" id="downloadTemplateBtn" onclick="downloadExcelTemplate()" title="Download Excel Template for Import">Template</button>
                 <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;">
-                <button class="btn btn-excel-import" id="importExcelBtn" onclick="document.getElementById('excelFileInput').click()" title="นำเข้าไฟล์ Excel เพื่อเพิ่มหรือแก้ไขหลายรายการตาม ID">📤 Import Excel</button>
-                <button class="btn btn-secondary" id="exportExcelBtn" onclick="exportExcelData()" title="ส่งออกข้อมูลตามตัวกรองปัจจุบันเป็น Excel (พร้อม ID)">📊 Export Excel</button>
+                <button class="btn btn-secondary" id="importExcelBtn" onclick="document.getElementById('excelFileInput').click()" title="Import expenses from Excel/CSV">Import Excel</button>
+                <button class="btn btn-secondary" id="exportExcelBtn" onclick="exportExcelData()" title="Export current filtered data to Excel">Export Excel</button>
                 <button class="btn btn-line" id="copyLineSummaryBtn" onclick="copyLineSummary()" title="คัดลอกสรุปสำหรับส่งใน LINE">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -1805,16 +1760,9 @@
 
     <!-- DATA TABLE CONTAINER -->
     <section class="glass-panel table-panel">
-        <div class="table-header-row" style="flex-wrap: wrap; gap: 12px; align-items: center;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <h3 class="table-title" style="margin: 0;">Expenses Records</h3>
-                <span class="row-count" id="tableRowCount">Showing 0 of 0 entries</span>
-            </div>
-            <div style="display: flex; gap: 8px; align-items: center; margin-left: auto; flex-wrap: wrap;">
-                <button class="btn btn-secondary" onclick="restoreDefaultExpenses()" title="กู้คืนข้อมูลรายการใช้จ่ายเริ่มต้นทั้งหมด 87 รายการ">🔄 กู้คืน 87 รายการ</button>
-                <button class="btn btn-excel-template" onclick="downloadExcelTemplate()" title="ดาวน์โหลด Template Excel">📥 โหลด Template Excel</button>
-                <button class="btn btn-excel-import" onclick="document.getElementById('excelFileInput').click()" title="นำเข้าไฟล์ Excel">📤 Import Excel</button>
-            </div>
+        <div class="table-header-row">
+            <h3 class="table-title">Expenses Records</h3>
+            <span class="row-count" id="tableRowCount">Showing 0 of 0 entries</span>
         </div>
 
         <div class="table-responsive">
@@ -2028,22 +1976,22 @@
                         <div id="detailPic" class="bold" style="font-size: 14px; color: #fff; margin-top: 2px;"></div>
                     </div>
                 </div>
-                    </div>
-                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                        <input type="number" id="modalOverallBonusLimit" class="form-input" style="flex: 1; min-width: 180px; font-size: 16px; font-weight: 700; padding: 10px 14px;" min="0" step="any" placeholder="200000">
-                        <div style="display: flex; gap: 6px;">
-                            <button type="button" class="btn btn-secondary" onclick="setPresetBonus(150000)" style="padding: 6px 10px; font-size: 11px;">150k</button>
-                            <button type="button" class="btn btn-secondary" onclick="setPresetBonus(200000)" style="padding: 6px 10px; font-size: 11px;">200k</button>
-                            <button type="button" class="btn btn-secondary" onclick="setPresetBonus(300000)" style="padding: 6px 10px; font-size: 11px;">300k</button>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Footer Action Buttons -->
-                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 10px;">
-                    <button class="btn btn-secondary" id="cancelOverallBudgetBtn">❌ ยกเลิก (Cancel)</button>
-                    <button class="btn btn-primary" id="saveOverallBudgetBtn" style="background: linear-gradient(135deg, #10b981, #059669);">
-                        💾 บันทึกงบประมาณ (Save Settings)
+                <!-- Actions Footer -->
+                <div class="details-actions">
+                    <button class="btn btn-secondary" id="detailEditBtn" style="flex: 1; justify-content: center;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px;">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                        Edit Item
+                    </button>
+                    <button class="btn" id="detailDeleteBtn" style="flex: 1; justify-content: center; background: var(--danger-glow); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px;">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        Delete Item
                     </button>
                 </div>
             </div>
@@ -2053,1624 +2001,7 @@
     <!-- CLIENT APP LOGIC -->
     <script>
         // Placeholder for initial dataset from backend JSON generator
-        const initialExpenses = [
-    {
-        "id":  "A087",
-        "item":  "ค่าไม้โครงห้องน้ำ",
-        "description":  "",
-        "location":  "ห้องน้ำ",
-        "category":  "งานระบบสุขาภิบาล",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1,
-        "unit":  "ชุด",
-        "priceUnit":  5687,
-        "total":  5687,
-        "invNo":  "บิลลายมือ-10/06/2026-2",
-        "date":  "2026-06-10",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A081",
-        "item":  "ใบตัด 4 นิ้วบาง WURTH",
-        "description":  "แผ่นตัดเหล็ก/สแตนเลสขนาด 4 นิ้วแบบบาง",
-        "location":  "ห้องน้ำ",
-        "category":  "งานระบบสุขาภิบาล",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  10,
-        "unit":  "แผ่น",
-        "priceUnit":  20,
-        "total":  200,
-        "invNo":  "IV202606100014",
-        "date":  "2026-06-10",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A080",
-        "item":  "ค่าขนส่ง กระบะ 4 ล้อ",
-        "description":  "ค่าบริการขนส่งสินค้าด้วยรถกระบะ",
-        "location":  "ห้องน้ำ",
-        "category":  "งานระบบสุขาภิบาล",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "คัน",
-        "priceUnit":  150,
-        "total":  150,
-        "invNo":  "IV202606090006",
-        "date":  "2026-06-09",
-        "type":  "ค่าขนส่ง",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A079",
-        "item":  "เหล็กกล่อง 1.1/21.1/2 นิ้ว2.0 มิล",
-        "description":  "เหล็กกล่องสี่เหลี่ยมจัตุรัสโครงสร้าง ขนาด 1.5x1.5 นิ้ว",
-        "location":  "ห้องน้ำ",
-        "category":  "งานระบบสุขาภิบาล",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "เส้น",
-        "priceUnit":  425,
-        "total":  425,
-        "invNo":  "IV202606090006",
-        "date":  "2026-06-09",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A078",
-        "item":  "น็อตร้อยเสา 5.1/2 นิ้ว",
-        "description":  "น็อตเหล็กสำหรับร้อยยึดโครงเสา ยาว 5.5 นิ้ว",
-        "location":  "ห้องน้ำ",
-        "category":  "งานระบบสุขาภิบาล",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1.2,
-        "unit":  "กก.",
-        "priceUnit":  120,
-        "total":  144,
-        "invNo":  "IV202606090006",
-        "date":  "2026-06-09",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A077",
-        "item":  "ลวดผูกเหล็ก 2.5 กก",
-        "description":  "ลวดสำหรับผูกโครงเหล็กเสริมคอนกรีต",
-        "location":  "ห้องน้ำ",
-        "category":  "งานระบบสุขาภิบาล",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "ชั้น",
-        "priceUnit":  120,
-        "total":  120,
-        "invNo":  "IV202606090006",
-        "date":  "2026-06-09",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A076",
-        "item":  "เหล็ก 2 หุน (6 มิล)",
-        "description":  "เหล็กเส้นกลมผิวเรียบ ขนาด 6 มิลลิเมตร (เหล็กปลอก)",
-        "location":  "ห้องน้ำ",
-        "category":  "งานระบบสุขาภิบาล",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  10,
-        "unit":  "เส้น",
-        "priceUnit":  65,
-        "total":  650,
-        "invNo":  "IV202606090006",
-        "date":  "2026-06-09",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A075",
-        "item":  "เหล็ก 3 หุน (9 มิล)",
-        "description":  "เหล็กเส้นกลมผิวเรียบ ขนาด 9 มิลลิเมตร",
-        "location":  "ห้องน้ำ",
-        "category":  "งานระบบสุขาภิบาล",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  10,
-        "unit":  "เส้น",
-        "priceUnit":  135,
-        "total":  1350,
-        "invNo":  "IV202606090006",
-        "date":  "2026-06-09",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A074",
-        "item":  "เสาหน้า 4*2.5 เมตร (ด)",
-        "description":  "เสาคอนกรีตสำเร็จรูปหน้า 4 นิ้ว ยาว 2.5 เมตร",
-        "location":  "ห้องน้ำ",
-        "category":  "งานระบบสุขาภิบาล",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  2,
-        "unit":  "ต้น",
-        "priceUnit":  400,
-        "total":  800,
-        "invNo":  "IV202606090006",
-        "date":  "2026-06-09",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A073",
-        "item":  "เสาหน้า 4*2.5 เมตร (ว)",
-        "description":  "เสาคอนกรีตสำเร็จรูปหน้า 4 นิ้ว ยาว 2.5 เมตร",
-        "location":  "ห้องน้ำ",
-        "category":  "งานระบบสุขาภิบาล",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  4,
-        "unit":  "ต้น",
-        "priceUnit":  400,
-        "total":  1600,
-        "invNo":  "IV202606090006",
-        "date":  "2026-06-09",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A072",
-        "item":  "ทรายหยาบ",
-        "description":  "ทรายหยาบสำหรับงานผสมปูนโครงสร้าง/เทพื้น",
-        "location":  "ห้องน้ำ",
-        "category":  "งานระบบสุขาภิบาล",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "คิว",
-        "priceUnit":  850,
-        "total":  850,
-        "invNo":  "IV202606090002",
-        "date":  "2026-06-09",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A071",
-        "item":  "หิน 3/4 (คิว)",
-        "description":  "หินก่อสร้างขนาด 3/4 นิ้ว สำหรับผสมปูนเทพื้น",
-        "location":  "ห้องน้ำ",
-        "category":  "งานระบบสุขาภิบาล",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "คิว",
-        "priceUnit":  950,
-        "total":  950,
-        "invNo":  "IV202606090002",
-        "date":  "2026-06-09",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A086",
-        "item":  "ค่าแรงรื้อพื้นห้องน้ำ ปรับพื้นที่",
-        "description":  "",
-        "location":  "ห้องน้ำ",
-        "category":  "งานระบบสุขาภิบาล",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  5000,
-        "total":  5000,
-        "invNo":  "บิลลายมือ-08/06/2026-2",
-        "date":  "2026-06-08",
-        "type":  "ค่าแรง",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A085",
-        "item":  "ค่าแรงเทพื้น",
-        "description":  "ค่าแรงปรับระดับและเทพื้นคอนกรีต",
-        "location":  "ออฟฟิศ",
-        "category":  "งานเทพื้น",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  900,
-        "total":  900,
-        "invNo":  "บิลลายมือ-08/06/2026-1",
-        "date":  "2026-06-08",
-        "type":  "ค่าแรง",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A084",
-        "item":  "ค่าแรงฉาบเสา",
-        "description":  "ค่าแรงฉาบตกแต่งผิวเสาคอนกรีต",
-        "location":  "ออฟฟิศ",
-        "category":  "งานเสา",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  3300,
-        "total":  3300,
-        "invNo":  "บิลลายมือ-08/06/2026-1",
-        "date":  "2026-06-08",
-        "type":  "ค่าแรง",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A083",
-        "item":  "ค่าแรงทำบันได",
-        "description":  "ค่าแรงก่อโครงสร้างและทำบันไดปูน",
-        "location":  "ออฟฟิศ",
-        "category":  "งานบันได",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  1295,
-        "total":  1295,
-        "invNo":  "บิลลายมือ-08/06/2026-1",
-        "date":  "2026-06-08",
-        "type":  "ค่าแรง",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A082",
-        "item":  "ค่าแรงจับเซี้ยม",
-        "description":  "ค่าแรงจับเซี้ยมแนวขอบเสาและโครงสร้าง",
-        "location":  "ออฟฟิศ",
-        "category":  "งานเสา",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  1500,
-        "total":  1500,
-        "invNo":  "บิลลายมือ-08/06/2026-1",
-        "date":  "2026-06-08",
-        "type":  "ค่าแรง",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A070",
-        "item":  "ค่าขนส่ง กระบะ 4 ล้อ",
-        "description":  "",
-        "location":  "คอกไก่ - ที่ทานข้าว",
-        "category":  "งานหลังคา",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "คัน",
-        "priceUnit":  150,
-        "total":  150,
-        "invNo":  "IV202606050007",
-        "date":  "2026-06-05",
-        "type":  "ค่าขนส่ง",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A069",
-        "item":  "สังกะสี 10 ฟุต มือ 2",
-        "description":  "",
-        "location":  "คอกไก่ - ที่ทานข้าว",
-        "category":  "งานหลังคา",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  12,
-        "unit":  "แผ่น",
-        "priceUnit":  100,
-        "total":  1200,
-        "invNo":  "IV202606050007",
-        "date":  "2026-06-05",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A068",
-        "item":  "สังกะสีหลบ 1*6 ฟุต",
-        "description":  "",
-        "location":  "คอกไก่ - ที่ทานข้าว",
-        "category":  "งานหลังคา",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  4,
-        "unit":  "แผ่น",
-        "priceUnit":  85,
-        "total":  340,
-        "invNo":  "IV202606050007",
-        "date":  "2026-06-05",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A067",
-        "item":  "น็อต w 10*2 นิ้ว แปรไม้",
-        "description":  "",
-        "location":  "คอกไก่ - ที่ทานข้าว",
-        "category":  "งานหลังคา",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  100,
-        "unit":  "ตัว",
-        "priceUnit":  2,
-        "total":  200,
-        "invNo":  "IV202606050007",
-        "date":  "2026-06-05",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A066",
-        "item":  "สังกะสี ลอนเล็ก 10 ฟุต ขาว",
-        "description":  "",
-        "location":  "คอกไก่ - ที่ทานข้าว",
-        "category":  "งานหลังคา",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  6,
-        "unit":  "แผ่น",
-        "priceUnit":  180,
-        "total":  1080,
-        "invNo":  "IV202606050007",
-        "date":  "2026-06-05",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A065",
-        "item":  "เชิงชาย 6 * 4 เมตร เพชร น้ำตาล",
-        "description":  "",
-        "location":  "คอกไก่ - ที่ทานข้าว",
-        "category":  "งานหลังคา",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  8,
-        "unit":  "แผ่น",
-        "priceUnit":  260,
-        "total":  2080,
-        "invNo":  "IV202606050007",
-        "date":  "2026-06-05",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A064",
-        "item":  "ค่าขนส่ง",
-        "description":  "งานห้องน้ำ/หลังคา",
-        "location":  "ห้องน้ำ",
-        "category":  "งานระบบสุขาภิบาล",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  75,
-        "total":  75,
-        "invNo":  "IV202606040019",
-        "date":  "2026-06-04",
-        "type":  "ค่าแรง",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A063",
-        "item":  "ค่าขนส่ง",
-        "description":  "งานห้องน้ำ/งานหลังคา",
-        "location":  "คอกไก่-ที่ทานข้าว",
-        "category":  "งานหลังคา",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  75,
-        "total":  75,
-        "invNo":  "IV202606040019",
-        "date":  "2026-06-04",
-        "type":  "ค่าขนส่ง",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A062",
-        "item":  "ตะปูดอกไม้ ตรามือ 3 10",
-        "description":  "",
-        "location":  "คอกไก่-ที่ทานข้าว",
-        "category":  "งานหลังคา",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "กิโลกรัม",
-        "priceUnit":  60,
-        "total":  60,
-        "invNo":  "IV202606040019",
-        "date":  "2026-06-04",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A061",
-        "item":  "น็อต W 104 นิ้ว แปรไม้",
-        "description":  "",
-        "location":  "คอกไก่-ที่ทานข้าว",
-        "category":  "งานหลังคา",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  100,
-        "unit":  "ชิ้น",
-        "priceUnit":  4,
-        "total":  400,
-        "invNo":  "IV202606040019",
-        "date":  "2026-06-04",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A060",
-        "item":  "ฝาปล่อง 80 ซม",
-        "description":  "",
-        "location":  "ห้องน้ำ",
-        "category":  "งานระบบสุขาภิบาล",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "แผ่น",
-        "priceUnit":  150,
-        "total":  150,
-        "invNo":  "IV202606040019",
-        "date":  "2026-06-04",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A059",
-        "item":  "ปล่อง 80 ซม",
-        "description":  "",
-        "location":  "ห้องน้ำ",
-        "category":  "งานระบบสุขาภิบาล",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  4,
-        "unit":  "ลูก",
-        "priceUnit":  180,
-        "total":  720,
-        "invNo":  "IV202606040019",
-        "date":  "2026-06-04",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A058",
-        "item":  "ไม้ปักหลัก",
-        "description":  "ปลูกต้นไม้ด้านหน้าถนน",
-        "location":  "งานรั้ว",
-        "category":  "งานรั้วต้นไม้",
-        "pic":  "ร้านไม้ปักหลักพุนพิน",
-        "number":  2,
-        "unit":  "ชุด",
-        "priceUnit":  180,
-        "total":  360,
-        "invNo":  "MIR0002606045510279957096",
-        "date":  "2026-06-04",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "f7ea6c42",
-        "item":  "ปูนเสือ",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานก่อเสา",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  10,
-        "unit":  "กระสอบ",
-        "priceUnit":  168,
-        "total":  1680,
-        "invNo":  "IV202606010008",
-        "date":  "2026-06-01",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "f5a4d6c7",
-        "item":  "ค่าส่งวัสดุงานก่อเสา",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานก่อเสา",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  150,
-        "total":  150,
-        "invNo":  "IV202606010008",
-        "date":  "2026-06-01",
-        "type":  "ค่าขนส่ง",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "1e9ea274",
-        "item":  "อิฐบล็อก ร้าน",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานก่อเสา",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  100,
-        "unit":  "ก้อน",
-        "priceUnit":  6.3,
-        "total":  630,
-        "invNo":  "IV202606010008",
-        "date":  "2026-06-01",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "f78d8f18",
-        "item":  "ค่าแรงงานฟุตบาท งวดที่ 2",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฟุตบาท",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  5000,
-        "total":  5000,
-        "invNo":  "MIR0002605285014102372021",
-        "date":  "2026-05-28",
-        "type":  "ค่าแรง",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A088",
-        "item":  "ค่าแรงงานหลังคางวดที่ 1",
-        "description":  "",
-        "location":  "คอกไก่-ที่ทานข้าว",
-        "category":  "งานหลังคา",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  5400,
-        "total":  5400,
-        "invNo":  "24058",
-        "date":  "2026-05-23",
-        "type":  "ค่าแรง",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "e3718367",
-        "item":  "ไม้",
-        "description":  "วัสดุทำโครงกันสาด-คอกไก่",
-        "location":  "คอกไก่-ที่ทานข้าว",
-        "category":  "งานหลังคา",
-        "pic":  "ร้านไม้",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  12362,
-        "total":  12362,
-        "invNo":  "MIR0002605224309512415500",
-        "date":  "2026-05-22",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A093",
-        "item":  "ปูนฉาบ",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1,
-        "unit":  "แพ็ค",
-        "priceUnit":  125,
-        "total":  125,
-        "invNo":  "IV202605220007",
-        "date":  "2026-05-22",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A092",
-        "item":  "ปูนเสือ",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฟุตบาท",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  10,
-        "unit":  "กระสอบ",
-        "priceUnit":  168,
-        "total":  1680,
-        "invNo":  "IV202605220007",
-        "date":  "2026-05-22",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A091",
-        "item":  "ทรายหยาบ",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฟุตบาท",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1.5,
-        "unit":  "คิว",
-        "priceUnit":  850,
-        "total":  1275,
-        "invNo":  "IV202605220007",
-        "date":  "2026-05-22",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A090",
-        "item":  "หินคลุก",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฟุตบาท",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1.5,
-        "unit":  "คิว",
-        "priceUnit":  700,
-        "total":  1050,
-        "invNo":  "IV202605220007",
-        "date":  "2026-05-22",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A089",
-        "item":  "หินคลุก",
-        "description":  "เทพื้นทางเข้า",
-        "location":  "ทางเข้า",
-        "category":  "งานเทพื้น",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "คิว",
-        "priceUnit":  1050,
-        "total":  1050,
-        "invNo":  "IV202605220028",
-        "date":  "2026-05-22",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A095",
-        "item":  "ตะปูคอนกรีตตราเพชร 3 นิ้ว",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานเสา",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "ก.ก.",
-        "priceUnit":  120,
-        "total":  120,
-        "invNo":  "IV202605190003",
-        "date":  "2026-05-19",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A094",
-        "item":  "เซี้ยมพีวีซี เบอร์ 3",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานเสา",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  20,
-        "unit":  "เส้น",
-        "priceUnit":  20,
-        "total":  400,
-        "invNo":  "IV202605190003",
-        "date":  "2026-05-19",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "e70f8ae8",
-        "item":  "ต้นไทรเกาหลี",
-        "description":  "ใช้ทำรั้ว",
-        "location":  "งานรั้ว",
-        "category":  "งานรั้วต้นไม้",
-        "pic":  "กรีนทรีพันธุ์ไม้",
-        "number":  115,
-        "unit":  "ต้น",
-        "priceUnit":  65,
-        "total":  7475,
-        "invNo":  "",
-        "date":  "2026-05-17",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "47cf80e6",
-        "item":  "ค่าแรงงานฟุตบาท งวดที่ 1",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฟุตบาท",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  5000,
-        "total":  5000,
-        "invNo":  "",
-        "date":  "2026-05-16",
-        "type":  "ค่าแรง",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A057",
-        "item":  "ไม้กวาดทางมะพร้าว",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฟุตบาท",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  2,
-        "unit":  "ชิ้น",
-        "priceUnit":  35,
-        "total":  70,
-        "invNo":  "IV202605120005",
-        "date":  "2026-05-12",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A056",
-        "item":  "อ่างกวนปูน",
-        "description":  "ขนาดใหญ่",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฟุตบาท",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "ชิ้น",
-        "priceUnit":  750,
-        "total":  750,
-        "invNo":  "IV202605120005",
-        "date":  "2026-05-12",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A055",
-        "item":  "ตะปูตอกไม้",
-        "description":  "ตรามือ 2.1/2*12 นิ้ว",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฟุตบาท",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  2,
-        "unit":  "กก.",
-        "priceUnit":  70,
-        "total":  140,
-        "invNo":  "IV202605120005",
-        "date":  "2026-05-12",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A054",
-        "item":  "วายเมท",
-        "description":  "2*25 ตรม.",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฟุตบาท",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "ชิ้น",
-        "priceUnit":  1250,
-        "total":  1250,
-        "invNo":  "IV202605120005",
-        "date":  "2026-05-12",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A053",
-        "item":  "ปูนเสือ",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฟุตบาท",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  10,
-        "unit":  "กระสอบ",
-        "priceUnit":  168,
-        "total":  1680,
-        "invNo":  "IV202605110015",
-        "date":  "2026-05-11",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A052",
-        "item":  "ทรายหยาบ",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฟุตบาท",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  2,
-        "unit":  "คิว",
-        "priceUnit":  850,
-        "total":  1700,
-        "invNo":  "IV202605110015",
-        "date":  "2026-05-11",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A051",
-        "item":  "หลอดไฟออฟฟิศ",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานแสงสว่าง",
-        "pic":  "Shopee",
-        "number":  3,
-        "unit":  "ชิ้น",
-        "priceUnit":  165.75,
-        "total":  497.25,
-        "invNo":  "260505HU9B3CU4",
-        "date":  "2026-05-05",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A048",
-        "item":  "ค่าปักเสาไฟฟ้า+ดึงสายไฟฟ้า",
-        "description":  "",
-        "location":  "งานไฟฟ้า-แสงสว่าง",
-        "category":  "งานไฟฟ้า",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  5500,
-        "total":  5500,
-        "invNo":  "W04-1-26",
-        "date":  "2026-05-02",
-        "type":  "ค่าแรง",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A035",
-        "item":  "ค่าแรงทำรั้ว งวดที่ 2",
-        "description":  "",
-        "location":  "งานรั้ว",
-        "category":  "งานรั้วลวดหนาม",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  3750,
-        "total":  3750,
-        "invNo":  "W03-2-26",
-        "date":  "2026-05-02",
-        "type":  "ค่าแรง",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A050",
-        "item":  "วัสดุเสาไฟฟ้า",
-        "description":  "",
-        "location":  "งานไฟฟ้า-แสงสว่าง",
-        "category":  "งานไฟฟ้า",
-        "pic":  "ร้านอุปกรณ์สายไฟ ตาขุน",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  6005,
-        "total":  6005,
-        "invNo":  "01/05/69",
-        "date":  "2026-05-01",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A047",
-        "item":  "ค่าขนส่งเสาไฟ",
-        "description":  "",
-        "location":  "งานไฟฟ้า-แสงสว่าง",
-        "category":  "งานไฟฟ้า",
-        "pic":  "TP วัสดุ",
-        "number":  1,
-        "unit":  "เที่ยว",
-        "priceUnit":  400,
-        "total":  400,
-        "invNo":  "TP69 04 - 0315",
-        "date":  "2026-04-28",
-        "type":  "ค่าขนส่ง",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A046",
-        "item":  "เสาไฟ 5 เมตร อัดแรง",
-        "description":  "",
-        "location":  "งานไฟฟ้า-แสงสว่าง",
-        "category":  "งานไฟฟ้า",
-        "pic":  "TP วัสดุ",
-        "number":  3,
-        "unit":  "ต้น",
-        "priceUnit":  1500,
-        "total":  4500,
-        "invNo":  "TP69 04 - 0315",
-        "date":  "2026-04-28",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A045",
-        "item":  "เสาไฟ 6 เมตร อัดแรง",
-        "description":  "",
-        "location":  "งานไฟฟ้า-แสงสว่าง",
-        "category":  "งานไฟฟ้า",
-        "pic":  "TP วัสดุ",
-        "number":  1,
-        "unit":  "ต้น",
-        "priceUnit":  2500,
-        "total":  2500,
-        "invNo":  "TP69 04 - 0315",
-        "date":  "2026-04-28",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A044",
-        "item":  "ไฟโซล่าเซลล์",
-        "description":  "",
-        "location":  "งานไฟฟ้า-แสงสว่าง",
-        "category":  "งานแสงสว่าง",
-        "pic":  "Shopee",
-        "number":  2,
-        "unit":  "ชิ้น",
-        "priceUnit":  987,
-        "total":  1974,
-        "invNo":  "260428113M3YQ2",
-        "date":  "2026-04-28",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A043",
-        "item":  "กล้องวงจรปิด 2 ตัว",
-        "description":  "",
-        "location":  "กล้องวงจรปิด",
-        "category":  "งานกล้องวงจรปิด \u0026 WiFi",
-        "pic":  "Shopee",
-        "number":  2,
-        "unit":  "ชิ้น",
-        "priceUnit":  2353.5,
-        "total":  4707,
-        "invNo":  "260427V4V6Q4XM",
-        "date":  "2026-04-27",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A033",
-        "item":  "ปูนเสือ",
-        "description":  "",
-        "location":  "งานรั้ว",
-        "category":  "งานรั้วลวดหนาม",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  5,
-        "unit":  "กระสอบ",
-        "priceUnit":  171,
-        "total":  855,
-        "invNo":  "IV202604250019",
-        "date":  "2026-04-25",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A029",
-        "item":  "UPS สำรองไฟ",
-        "description":  "",
-        "location":  "กล้องวงจรปิด",
-        "category":  "งานกล้องวงจรปิด \u0026 WiFi",
-        "pic":  "Shopee",
-        "number":  2,
-        "unit":  "ชิ้น",
-        "priceUnit":  1078,
-        "total":  2156,
-        "invNo":  "260424K8DQWGE1",
-        "date":  "2026-04-25",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A028",
-        "item":  "ค่าแรงจับเซี้ยม ฉาบผนัง รอบที่ 2",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  13000,
-        "total":  13000,
-        "invNo":  "W02-2-26",
-        "date":  "2026-04-25",
-        "type":  "ค่าแรง",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A010",
-        "item":  "ค่า Internet รายเดือน",
-        "description":  "",
-        "location":  "กล้องวงจรปิด",
-        "category":  "งานกล้องวงจรปิด \u0026 WiFi",
-        "pic":  "Gomo AIS",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  259,
-        "total":  259,
-        "invNo":  "GOMO2026-2",
-        "date":  "2026-04-25",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A034",
-        "item":  "ค่าแรงทำรั้ว งวดที่ 1",
-        "description":  "",
-        "location":  "งานรั้ว",
-        "category":  "งานรั้วลวดหนาม",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  3000,
-        "total":  3000,
-        "invNo":  "W03-1-26",
-        "date":  "2026-04-24",
-        "type":  "ค่าแรง",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A032",
-        "item":  "เคเบิ้ลแกลนไนล่อน",
-        "description":  "",
-        "location":  "กล้องวงจรปิด",
-        "category":  "งานกล้องวงจรปิด \u0026 WiFi",
-        "pic":  "นำสิน",
-        "number":  4,
-        "unit":  "ชิ้น",
-        "priceUnit":  11,
-        "total":  44,
-        "invNo":  "BCA-378",
-        "date":  "2026-04-22",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A031",
-        "item":  "ตู้ทึบ",
-        "description":  "",
-        "location":  "กล้องวงจรปิด",
-        "category":  "งานกล้องวงจรปิด \u0026 WiFi",
-        "pic":  "นำสิน",
-        "number":  1,
-        "unit":  "ชิ้น",
-        "priceUnit":  161,
-        "total":  161,
-        "invNo":  "BCA-376",
-        "date":  "2026-04-22",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A030",
-        "item":  "Cable tie",
-        "description":  "",
-        "location":  "กล้องวงจรปิด",
-        "category":  "งานกล้องวงจรปิด \u0026 WiFi",
-        "pic":  "นำสิน",
-        "number":  1,
-        "unit":  "แพ็ค",
-        "priceUnit":  110,
-        "total":  110,
-        "invNo":  "BCA-376",
-        "date":  "2026-04-22",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A027",
-        "item":  "เกียง",
-        "description":  "ค่าวัสดุ อุปกรณ์ฟุตบาท",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  2,
-        "unit":  "ชิ้น",
-        "priceUnit":  30,
-        "total":  60,
-        "invNo":  "IV202604210001",
-        "date":  "2026-04-21",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A026",
-        "item":  "ปูนเสือ",
-        "description":  "ค่าวัสดุ อุปกรณ์ฟุตบาท",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  5,
-        "unit":  "กระสอบ",
-        "priceUnit":  171,
-        "total":  855,
-        "invNo":  "IV202604210001",
-        "date":  "2026-04-21",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A025",
-        "item":  "ค่าขนส่งงานรั้ว",
-        "description":  "",
-        "location":  "งานรั้ว",
-        "category":  "งานรั้วลวดหนาม",
-        "pic":  "PR วัสดุ",
-        "number":  1,
-        "unit":  "เที่ยว",
-        "priceUnit":  300,
-        "total":  300,
-        "invNo":  "IV/6907799",
-        "date":  "2026-04-20",
-        "type":  "ค่าขนส่ง",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A024",
-        "item":  "แชลง",
-        "description":  "",
-        "location":  "งานรั้ว",
-        "category":  "งานรั้วลวดหนาม",
-        "pic":  "PR วัสดุ",
-        "number":  1,
-        "unit":  "อัน",
-        "priceUnit":  366,
-        "total":  366,
-        "invNo":  "IV/6907799",
-        "date":  "2026-04-20",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A023",
-        "item":  "กิ๊บลวด",
-        "description":  "",
-        "location":  "งานรั้ว",
-        "category":  "งานรั้วลวดหนาม",
-        "pic":  "PR วัสดุ",
-        "number":  5,
-        "unit":  "ถุง",
-        "priceUnit":  46,
-        "total":  230,
-        "invNo":  "IV/6907799",
-        "date":  "2026-04-20",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A022",
-        "item":  "ลวดหนาม",
-        "description":  "",
-        "location":  "งานรั้ว",
-        "category":  "งานรั้วลวดหนาม",
-        "pic":  "PR วัสดุ",
-        "number":  4,
-        "unit":  "ขด",
-        "priceUnit":  379,
-        "total":  1516,
-        "invNo":  "IV/6907799",
-        "date":  "2026-04-20",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A021",
-        "item":  "เสารั้ว",
-        "description":  "",
-        "location":  "งานรั้ว",
-        "category":  "งานรั้วลวดหนาม",
-        "pic":  "PR วัสดุ",
-        "number":  31,
-        "unit":  "ต้น",
-        "priceUnit":  213,
-        "total":  6603,
-        "invNo":  "IV/6907799",
-        "date":  "2026-04-20",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A009",
-        "item":  "SSD",
-        "description":  "",
-        "location":  "กล้องวงจรปิด",
-        "category":  "งานกล้องวงจรปิด \u0026 WiFi",
-        "pic":  "Shopee",
-        "number":  1,
-        "unit":  "ชิ้น",
-        "priceUnit":  2070,
-        "total":  2070,
-        "invNo":  "SSS2026",
-        "date":  "2026-04-20",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A042",
-        "item":  "ส่วนลด",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "รายการ",
-        "priceUnit":  -56,
-        "total":  -56,
-        "invNo":  "IV202512250019-2",
-        "date":  "2026-04-18",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A041",
-        "item":  "ปูนTOA",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  6,
-        "unit":  "กระสอบ",
-        "priceUnit":  235,
-        "total":  1410,
-        "invNo":  "IV202512250019-2",
-        "date":  "2026-04-18",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A040",
-        "item":  "สีฝุ่นดำ",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "ถุง",
-        "priceUnit":  75,
-        "total":  75,
-        "invNo":  "IV202512250019-2",
-        "date":  "2026-04-18",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A039",
-        "item":  "สีฝุ่นเหลือง",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "ถุง",
-        "priceUnit":  115,
-        "total":  115,
-        "invNo":  "IV202512250019-2",
-        "date":  "2026-04-18",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A038",
-        "item":  "สีฝุ่นแดง",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "ถุง",
-        "priceUnit":  100,
-        "total":  100,
-        "invNo":  "IV202512250019-2",
-        "date":  "2026-04-18",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A037",
-        "item":  "เกียงขัดมัน",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  2,
-        "unit":  "อัน",
-        "priceUnit":  89,
-        "total":  178,
-        "invNo":  "IV202512250019-2",
-        "date":  "2026-04-18",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A008",
-        "item":  "ค่าซิม",
-        "description":  "",
-        "location":  "กล้องวงจรปิด",
-        "category":  "งานกล้องวงจรปิด \u0026 WiFi",
-        "pic":  "Gomo AIS",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  99,
-        "total":  99,
-        "invNo":  "GOMO2026-1",
-        "date":  "2026-04-18",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A007",
-        "item":  "Router Wifi",
-        "description":  "",
-        "location":  "กล้องวงจรปิด",
-        "category":  "งานกล้องวงจรปิด \u0026 WiFi",
-        "pic":  "Shopee",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  880,
-        "total":  880,
-        "invNo":  "2604173Q74T9K8",
-        "date":  "2026-04-18",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A006",
-        "item":  "กล้องวงจรปิด 4 ตัว + Homebase",
-        "description":  "",
-        "location":  "กล้องวงจรปิด",
-        "category":  "งานกล้องวงจรปิด \u0026 WiFi",
-        "pic":  "Shopee",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  11720,
-        "total":  11720,
-        "invNo":  "2604209WNYV9HU",
-        "date":  "2026-04-18",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A020",
-        "item":  "ปูนเสือ",
-        "description":  "ค่าวัสดุ อุปกรณ์ฟุตบาท",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  5,
-        "unit":  "กระสอบ",
-        "priceUnit":  171,
-        "total":  855,
-        "invNo":  "IV202512250019-4",
-        "date":  "2026-04-17",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A019",
-        "item":  "ทรายหยาบ",
-        "description":  "ค่าวัสดุ อุปกรณ์ฟุตบาท",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "คิว",
-        "priceUnit":  800,
-        "total":  800,
-        "invNo":  "IV202512250019-4",
-        "date":  "2026-04-17",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A018",
-        "item":  "หิน 3/4",
-        "description":  "ค่าวัสดุ อุปกรณ์ฟุตบาท",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "คิว",
-        "priceUnit":  950,
-        "total":  950,
-        "invNo":  "IV202512250019-4",
-        "date":  "2026-04-17",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A017",
-        "item":  "ค่าวัสดุ อุปกรณ์จับเซี้ยม ฉาบผนัง",
-        "description":  "ค่าวัสดุ อุปกรณ์จับเซี้ยม ฉาบผนัง",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "HomePro",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  1821.66,
-        "total":  1821.66,
-        "invNo":  "3403493614",
-        "date":  "2026-04-17",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A036",
-        "item":  "อิฐแดง 8 รู",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  40,
-        "unit":  "ก้อน",
-        "priceUnit":  7,
-        "total":  280,
-        "invNo":  "IV202512250019-1",
-        "date":  "2026-04-16",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A016",
-        "item":  "สามเหลี่ยมปาดปูน 2 เมตร",
-        "description":  "ค่าวัสดุ อุปกรณ์จับเซี้ยม ฉาบผนัง",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "อัน",
-        "priceUnit":  315,
-        "total":  315,
-        "invNo":  "IV202512250019-1",
-        "date":  "2026-04-16",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A015",
-        "item":  "ฟองน้ำฉาบปูน",
-        "description":  "ค่าวัสดุ อุปกรณ์จับเซี้ยม ฉาบผนัง",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  6,
-        "unit":  "แผ่น",
-        "priceUnit":  10,
-        "total":  60,
-        "invNo":  "IV202512250019-1",
-        "date":  "2026-04-16",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A014",
-        "item":  "ทรายละเอียด",
-        "description":  "ค่าวัสดุ อุปกรณ์จับเซี้ยม ฉาบผนัง",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  2,
-        "unit":  "คิว",
-        "priceUnit":  1300,
-        "total":  2600,
-        "invNo":  "IV202512250019-1",
-        "date":  "2026-04-16",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A013",
-        "item":  "อิฐบล๊อก",
-        "description":  "ค่าวัสดุ อุปกรณ์จับเซี้ยม ฉาบผนัง",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  100,
-        "unit":  "ก้อน",
-        "priceUnit":  7.2,
-        "total":  720,
-        "invNo":  "IV202512250019-1",
-        "date":  "2026-04-16",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A012",
-        "item":  "ค่าแรงจับเซี้ยม ฉาบผนัง รอบที่ 1",
-        "description":  "",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  7900,
-        "total":  7900,
-        "invNo":  "W02-1-26",
-        "date":  "2026-04-15",
-        "type":  "ค่าแรง",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A005",
-        "item":  "ค่าขนส่ง",
-        "description":  "ปูนเพ้นท์ สเต็ง 240",
-        "location":  "คอกไก่-ที่ทานข้าว",
-        "category":  "งานเทพื้น",
-        "pic":  "TP วัสดุ",
-        "number":  1,
-        "unit":  "เที่ยว",
-        "priceUnit":  500,
-        "total":  500,
-        "invNo":  "TP69 04 - 0315",
-        "date":  "2026-04-10",
-        "type":  "ค่าขนส่ง",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A004",
-        "item":  "ปูนเพ้นท์ สเต็ง 240",
-        "description":  "",
-        "location":  "คอกไก่-ที่ทานข้าว",
-        "category":  "งานเทพื้น",
-        "pic":  "TP วัสดุ",
-        "number":  2,
-        "unit":  "คิว",
-        "priceUnit":  2300,
-        "total":  4600,
-        "invNo":  "TP69 04 - 0315",
-        "date":  "2026-04-10",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A003",
-        "item":  "ค่าแรงเทพื้น",
-        "description":  "",
-        "location":  "คอกไก่-ที่ทานข้าว",
-        "category":  "งานเทพื้น",
-        "pic":  "ช่าง-อาสิทธิ์",
-        "number":  1,
-        "unit":  "งาน",
-        "priceUnit":  4000,
-        "total":  4000,
-        "invNo":  "W01-1-26",
-        "date":  "2026-04-10",
-        "type":  "ค่าแรง",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A011",
-        "item":  "ปูน",
-        "description":  "ตราเสือ",
-        "location":  "ออฟฟิศ",
-        "category":  "งานฉาบผนัง",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  2,
-        "unit":  "กระสอบ",
-        "priceUnit":  171,
-        "total":  342,
-        "invNo":  "IV202604090019-3",
-        "date":  "2026-04-09",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Dad"
-    },
-    {
-        "id":  "A002",
-        "item":  "ทรายหยาบ",
-        "description":  "",
-        "location":  "คอกไก่-ที่ทานข้าว",
-        "category":  "งานเทพื้น",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "คิว",
-        "priceUnit":  800,
-        "total":  800,
-        "invNo":  "IV202604090019-3",
-        "date":  "2026-04-09",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    },
-    {
-        "id":  "A001",
-        "item":  "วายเมท",
-        "description":  "2*25 ตรม.",
-        "location":  "คอกไก่-ที่ทานข้าว",
-        "category":  "งานเทพื้น",
-        "pic":  "79 วัสดุก่อสร้าง",
-        "number":  1,
-        "unit":  "ชิ้น",
-        "priceUnit":  1250,
-        "total":  1250,
-        "invNo":  "IV202604090019-3",
-        "date":  "2026-04-09",
-        "type":  "ค่าวัสดุ/อุปกรณ์",
-        "budget":  "Bonus"
-    }
-];
+        const initialExpenses = [{"id":"A087","item":"à¸„à¹ˆà¸²à¹„à¸¡à¹‰à¹‚à¸„à¸£à¸‡à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³","description":"","location":"à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³","category":"à¸‡à¸²à¸™à¸£à¸°à¸šà¸šà¸ªà¸¸à¸‚à¸²à¸ à¸´à¸šà¸²à¸¥","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1,"unit":"à¸Šà¸¸à¸”","priceUnit":5687,"total":5687,"invNo":"à¸šà¸´à¸¥à¸¥à¸²à¸¢à¸¡à¸·à¸­-10/06/2026-2","date":"2026-06-10","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A081","item":"à¹ƒà¸šà¸•à¸±à¸” 4 à¸™à¸´à¹‰à¸§à¸šà¸²à¸‡ WURTH","description":"à¹à¸œà¹ˆà¸™à¸•à¸±à¸”à¹€à¸«à¸¥à¹‡à¸/à¸ªà¹à¸•à¸™à¹€à¸¥à¸ªà¸‚à¸™à¸²à¸” 4 à¸™à¸´à¹‰à¸§à¹à¸šà¸šà¸šà¸²à¸‡","location":"à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³","category":"à¸‡à¸²à¸™à¸£à¸°à¸šà¸šà¸ªà¸¸à¸‚à¸²à¸ à¸´à¸šà¸²à¸¥","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":10,"unit":"à¹à¸œà¹ˆà¸™","priceUnit":20,"total":200,"invNo":"IV202606100014","date":"2026-06-10","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A080","item":"à¸„à¹ˆà¸²à¸‚à¸™à¸ªà¹ˆà¸‡ à¸à¸£à¸°à¸šà¸° 4 à¸¥à¹‰à¸­","description":"à¸„à¹ˆà¸²à¸šà¸£à¸´à¸à¸²à¸£à¸‚à¸™à¸ªà¹ˆà¸‡à¸ªà¸´à¸™à¸„à¹‰à¸²à¸”à¹‰à¸§à¸¢à¸£à¸–à¸à¸£à¸°à¸šà¸°","location":"à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³","category":"à¸‡à¸²à¸™à¸£à¸°à¸šà¸šà¸ªà¸¸à¸‚à¸²à¸ à¸´à¸šà¸²à¸¥","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸„à¸±à¸™","priceUnit":150,"total":150,"invNo":"IV202606090006","date":"2026-06-09","type":"à¸„à¹ˆà¸²à¸‚à¸™à¸ªà¹ˆà¸‡","budget":"Bonus"},{"id":"A079","item":"à¹€à¸«à¸¥à¹‡à¸à¸à¸¥à¹ˆà¸­à¸‡ 1.1/21.1/2 à¸™à¸´à¹‰à¸§2.0 à¸¡à¸´à¸¥","description":"à¹€à¸«à¸¥à¹‡à¸à¸à¸¥à¹ˆà¸­à¸‡à¸ªà¸µà¹ˆà¹€à¸«à¸¥à¸µà¹ˆà¸¢à¸¡à¸ˆà¸±à¸•à¸¸à¸£à¸±à¸ªà¹‚à¸„à¸£à¸‡à¸ªà¸£à¹‰à¸²à¸‡ à¸‚à¸™à¸²à¸” 1.5x1.5 à¸™à¸´à¹‰à¸§","location":"à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³","category":"à¸‡à¸²à¸™à¸£à¸°à¸šà¸šà¸ªà¸¸à¸‚à¸²à¸ à¸´à¸šà¸²à¸¥","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¹€à¸ªà¹‰à¸™","priceUnit":425,"total":425,"invNo":"IV202606090006","date":"2026-06-09","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A078","item":"à¸™à¹‡à¸­à¸•à¸£à¹‰à¸­à¸¢à¹€à¸ªà¸² 5.1/2 à¸™à¸´à¹‰à¸§","description":"à¸™à¹‡à¸­à¸•à¹€à¸«à¸¥à¹‡à¸à¸ªà¸³à¸«à¸£à¸±à¸šà¸£à¹‰à¸­à¸¢à¸¢à¸¶à¸”à¹‚à¸„à¸£à¸‡à¹€à¸ªà¸² à¸¢à¸²à¸§ 5.5 à¸™à¸´à¹‰à¸§","location":"à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³","category":"à¸‡à¸²à¸™à¸£à¸°à¸šà¸šà¸ªà¸¸à¸‚à¸²à¸ à¸´à¸šà¸²à¸¥","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1.2,"unit":"à¸à¸.","priceUnit":120,"total":144,"invNo":"IV202606090006","date":"2026-06-09","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A077","item":"à¸¥à¸§à¸”à¸œà¸¹à¸à¹€à¸«à¸¥à¹‡à¸ 2.5 à¸à¸","description":"à¸¥à¸§à¸”à¸ªà¸³à¸«à¸£à¸±à¸šà¸œà¸¹à¸à¹‚à¸„à¸£à¸‡à¹€à¸«à¸¥à¹‡à¸à¹€à¸ªà¸£à¸´à¸¡à¸„à¸­à¸™à¸à¸£à¸µà¸•","location":"à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³","category":"à¸‡à¸²à¸™à¸£à¸°à¸šà¸šà¸ªà¸¸à¸‚à¸²à¸ à¸´à¸šà¸²à¸¥","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸Šà¸±à¹‰à¸™","priceUnit":120,"total":120,"invNo":"IV202606090006","date":"2026-06-09","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A076","item":"à¹€à¸«à¸¥à¹‡à¸ 2 à¸«à¸¸à¸™ (6 à¸¡à¸´à¸¥)","description":"à¹€à¸«à¸¥à¹‡à¸à¹€à¸ªà¹‰à¸™à¸à¸¥à¸¡à¸œà¸´à¸§à¹€à¸£à¸µà¸¢à¸š à¸‚à¸™à¸²à¸” 6 à¸¡à¸´à¸¥à¸¥à¸´à¹€à¸¡à¸•à¸£ (à¹€à¸«à¸¥à¹‡à¸à¸›à¸¥à¸­à¸)","location":"à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³","category":"à¸‡à¸²à¸™à¸£à¸°à¸šà¸šà¸ªà¸¸à¸‚à¸²à¸ à¸´à¸šà¸²à¸¥","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":10,"unit":"à¹€à¸ªà¹‰à¸™","priceUnit":65,"total":650,"invNo":"IV202606090006","date":"2026-06-09","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A075","item":"à¹€à¸«à¸¥à¹‡à¸ 3 à¸«à¸¸à¸™ (9 à¸¡à¸´à¸¥)","description":"à¹€à¸«à¸¥à¹‡à¸à¹€à¸ªà¹‰à¸™à¸à¸¥à¸¡à¸œà¸´à¸§à¹€à¸£à¸µà¸¢à¸š à¸‚à¸™à¸²à¸” 9 à¸¡à¸´à¸¥à¸¥à¸´à¹€à¸¡à¸•à¸£","location":"à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³","category":"à¸‡à¸²à¸™à¸£à¸°à¸šà¸šà¸ªà¸¸à¸‚à¸²à¸ à¸´à¸šà¸²à¸¥","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":10,"unit":"à¹€à¸ªà¹‰à¸™","priceUnit":135,"total":1350,"invNo":"IV202606090006","date":"2026-06-09","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A074","item":"à¹€à¸ªà¸²à¸«à¸™à¹‰à¸² 4*2.5 à¹€à¸¡à¸•à¸£ (à¸”)","description":"à¹€à¸ªà¸²à¸„à¸­à¸™à¸à¸£à¸µà¸•à¸ªà¸³à¹€à¸£à¹‡à¸ˆà¸£à¸¹à¸›à¸«à¸™à¹‰à¸² 4 à¸™à¸´à¹‰à¸§ à¸¢à¸²à¸§ 2.5 à¹€à¸¡à¸•à¸£","location":"à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³","category":"à¸‡à¸²à¸™à¸£à¸°à¸šà¸šà¸ªà¸¸à¸‚à¸²à¸ à¸´à¸šà¸²à¸¥","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":2,"unit":"à¸•à¹‰à¸™","priceUnit":400,"total":800,"invNo":"IV202606090006","date":"2026-06-09","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A073","item":"à¹€à¸ªà¸²à¸«à¸™à¹‰à¸² 4*2.5 à¹€à¸¡à¸•à¸£ (à¸§)","description":"à¹€à¸ªà¸²à¸„à¸­à¸™à¸à¸£à¸µà¸•à¸ªà¸³à¹€à¸£à¹‡à¸ˆà¸£à¸¹à¸›à¸«à¸™à¹‰à¸² 4 à¸™à¸´à¹‰à¸§ à¸¢à¸²à¸§ 2.5 à¹€à¸¡à¸•à¸£","location":"à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³","category":"à¸‡à¸²à¸™à¸£à¸°à¸šà¸šà¸ªà¸¸à¸‚à¸²à¸ à¸´à¸šà¸²à¸¥","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":4,"unit":"à¸•à¹‰à¸™","priceUnit":400,"total":1600,"invNo":"IV202606090006","date":"2026-06-09","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A072","item":"à¸—à¸£à¸²à¸¢à¸«à¸¢à¸²à¸š","description":"à¸—à¸£à¸²à¸¢à¸«à¸¢à¸²à¸šà¸ªà¸³à¸«à¸£à¸±à¸šà¸‡à¸²à¸™à¸œà¸ªà¸¡à¸›à¸¹à¸™à¹‚à¸„à¸£à¸‡à¸ªà¸£à¹‰à¸²à¸‡/à¹€à¸—à¸žà¸·à¹‰à¸™","location":"à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³","category":"à¸‡à¸²à¸™à¸£à¸°à¸šà¸šà¸ªà¸¸à¸‚à¸²à¸ à¸´à¸šà¸²à¸¥","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸„à¸´à¸§","priceUnit":850,"total":850,"invNo":"IV202606090002","date":"2026-06-09","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A071","item":"à¸«à¸´à¸™ 3/4 (à¸„à¸´à¸§)","description":"à¸«à¸´à¸™à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡à¸‚à¸™à¸²à¸” 3/4 à¸™à¸´à¹‰à¸§ à¸ªà¸³à¸«à¸£à¸±à¸šà¸œà¸ªà¸¡à¸›à¸¹à¸™à¹€à¸—à¸žà¸·à¹‰à¸™","location":"à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³","category":"à¸‡à¸²à¸™à¸£à¸°à¸šà¸šà¸ªà¸¸à¸‚à¸²à¸ à¸´à¸šà¸²à¸¥","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸„à¸´à¸§","priceUnit":950,"total":950,"invNo":"IV202606090002","date":"2026-06-09","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A086","item":"à¸„à¹ˆà¸²à¹à¸£à¸‡à¸£à¸·à¹‰à¸­à¸žà¸·à¹‰à¸™à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³ à¸›à¸£à¸±à¸šà¸žà¸·à¹‰à¸™à¸—à¸µà¹ˆ","description":"","location":"à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³","category":"à¸‡à¸²à¸™à¸£à¸°à¸šà¸šà¸ªà¸¸à¸‚à¸²à¸ à¸´à¸šà¸²à¸¥","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":5000,"total":5000,"invNo":"à¸šà¸´à¸¥à¸¥à¸²à¸¢à¸¡à¸·à¸­-08/06/2026-2","date":"2026-06-08","type":"à¸„à¹ˆà¸²à¹à¸£à¸‡","budget":"Bonus"},{"id":"A085","item":"à¸„à¹ˆà¸²à¹à¸£à¸‡à¹€à¸—à¸žà¸·à¹‰à¸™","description":"à¸„à¹ˆà¸²à¹à¸£à¸‡à¸›à¸£à¸±à¸šà¸£à¸°à¸”à¸±à¸šà¹à¸¥à¸°à¹€à¸—à¸žà¸·à¹‰à¸™à¸„à¸­à¸™à¸à¸£à¸µà¸•","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¹€à¸—à¸žà¸·à¹‰à¸™","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":900,"total":900,"invNo":"à¸šà¸´à¸¥à¸¥à¸²à¸¢à¸¡à¸·à¸­-08/06/2026-1","date":"2026-06-08","type":"à¸„à¹ˆà¸²à¹à¸£à¸‡","budget":"Dad"},{"id":"A084","item":"à¸„à¹ˆà¸²à¹à¸£à¸‡à¸‰à¸²à¸šà¹€à¸ªà¸²","description":"à¸„à¹ˆà¸²à¹à¸£à¸‡à¸‰à¸²à¸šà¸•à¸à¹à¸•à¹ˆà¸‡à¸œà¸´à¸§à¹€à¸ªà¸²à¸„à¸­à¸™à¸à¸£à¸µà¸•","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¹€à¸ªà¸²","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":3300,"total":3300,"invNo":"à¸šà¸´à¸¥à¸¥à¸²à¸¢à¸¡à¸·à¸­-08/06/2026-1","date":"2026-06-08","type":"à¸„à¹ˆà¸²à¹à¸£à¸‡","budget":"Dad"},{"id":"A083","item":"à¸„à¹ˆà¸²à¹à¸£à¸‡à¸—à¸³à¸šà¸±à¸™à¹„à¸”","description":"à¸„à¹ˆà¸²à¹à¸£à¸‡à¸à¹ˆà¸­à¹‚à¸„à¸£à¸‡à¸ªà¸£à¹‰à¸²à¸‡à¹à¸¥à¸°à¸—à¸³à¸šà¸±à¸™à¹„à¸”à¸›à¸¹à¸™","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸šà¸±à¸™à¹„à¸”","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":1295,"total":1295,"invNo":"à¸šà¸´à¸¥à¸¥à¸²à¸¢à¸¡à¸·à¸­-08/06/2026-1","date":"2026-06-08","type":"à¸„à¹ˆà¸²à¹à¸£à¸‡","budget":"Dad"},{"id":"A082","item":"à¸„à¹ˆà¸²à¹à¸£à¸‡à¸ˆà¸±à¸šà¹€à¸‹à¸µà¹‰à¸¢à¸¡","description":"à¸„à¹ˆà¸²à¹à¸£à¸‡à¸ˆà¸±à¸šà¹€à¸‹à¸µà¹‰à¸¢à¸¡à¹à¸™à¸§à¸‚à¸­à¸šà¹€à¸ªà¸²à¹à¸¥à¸°à¹‚à¸„à¸£à¸‡à¸ªà¸£à¹‰à¸²à¸‡","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¹€à¸ªà¸²","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":1500,"total":1500,"invNo":"à¸šà¸´à¸¥à¸¥à¸²à¸¢à¸¡à¸·à¸­-08/06/2026-1","date":"2026-06-08","type":"à¸„à¹ˆà¸²à¹à¸£à¸‡","budget":"Dad"},{"id":"A070","item":"à¸„à¹ˆà¸²à¸‚à¸™à¸ªà¹ˆà¸‡ à¸à¸£à¸°à¸šà¸° 4 à¸¥à¹‰à¸­","description":"","location":"à¸„à¸­à¸à¹„à¸à¹ˆ - à¸—à¸µà¹ˆà¸—à¸²à¸™à¸‚à¹‰à¸²à¸§","category":"à¸‡à¸²à¸™à¸«à¸¥à¸±à¸‡à¸„à¸²","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸„à¸±à¸™","priceUnit":150,"total":150,"invNo":"IV202606050007","date":"2026-06-05","type":"à¸„à¹ˆà¸²à¸‚à¸™à¸ªà¹ˆà¸‡","budget":"Bonus"},{"id":"A069","item":"à¸ªà¸±à¸‡à¸à¸°à¸ªà¸µ 10 à¸Ÿà¸¸à¸• à¸¡à¸·à¸­ 2","description":"","location":"à¸„à¸­à¸à¹„à¸à¹ˆ - à¸—à¸µà¹ˆà¸—à¸²à¸™à¸‚à¹‰à¸²à¸§","category":"à¸‡à¸²à¸™à¸«à¸¥à¸±à¸‡à¸„à¸²","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":12,"unit":"à¹à¸œà¹ˆà¸™","priceUnit":100,"total":1200,"invNo":"IV202606050007","date":"2026-06-05","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A068","item":"à¸ªà¸±à¸‡à¸à¸°à¸ªà¸µà¸«à¸¥à¸š 1*6 à¸Ÿà¸¸à¸•","description":"","location":"à¸„à¸­à¸à¹„à¸à¹ˆ - à¸—à¸µà¹ˆà¸—à¸²à¸™à¸‚à¹‰à¸²à¸§","category":"à¸‡à¸²à¸™à¸«à¸¥à¸±à¸‡à¸„à¸²","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":4,"unit":"à¹à¸œà¹ˆà¸™","priceUnit":85,"total":340,"invNo":"IV202606050007","date":"2026-06-05","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A067","item":"à¸™à¹‡à¸­à¸• w 10*2 à¸™à¸´à¹‰à¸§ à¹à¸›à¸£à¹„à¸¡à¹‰","description":"","location":"à¸„à¸­à¸à¹„à¸à¹ˆ - à¸—à¸µà¹ˆà¸—à¸²à¸™à¸‚à¹‰à¸²à¸§","category":"à¸‡à¸²à¸™à¸«à¸¥à¸±à¸‡à¸„à¸²","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":100,"unit":"à¸•à¸±à¸§","priceUnit":2,"total":200,"invNo":"IV202606050007","date":"2026-06-05","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A066","item":"à¸ªà¸±à¸‡à¸à¸°à¸ªà¸µ à¸¥à¸­à¸™à¹€à¸¥à¹‡à¸ 10 à¸Ÿà¸¸à¸• à¸‚à¸²à¸§","description":"","location":"à¸„à¸­à¸à¹„à¸à¹ˆ - à¸—à¸µà¹ˆà¸—à¸²à¸™à¸‚à¹‰à¸²à¸§","category":"à¸‡à¸²à¸™à¸«à¸¥à¸±à¸‡à¸„à¸²","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":6,"unit":"à¹à¸œà¹ˆà¸™","priceUnit":180,"total":1080,"invNo":"IV202606050007","date":"2026-06-05","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A065","item":"à¹€à¸Šà¸´à¸‡à¸Šà¸²à¸¢ 6 * 4 à¹€à¸¡à¸•à¸£ à¹€à¸žà¸Šà¸£ à¸™à¹‰à¸³à¸•à¸²à¸¥","description":"","location":"à¸„à¸­à¸à¹„à¸à¹ˆ - à¸—à¸µà¹ˆà¸—à¸²à¸™à¸‚à¹‰à¸²à¸§","category":"à¸‡à¸²à¸™à¸«à¸¥à¸±à¸‡à¸„à¸²","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":8,"unit":"à¹à¸œà¹ˆà¸™","priceUnit":260,"total":2080,"invNo":"IV202606050007","date":"2026-06-05","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A064","item":"à¸„à¹ˆà¸²à¸‚à¸™à¸ªà¹ˆà¸‡","description":"à¸‡à¸²à¸™à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³/à¸«à¸¥à¸±à¸‡à¸„à¸²","location":"à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³","category":"à¸‡à¸²à¸™à¸£à¸°à¸šà¸šà¸ªà¸¸à¸‚à¸²à¸ à¸´à¸šà¸²à¸¥","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":75,"total":75,"invNo":"IV202606040019","date":"2026-06-04","type":"à¸„à¹ˆà¸²à¹à¸£à¸‡","budget":"Bonus"},{"id":"A063","item":"à¸„à¹ˆà¸²à¸‚à¸™à¸ªà¹ˆà¸‡","description":"à¸‡à¸²à¸™à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³/à¸‡à¸²à¸™à¸«à¸¥à¸±à¸‡à¸„à¸²","location":"à¸„à¸­à¸à¹„à¸à¹ˆ-à¸—à¸µà¹ˆà¸—à¸²à¸™à¸‚à¹‰à¸²à¸§","category":"à¸‡à¸²à¸™à¸«à¸¥à¸±à¸‡à¸„à¸²","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":75,"total":75,"invNo":"IV202606040019","date":"2026-06-04","type":"à¸„à¹ˆà¸²à¸‚à¸™à¸ªà¹ˆà¸‡","budget":"Bonus"},{"id":"A062","item":"à¸•à¸°à¸›à¸¹à¸”à¸­à¸à¹„à¸¡à¹‰ à¸•à¸£à¸²à¸¡à¸·à¸­ 3 10","description":"","location":"à¸„à¸­à¸à¹„à¸à¹ˆ-à¸—à¸µà¹ˆà¸—à¸²à¸™à¸‚à¹‰à¸²à¸§","category":"à¸‡à¸²à¸™à¸«à¸¥à¸±à¸‡à¸„à¸²","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸à¸´à¹‚à¸¥à¸à¸£à¸±à¸¡","priceUnit":60,"total":60,"invNo":"IV202606040019","date":"2026-06-04","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A061","item":"à¸™à¹‡à¸­à¸• W 104 à¸™à¸´à¹‰à¸§ à¹à¸›à¸£à¹„à¸¡à¹‰","description":"","location":"à¸„à¸­à¸à¹„à¸à¹ˆ-à¸—à¸µà¹ˆà¸—à¸²à¸™à¸‚à¹‰à¸²à¸§","category":"à¸‡à¸²à¸™à¸«à¸¥à¸±à¸‡à¸„à¸²","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":100,"unit":"à¸Šà¸´à¹‰à¸™","priceUnit":4,"total":400,"invNo":"IV202606040019","date":"2026-06-04","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A060","item":"à¸à¸²à¸›à¸¥à¹ˆà¸­à¸‡ 80 à¸‹à¸¡","description":"","location":"à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³","category":"à¸‡à¸²à¸™à¸£à¸°à¸šà¸šà¸ªà¸¸à¸‚à¸²à¸ à¸´à¸šà¸²à¸¥","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¹à¸œà¹ˆà¸™","priceUnit":150,"total":150,"invNo":"IV202606040019","date":"2026-06-04","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A059","item":"à¸›à¸¥à¹ˆà¸­à¸‡ 80 à¸‹à¸¡","description":"","location":"à¸«à¹‰à¸­à¸‡à¸™à¹‰à¸³","category":"à¸‡à¸²à¸™à¸£à¸°à¸šà¸šà¸ªà¸¸à¸‚à¸²à¸ à¸´à¸šà¸²à¸¥","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":4,"unit":"à¸¥à¸¹à¸","priceUnit":180,"total":720,"invNo":"IV202606040019","date":"2026-06-04","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A058","item":"à¹„à¸¡à¹‰à¸›à¸±à¸à¸«à¸¥à¸±à¸","description":"à¸›à¸¥à¸¹à¸à¸•à¹‰à¸™à¹„à¸¡à¹‰à¸”à¹‰à¸²à¸™à¸«à¸™à¹‰à¸²à¸–à¸™à¸™","location":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§","category":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§à¸•à¹‰à¸™à¹„à¸¡à¹‰","pic":"à¸£à¹‰à¸²à¸™à¹„à¸¡à¹‰à¸›à¸±à¸à¸«à¸¥à¸±à¸à¸žà¸¸à¸™à¸žà¸´à¸™","number":2,"unit":"à¸Šà¸¸à¸”","priceUnit":180,"total":360,"invNo":"MIR0002606045510279957096","date":"2026-06-04","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"f7ea6c42","item":"à¸›à¸¹à¸™à¹€à¸ªà¸·à¸­","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸à¹ˆà¸­à¹€à¸ªà¸²","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":10,"unit":"à¸à¸£à¸°à¸ªà¸­à¸š","priceUnit":168,"total":1680,"invNo":"IV202606010008","date":"2026-06-01","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"f5a4d6c7","item":"à¸„à¹ˆà¸²à¸ªà¹ˆà¸‡à¸§à¸±à¸ªà¸”à¸¸à¸‡à¸²à¸™à¸à¹ˆà¸­à¹€à¸ªà¸²","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸à¹ˆà¸­à¹€à¸ªà¸²","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":150,"total":150,"invNo":"IV202606010008","date":"2026-06-01","type":"à¸„à¹ˆà¸²à¸‚à¸™à¸ªà¹ˆà¸‡","budget":"Dad"},{"id":"1e9ea274","item":"à¸­à¸´à¸à¸šà¸¥à¹‡à¸­à¸ à¸£à¹‰à¸²à¸™","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸à¹ˆà¸­à¹€à¸ªà¸²","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":100,"unit":"à¸à¹‰à¸­à¸™","priceUnit":6.3,"total":630,"invNo":"IV202606010008","date":"2026-06-01","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"f78d8f18","item":"à¸„à¹ˆà¸²à¹à¸£à¸‡à¸‡à¸²à¸™à¸Ÿà¸¸à¸•à¸šà¸²à¸— à¸‡à¸§à¸”à¸—à¸µà¹ˆ 2","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸Ÿà¸¸à¸•à¸šà¸²à¸—","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":5000,"total":5000,"invNo":"MIR0002605285014102372021","date":"2026-05-28","type":"à¸„à¹ˆà¸²à¹à¸£à¸‡","budget":"Dad"},{"id":"A088","item":"à¸„à¹ˆà¸²à¹à¸£à¸‡à¸‡à¸²à¸™à¸«à¸¥à¸±à¸‡à¸„à¸²à¸‡à¸§à¸”à¸—à¸µà¹ˆ 1","description":"","location":"à¸„à¸­à¸à¹„à¸à¹ˆ-à¸—à¸µà¹ˆà¸—à¸²à¸™à¸‚à¹‰à¸²à¸§","category":"à¸‡à¸²à¸™à¸«à¸¥à¸±à¸‡à¸„à¸²","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":5400,"total":5400,"invNo":"24058","date":"2026-05-23","type":"à¸„à¹ˆà¸²à¹à¸£à¸‡","budget":"Bonus"},{"id":"e3718367","item":"à¹„à¸¡à¹‰","description":"à¸§à¸±à¸ªà¸”à¸¸à¸—à¸³à¹‚à¸„à¸£à¸‡à¸à¸±à¸™à¸ªà¸²à¸”-à¸„à¸­à¸à¹„à¸à¹ˆ","location":"à¸„à¸­à¸à¹„à¸à¹ˆ-à¸—à¸µà¹ˆà¸—à¸²à¸™à¸‚à¹‰à¸²à¸§","category":"à¸‡à¸²à¸™à¸«à¸¥à¸±à¸‡à¸„à¸²","pic":"à¸£à¹‰à¸²à¸™à¹„à¸¡à¹‰","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":12362,"total":12362,"invNo":"MIR0002605224309512415500","date":"2026-05-22","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A093","item":"à¸›à¸¹à¸™à¸‰à¸²à¸š","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1,"unit":"à¹à¸žà¹‡à¸„","priceUnit":125,"total":125,"invNo":"IV202605220007","date":"2026-05-22","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A092","item":"à¸›à¸¹à¸™à¹€à¸ªà¸·à¸­","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸Ÿà¸¸à¸•à¸šà¸²à¸—","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":10,"unit":"à¸à¸£à¸°à¸ªà¸­à¸š","priceUnit":168,"total":1680,"invNo":"IV202605220007","date":"2026-05-22","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A091","item":"à¸—à¸£à¸²à¸¢à¸«à¸¢à¸²à¸š","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸Ÿà¸¸à¸•à¸šà¸²à¸—","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1.5,"unit":"à¸„à¸´à¸§","priceUnit":850,"total":1275,"invNo":"IV202605220007","date":"2026-05-22","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A090","item":"à¸«à¸´à¸™à¸„à¸¥à¸¸à¸","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸Ÿà¸¸à¸•à¸šà¸²à¸—","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1.5,"unit":"à¸„à¸´à¸§","priceUnit":700,"total":1050,"invNo":"IV202605220007","date":"2026-05-22","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A089","item":"à¸«à¸´à¸™à¸„à¸¥à¸¸à¸","description":"à¹€à¸—à¸žà¸·à¹‰à¸™à¸—à¸²à¸‡à¹€à¸‚à¹‰à¸²","location":"à¸—à¸²à¸‡à¹€à¸‚à¹‰à¸²","category":"à¸‡à¸²à¸™à¹€à¸—à¸žà¸·à¹‰à¸™","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸„à¸´à¸§","priceUnit":1050,"total":1050,"invNo":"IV202605220028","date":"2026-05-22","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A095","item":"à¸•à¸°à¸›à¸¹à¸„à¸­à¸™à¸à¸£à¸µà¸•à¸•à¸£à¸²à¹€à¸žà¸Šà¸£ 3 à¸™à¸´à¹‰à¸§","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¹€à¸ªà¸²","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸.à¸.","priceUnit":120,"total":120,"invNo":"IV202605190003","date":"2026-05-19","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A094","item":"à¹€à¸‹à¸µà¹‰à¸¢à¸¡à¸žà¸µà¸§à¸µà¸‹à¸µ à¹€à¸šà¸­à¸£à¹Œ 3","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¹€à¸ªà¸²","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":20,"unit":"à¹€à¸ªà¹‰à¸™","priceUnit":20,"total":400,"invNo":"IV202605190003","date":"2026-05-19","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"e70f8ae8","item":"à¸•à¹‰à¸™à¹„à¸—à¸£à¹€à¸à¸²à¸«à¸¥à¸µ","description":"à¹ƒà¸Šà¹‰à¸—à¸³à¸£à¸±à¹‰à¸§","location":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§","category":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§à¸•à¹‰à¸™à¹„à¸¡à¹‰","pic":"à¸à¸£à¸µà¸™à¸—à¸£à¸µà¸žà¸±à¸™à¸˜à¸¸à¹Œà¹„à¸¡à¹‰","number":115,"unit":"à¸•à¹‰à¸™","priceUnit":65,"total":7475,"invNo":"","date":"2026-05-17","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"47cf80e6","item":"à¸„à¹ˆà¸²à¹à¸£à¸‡à¸‡à¸²à¸™à¸Ÿà¸¸à¸•à¸šà¸²à¸— à¸‡à¸§à¸”à¸—à¸µà¹ˆ 1","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸Ÿà¸¸à¸•à¸šà¸²à¸—","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":5000,"total":5000,"invNo":"","date":"2026-05-16","type":"à¸„à¹ˆà¸²à¹à¸£à¸‡","budget":"Dad"},{"id":"A057","item":"à¹„à¸¡à¹‰à¸à¸§à¸²à¸”à¸—à¸²à¸‡à¸¡à¸°à¸žà¸£à¹‰à¸²à¸§","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸Ÿà¸¸à¸•à¸šà¸²à¸—","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":2,"unit":"à¸Šà¸´à¹‰à¸™","priceUnit":35,"total":70,"invNo":"IV202605120005","date":"2026-05-12","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A056","item":"à¸­à¹ˆà¸²à¸‡à¸à¸§à¸™à¸›à¸¹à¸™","description":"à¸‚à¸™à¸²à¸”à¹ƒà¸«à¸à¹ˆ","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸Ÿà¸¸à¸•à¸šà¸²à¸—","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸Šà¸´à¹‰à¸™","priceUnit":750,"total":750,"invNo":"IV202605120005","date":"2026-05-12","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A055","item":"à¸•à¸°à¸›à¸¹à¸•à¸­à¸à¹„à¸¡à¹‰","description":"à¸•à¸£à¸²à¸¡à¸·à¸­ 2.1/2*12 à¸™à¸´à¹‰à¸§","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸Ÿà¸¸à¸•à¸šà¸²à¸—","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":2,"unit":"à¸à¸.","priceUnit":70,"total":140,"invNo":"IV202605120005","date":"2026-05-12","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A054","item":"à¸§à¸²à¸¢à¹€à¸¡à¸—","description":"2*25 à¸•à¸£à¸¡.","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸Ÿà¸¸à¸•à¸šà¸²à¸—","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸Šà¸´à¹‰à¸™","priceUnit":1250,"total":1250,"invNo":"IV202605120005","date":"2026-05-12","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A053","item":"à¸›à¸¹à¸™à¹€à¸ªà¸·à¸­","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸Ÿà¸¸à¸•à¸šà¸²à¸—","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":10,"unit":"à¸à¸£à¸°à¸ªà¸­à¸š","priceUnit":168,"total":1680,"invNo":"IV202605110015","date":"2026-05-11","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A052","item":"à¸—à¸£à¸²à¸¢à¸«à¸¢à¸²à¸š","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸Ÿà¸¸à¸•à¸šà¸²à¸—","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":2,"unit":"à¸„à¸´à¸§","priceUnit":850,"total":1700,"invNo":"IV202605110015","date":"2026-05-11","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A051","item":"à¸«à¸¥à¸­à¸”à¹„à¸Ÿà¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¹à¸ªà¸‡à¸ªà¸§à¹ˆà¸²à¸‡","pic":"Shopee","number":3,"unit":"à¸Šà¸´à¹‰à¸™","priceUnit":165.75,"total":497.25,"invNo":"260505HU9B3CU4","date":"2026-05-05","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A048","item":"à¸„à¹ˆà¸²à¸›à¸±à¸à¹€à¸ªà¸²à¹„à¸Ÿà¸Ÿà¹‰à¸²+à¸”à¸¶à¸‡à¸ªà¸²à¸¢à¹„à¸Ÿà¸Ÿà¹‰à¸²","description":"","location":"à¸‡à¸²à¸™à¹„à¸Ÿà¸Ÿà¹‰à¸²-à¹à¸ªà¸‡à¸ªà¸§à¹ˆà¸²à¸‡","category":"à¸‡à¸²à¸™à¹„à¸Ÿà¸Ÿà¹‰à¸²","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":5500,"total":5500,"invNo":"W04-1-26","date":"2026-05-02","type":"à¸„à¹ˆà¸²à¹à¸£à¸‡","budget":"Bonus"},{"id":"A035","item":"à¸„à¹ˆà¸²à¹à¸£à¸‡à¸—à¸³à¸£à¸±à¹‰à¸§ à¸‡à¸§à¸”à¸—à¸µà¹ˆ 2","description":"","location":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§","category":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§à¸¥à¸§à¸”à¸«à¸™à¸²à¸¡","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":3750,"total":3750,"invNo":"W03-2-26","date":"2026-05-02","type":"à¸„à¹ˆà¸²à¹à¸£à¸‡","budget":"Bonus"},{"id":"A050","item":"à¸§à¸±à¸ªà¸”à¸¸à¹€à¸ªà¸²à¹„à¸Ÿà¸Ÿà¹‰à¸²","description":"","location":"à¸‡à¸²à¸™à¹„à¸Ÿà¸Ÿà¹‰à¸²-à¹à¸ªà¸‡à¸ªà¸§à¹ˆà¸²à¸‡","category":"à¸‡à¸²à¸™à¹„à¸Ÿà¸Ÿà¹‰à¸²","pic":"à¸£à¹‰à¸²à¸™à¸­à¸¸à¸›à¸à¸£à¸“à¹Œà¸ªà¸²à¸¢à¹„à¸Ÿ à¸•à¸²à¸‚à¸¸à¸™","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":6005,"total":6005,"invNo":"01/05/69","date":"2026-05-01","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A047","item":"à¸„à¹ˆà¸²à¸‚à¸™à¸ªà¹ˆà¸‡à¹€à¸ªà¸²à¹„à¸Ÿ","description":"","location":"à¸‡à¸²à¸™à¹„à¸Ÿà¸Ÿà¹‰à¸²-à¹à¸ªà¸‡à¸ªà¸§à¹ˆà¸²à¸‡","category":"à¸‡à¸²à¸™à¹„à¸Ÿà¸Ÿà¹‰à¸²","pic":"TP à¸§à¸±à¸ªà¸”à¸¸","number":1,"unit":"à¹€à¸—à¸µà¹ˆà¸¢à¸§","priceUnit":400,"total":400,"invNo":"TP69 04 - 0315","date":"2026-04-28","type":"à¸„à¹ˆà¸²à¸‚à¸™à¸ªà¹ˆà¸‡","budget":"Bonus"},{"id":"A046","item":"à¹€à¸ªà¸²à¹„à¸Ÿ 5 à¹€à¸¡à¸•à¸£ à¸­à¸±à¸”à¹à¸£à¸‡","description":"","location":"à¸‡à¸²à¸™à¹„à¸Ÿà¸Ÿà¹‰à¸²-à¹à¸ªà¸‡à¸ªà¸§à¹ˆà¸²à¸‡","category":"à¸‡à¸²à¸™à¹„à¸Ÿà¸Ÿà¹‰à¸²","pic":"TP à¸§à¸±à¸ªà¸”à¸¸","number":3,"unit":"à¸•à¹‰à¸™","priceUnit":1500,"total":4500,"invNo":"TP69 04 - 0315","date":"2026-04-28","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A045","item":"à¹€à¸ªà¸²à¹„à¸Ÿ 6 à¹€à¸¡à¸•à¸£ à¸­à¸±à¸”à¹à¸£à¸‡","description":"","location":"à¸‡à¸²à¸™à¹„à¸Ÿà¸Ÿà¹‰à¸²-à¹à¸ªà¸‡à¸ªà¸§à¹ˆà¸²à¸‡","category":"à¸‡à¸²à¸™à¹„à¸Ÿà¸Ÿà¹‰à¸²","pic":"TP à¸§à¸±à¸ªà¸”à¸¸","number":1,"unit":"à¸•à¹‰à¸™","priceUnit":2500,"total":2500,"invNo":"TP69 04 - 0315","date":"2026-04-28","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A044","item":"à¹„à¸Ÿà¹‚à¸‹à¸¥à¹ˆà¸²à¹€à¸‹à¸¥à¸¥à¹Œ","description":"","location":"à¸‡à¸²à¸™à¹„à¸Ÿà¸Ÿà¹‰à¸²-à¹à¸ªà¸‡à¸ªà¸§à¹ˆà¸²à¸‡","category":"à¸‡à¸²à¸™à¹à¸ªà¸‡à¸ªà¸§à¹ˆà¸²à¸‡","pic":"Shopee","number":2,"unit":"à¸Šà¸´à¹‰à¸™","priceUnit":987,"total":1974,"invNo":"260428113M3YQ2","date":"2026-04-28","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A043","item":"à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸” 2 à¸•à¸±à¸§","description":"","location":"à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸”","category":"à¸‡à¸²à¸™à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸” & WiFi","pic":"Shopee","number":2,"unit":"à¸Šà¸´à¹‰à¸™","priceUnit":2353.5,"total":4707,"invNo":"260427V4V6Q4XM","date":"2026-04-27","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A033","item":"à¸›à¸¹à¸™à¹€à¸ªà¸·à¸­","description":"","location":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§","category":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§à¸¥à¸§à¸”à¸«à¸™à¸²à¸¡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":5,"unit":"à¸à¸£à¸°à¸ªà¸­à¸š","priceUnit":171,"total":855,"invNo":"IV202604250019","date":"2026-04-25","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A029","item":"UPS à¸ªà¸³à¸£à¸­à¸‡à¹„à¸Ÿ","description":"","location":"à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸”","category":"à¸‡à¸²à¸™à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸” & WiFi","pic":"Shopee","number":2,"unit":"à¸Šà¸´à¹‰à¸™","priceUnit":1078,"total":2156,"invNo":"260424K8DQWGE1","date":"2026-04-25","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A028","item":"à¸„à¹ˆà¸²à¹à¸£à¸‡à¸ˆà¸±à¸šà¹€à¸‹à¸µà¹‰à¸¢à¸¡ à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡ à¸£à¸­à¸šà¸—à¸µà¹ˆ 2","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":13000,"total":13000,"invNo":"W02-2-26","date":"2026-04-25","type":"à¸„à¹ˆà¸²à¹à¸£à¸‡","budget":"Dad"},{"id":"A010","item":"à¸„à¹ˆà¸² Internet à¸£à¸²à¸¢à¹€à¸”à¸·à¸­à¸™","description":"","location":"à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸”","category":"à¸‡à¸²à¸™à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸” & WiFi","pic":"Gomo AIS","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":259,"total":259,"invNo":"GOMO2026-2","date":"2026-04-25","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A034","item":"à¸„à¹ˆà¸²à¹à¸£à¸‡à¸—à¸³à¸£à¸±à¹‰à¸§ à¸‡à¸§à¸”à¸—à¸µà¹ˆ 1","description":"","location":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§","category":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§à¸¥à¸§à¸”à¸«à¸™à¸²à¸¡","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":3000,"total":3000,"invNo":"W03-1-26","date":"2026-04-24","type":"à¸„à¹ˆà¸²à¹à¸£à¸‡","budget":"Bonus"},{"id":"A032","item":"à¹€à¸„à¹€à¸šà¸´à¹‰à¸¥à¹à¸à¸¥à¸™à¹„à¸™à¸¥à¹ˆà¸­à¸™","description":"","location":"à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸”","category":"à¸‡à¸²à¸™à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸” & WiFi","pic":"à¸™à¸³à¸ªà¸´à¸™","number":4,"unit":"à¸Šà¸´à¹‰à¸™","priceUnit":11,"total":44,"invNo":"BCA-378","date":"2026-04-22","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A031","item":"à¸•à¸¹à¹‰à¸—à¸¶à¸š","description":"","location":"à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸”","category":"à¸‡à¸²à¸™à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸” & WiFi","pic":"à¸™à¸³à¸ªà¸´à¸™","number":1,"unit":"à¸Šà¸´à¹‰à¸™","priceUnit":161,"total":161,"invNo":"BCA-376","date":"2026-04-22","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A030","item":"Cable tie","description":"","location":"à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸”","category":"à¸‡à¸²à¸™à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸” & WiFi","pic":"à¸™à¸³à¸ªà¸´à¸™","number":1,"unit":"à¹à¸žà¹‡à¸„","priceUnit":110,"total":110,"invNo":"BCA-376","date":"2026-04-22","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A027","item":"à¹€à¸à¸µà¸¢à¸‡","description":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸ à¸­à¸¸à¸›à¸à¸£à¸“à¹Œà¸Ÿà¸¸à¸•à¸šà¸²à¸—","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":2,"unit":"à¸Šà¸´à¹‰à¸™","priceUnit":30,"total":60,"invNo":"IV202604210001","date":"2026-04-21","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A026","item":"à¸›à¸¹à¸™à¹€à¸ªà¸·à¸­","description":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸ à¸­à¸¸à¸›à¸à¸£à¸“à¹Œà¸Ÿà¸¸à¸•à¸šà¸²à¸—","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":5,"unit":"à¸à¸£à¸°à¸ªà¸­à¸š","priceUnit":171,"total":855,"invNo":"IV202604210001","date":"2026-04-21","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A025","item":"à¸„à¹ˆà¸²à¸‚à¸™à¸ªà¹ˆà¸‡à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§","description":"","location":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§","category":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§à¸¥à¸§à¸”à¸«à¸™à¸²à¸¡","pic":"PR à¸§à¸±à¸ªà¸”à¸¸","number":1,"unit":"à¹€à¸—à¸µà¹ˆà¸¢à¸§","priceUnit":300,"total":300,"invNo":"IV/6907799","date":"2026-04-20","type":"à¸„à¹ˆà¸²à¸‚à¸™à¸ªà¹ˆà¸‡","budget":"Bonus"},{"id":"A024","item":"à¹à¸Šà¸¥à¸‡","description":"","location":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§","category":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§à¸¥à¸§à¸”à¸«à¸™à¸²à¸¡","pic":"PR à¸§à¸±à¸ªà¸”à¸¸","number":1,"unit":"à¸­à¸±à¸™","priceUnit":366,"total":366,"invNo":"IV/6907799","date":"2026-04-20","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A023","item":"à¸à¸´à¹Šà¸šà¸¥à¸§à¸”","description":"","location":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§","category":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§à¸¥à¸§à¸”à¸«à¸™à¸²à¸¡","pic":"PR à¸§à¸±à¸ªà¸”à¸¸","number":5,"unit":"à¸–à¸¸à¸‡","priceUnit":46,"total":230,"invNo":"IV/6907799","date":"2026-04-20","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A022","item":"à¸¥à¸§à¸”à¸«à¸™à¸²à¸¡","description":"","location":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§","category":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§à¸¥à¸§à¸”à¸«à¸™à¸²à¸¡","pic":"PR à¸§à¸±à¸ªà¸”à¸¸","number":4,"unit":"à¸‚à¸”","priceUnit":379,"total":1516,"invNo":"IV/6907799","date":"2026-04-20","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A021","item":"à¹€à¸ªà¸²à¸£à¸±à¹‰à¸§","description":"","location":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§","category":"à¸‡à¸²à¸™à¸£à¸±à¹‰à¸§à¸¥à¸§à¸”à¸«à¸™à¸²à¸¡","pic":"PR à¸§à¸±à¸ªà¸”à¸¸","number":31,"unit":"à¸•à¹‰à¸™","priceUnit":213,"total":6603,"invNo":"IV/6907799","date":"2026-04-20","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A009","item":"SSD","description":"","location":"à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸”","category":"à¸‡à¸²à¸™à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸” & WiFi","pic":"Shopee","number":1,"unit":"à¸Šà¸´à¹‰à¸™","priceUnit":2070,"total":2070,"invNo":"SSS2026","date":"2026-04-20","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A042","item":"à¸ªà¹ˆà¸§à¸™à¸¥à¸”","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸£à¸²à¸¢à¸à¸²à¸£","priceUnit":-56,"total":-56,"invNo":"IV202512250019-2","date":"2026-04-18","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A041","item":"à¸›à¸¹à¸™TOA","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":6,"unit":"à¸à¸£à¸°à¸ªà¸­à¸š","priceUnit":235,"total":1410,"invNo":"IV202512250019-2","date":"2026-04-18","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A040","item":"à¸ªà¸µà¸à¸¸à¹ˆà¸™à¸”à¸³","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸–à¸¸à¸‡","priceUnit":75,"total":75,"invNo":"IV202512250019-2","date":"2026-04-18","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A039","item":"à¸ªà¸µà¸à¸¸à¹ˆà¸™à¹€à¸«à¸¥à¸·à¸­à¸‡","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸–à¸¸à¸‡","priceUnit":115,"total":115,"invNo":"IV202512250019-2","date":"2026-04-18","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A038","item":"à¸ªà¸µà¸à¸¸à¹ˆà¸™à¹à¸”à¸‡","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸–à¸¸à¸‡","priceUnit":100,"total":100,"invNo":"IV202512250019-2","date":"2026-04-18","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A037","item":"à¹€à¸à¸µà¸¢à¸‡à¸‚à¸±à¸”à¸¡à¸±à¸™","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":2,"unit":"à¸­à¸±à¸™","priceUnit":89,"total":178,"invNo":"IV202512250019-2","date":"2026-04-18","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A008","item":"à¸„à¹ˆà¸²à¸‹à¸´à¸¡","description":"","location":"à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸”","category":"à¸‡à¸²à¸™à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸” & WiFi","pic":"Gomo AIS","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":99,"total":99,"invNo":"GOMO2026-1","date":"2026-04-18","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A007","item":"Router Wifi","description":"","location":"à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸”","category":"à¸‡à¸²à¸™à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸” & WiFi","pic":"Shopee","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":880,"total":880,"invNo":"2604173Q74T9K8","date":"2026-04-18","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A006","item":"à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸” 4 à¸•à¸±à¸§ + Homebase","description":"","location":"à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸”","category":"à¸‡à¸²à¸™à¸à¸¥à¹‰à¸­à¸‡à¸§à¸‡à¸ˆà¸£à¸›à¸´à¸” & WiFi","pic":"Shopee","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":11720,"total":11720,"invNo":"2604209WNYV9HU","date":"2026-04-18","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A020","item":"à¸›à¸¹à¸™à¹€à¸ªà¸·à¸­","description":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸ à¸­à¸¸à¸›à¸à¸£à¸“à¹Œà¸Ÿà¸¸à¸•à¸šà¸²à¸—","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":5,"unit":"à¸à¸£à¸°à¸ªà¸­à¸š","priceUnit":171,"total":855,"invNo":"IV202512250019-4","date":"2026-04-17","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A019","item":"à¸—à¸£à¸²à¸¢à¸«à¸¢à¸²à¸š","description":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸ à¸­à¸¸à¸›à¸à¸£à¸“à¹Œà¸Ÿà¸¸à¸•à¸šà¸²à¸—","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸„à¸´à¸§","priceUnit":800,"total":800,"invNo":"IV202512250019-4","date":"2026-04-17","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A018","item":"à¸«à¸´à¸™ 3/4","description":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸ à¸­à¸¸à¸›à¸à¸£à¸“à¹Œà¸Ÿà¸¸à¸•à¸šà¸²à¸—","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸„à¸´à¸§","priceUnit":950,"total":950,"invNo":"IV202512250019-4","date":"2026-04-17","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A017","item":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸ à¸­à¸¸à¸›à¸à¸£à¸“à¹Œà¸ˆà¸±à¸šà¹€à¸‹à¸µà¹‰à¸¢à¸¡ à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","description":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸ à¸­à¸¸à¸›à¸à¸£à¸“à¹Œà¸ˆà¸±à¸šà¹€à¸‹à¸µà¹‰à¸¢à¸¡ à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"HomePro","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":1821.66,"total":1821.66,"invNo":"3403493614","date":"2026-04-17","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A036","item":"à¸­à¸´à¸à¹à¸”à¸‡ 8 à¸£à¸¹","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":40,"unit":"à¸à¹‰à¸­à¸™","priceUnit":7,"total":280,"invNo":"IV202512250019-1","date":"2026-04-16","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A016","item":"à¸ªà¸²à¸¡à¹€à¸«à¸¥à¸µà¹ˆà¸¢à¸¡à¸›à¸²à¸”à¸›à¸¹à¸™ 2 à¹€à¸¡à¸•à¸£","description":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸ à¸­à¸¸à¸›à¸à¸£à¸“à¹Œà¸ˆà¸±à¸šà¹€à¸‹à¸µà¹‰à¸¢à¸¡ à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸­à¸±à¸™","priceUnit":315,"total":315,"invNo":"IV202512250019-1","date":"2026-04-16","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A015","item":"à¸Ÿà¸­à¸‡à¸™à¹‰à¸³à¸‰à¸²à¸šà¸›à¸¹à¸™","description":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸ à¸­à¸¸à¸›à¸à¸£à¸“à¹Œà¸ˆà¸±à¸šà¹€à¸‹à¸µà¹‰à¸¢à¸¡ à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":6,"unit":"à¹à¸œà¹ˆà¸™","priceUnit":10,"total":60,"invNo":"IV202512250019-1","date":"2026-04-16","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A014","item":"à¸—à¸£à¸²à¸¢à¸¥à¸°à¹€à¸­à¸µà¸¢à¸”","description":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸ à¸­à¸¸à¸›à¸à¸£à¸“à¹Œà¸ˆà¸±à¸šà¹€à¸‹à¸µà¹‰à¸¢à¸¡ à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":2,"unit":"à¸„à¸´à¸§","priceUnit":1300,"total":2600,"invNo":"IV202512250019-1","date":"2026-04-16","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A013","item":"à¸­à¸´à¸à¸šà¸¥à¹Šà¸­à¸","description":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸ à¸­à¸¸à¸›à¸à¸£à¸“à¹Œà¸ˆà¸±à¸šà¹€à¸‹à¸µà¹‰à¸¢à¸¡ à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":100,"unit":"à¸à¹‰à¸­à¸™","priceUnit":7.2,"total":720,"invNo":"IV202512250019-1","date":"2026-04-16","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A012","item":"à¸„à¹ˆà¸²à¹à¸£à¸‡à¸ˆà¸±à¸šà¹€à¸‹à¸µà¹‰à¸¢à¸¡ à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡ à¸£à¸­à¸šà¸—à¸µà¹ˆ 1","description":"","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":7900,"total":7900,"invNo":"W02-1-26","date":"2026-04-15","type":"à¸„à¹ˆà¸²à¹à¸£à¸‡","budget":"Dad"},{"id":"A005","item":"à¸„à¹ˆà¸²à¸‚à¸™à¸ªà¹ˆà¸‡","description":"à¸›à¸¹à¸™à¹€à¸žà¹‰à¸™à¸—à¹Œ à¸ªà¹€à¸•à¹‡à¸‡ 240","location":"à¸„à¸­à¸à¹„à¸à¹ˆ-à¸—à¸µà¹ˆà¸—à¸²à¸™à¸‚à¹‰à¸²à¸§","category":"à¸‡à¸²à¸™à¹€à¸—à¸žà¸·à¹‰à¸™","pic":"TP à¸§à¸±à¸ªà¸”à¸¸","number":1,"unit":"à¹€à¸—à¸µà¹ˆà¸¢à¸§","priceUnit":500,"total":500,"invNo":"TP69 04 - 0315","date":"2026-04-10","type":"à¸„à¹ˆà¸²à¸‚à¸™à¸ªà¹ˆà¸‡","budget":"Bonus"},{"id":"A004","item":"à¸›à¸¹à¸™à¹€à¸žà¹‰à¸™à¸—à¹Œ à¸ªà¹€à¸•à¹‡à¸‡ 240","description":"","location":"à¸„à¸­à¸à¹„à¸à¹ˆ-à¸—à¸µà¹ˆà¸—à¸²à¸™à¸‚à¹‰à¸²à¸§","category":"à¸‡à¸²à¸™à¹€à¸—à¸žà¸·à¹‰à¸™","pic":"TP à¸§à¸±à¸ªà¸”à¸¸","number":2,"unit":"à¸„à¸´à¸§","priceUnit":2300,"total":4600,"invNo":"TP69 04 - 0315","date":"2026-04-10","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A003","item":"à¸„à¹ˆà¸²à¹à¸£à¸‡à¹€à¸—à¸žà¸·à¹‰à¸™","description":"","location":"à¸„à¸­à¸à¹„à¸à¹ˆ-à¸—à¸µà¹ˆà¸—à¸²à¸™à¸‚à¹‰à¸²à¸§","category":"à¸‡à¸²à¸™à¹€à¸—à¸žà¸·à¹‰à¸™","pic":"à¸Šà¹ˆà¸²à¸‡-à¸­à¸²à¸ªà¸´à¸—à¸˜à¸´à¹Œ","number":1,"unit":"à¸‡à¸²à¸™","priceUnit":4000,"total":4000,"invNo":"W01-1-26","date":"2026-04-10","type":"à¸„à¹ˆà¸²à¹à¸£à¸‡","budget":"Bonus"},{"id":"A011","item":"à¸›à¸¹à¸™","description":"à¸•à¸£à¸²à¹€à¸ªà¸·à¸­","location":"à¸­à¸­à¸Ÿà¸Ÿà¸´à¸¨","category":"à¸‡à¸²à¸™à¸‰à¸²à¸šà¸œà¸™à¸±à¸‡","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":2,"unit":"à¸à¸£à¸°à¸ªà¸­à¸š","priceUnit":171,"total":342,"invNo":"IV202604090019-3","date":"2026-04-09","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Dad"},{"id":"A002","item":"à¸—à¸£à¸²à¸¢à¸«à¸¢à¸²à¸š","description":"","location":"à¸„à¸­à¸à¹„à¸à¹ˆ-à¸—à¸µà¹ˆà¸—à¸²à¸™à¸‚à¹‰à¸²à¸§","category":"à¸‡à¸²à¸™à¹€à¸—à¸žà¸·à¹‰à¸™","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸„à¸´à¸§","priceUnit":800,"total":800,"invNo":"IV202604090019-3","date":"2026-04-09","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"},{"id":"A001","item":"à¸§à¸²à¸¢à¹€à¸¡à¸—","description":"2*25 à¸•à¸£à¸¡.","location":"à¸„à¸­à¸à¹„à¸à¹ˆ-à¸—à¸µà¹ˆà¸—à¸²à¸™à¸‚à¹‰à¸²à¸§","category":"à¸‡à¸²à¸™à¹€à¸—à¸žà¸·à¹‰à¸™","pic":"79 à¸§à¸±à¸ªà¸”à¸¸à¸à¹ˆà¸­à¸ªà¸£à¹‰à¸²à¸‡","number":1,"unit":"à¸Šà¸´à¹‰à¸™","priceUnit":1250,"total":1250,"invNo":"IV202604090019-3","date":"2026-04-09","type":"à¸„à¹ˆà¸²à¸§à¸±à¸ªà¸”à¸¸/à¸­à¸¸à¸›à¸à¸£à¸“à¹Œ","budget":"Bonus"}];
 
         // Register the Chart.js Datalabels plugin globally
         Chart.register(ChartDataLabels);
@@ -3748,17 +2079,15 @@
             const dot = document.getElementById('syncStatusDot');
             const text = document.getElementById('syncStatusText');
 
-            if (!dot || !text) return;
-
-            if (state === "loading") {
-                dot.className = "status-dot connected";
-                text.textContent = "Syncing Cloud D1...";
-            } else if (state === "error") {
-                dot.className = "status-dot warn";
-                text.textContent = "Offline: " + (extra || "Cache mode");
-            } else {
+            if (state === "connected") {
                 dot.className = "status-dot connected";
                 text.textContent = "Cloud DB Connected";
+            } else if (state === "loading") {
+                dot.className = "status-dot warn";
+                text.textContent = "Connecting to D1...";
+            } else {
+                dot.className = "status-dot";
+                text.textContent = "Offline: " + (extra || "Error");
             }
         }
 
@@ -3784,10 +2113,8 @@
                 }
 
                 const data = await res.json();
-                if (Array.isArray(data) && data.length > 0) {
-                    expenses = sanitizeExpenses(data);
-                    saveToLocalStorage(expenses);
-                }
+                expenses = data;
+                saveToLocalStorage(expenses);
 
                 // Fetch budgets from D1
                 try {
@@ -3801,30 +2128,33 @@
                     console.error("Failed to fetch location budgets:", bErr);
                 }
                 
+                updateSyncStatus("connected");
                 populateSuggestions();
                 renderLocationBudgets();
                 applyFilters();
-                updateSyncStatus("connected");
             } catch (err) {
                 console.error("Fetch error:", err);
-                updateSyncStatus("connected");
+                updateSyncStatus("error", err.message);
+                showToast("Failed to connect to cloud database: " + err.message, "error");
                 
-                // Fallback to localStorage offline copy, or default to initialExpenses
+                // Fallback to localStorage offline copy, or default to initialExpenses (demo mode)
                 const localData = localStorage.getItem('camping_expenses');
                 if (localData) {
-                    try {
-                        const parsed = JSON.parse(localData);
-                        if (Array.isArray(parsed) && parsed.length > 0) {
-                            expenses = parsed;
-                        }
-                    } catch(e) {}
+                    expenses = JSON.parse(localData);
+                    showToast("Viewing offline local cached copy", "warning");
+                } else {
+                    expenses = JSON.parse(JSON.stringify(initialExpenses));
+                    showToast("Cloud offline: Displaying default demo dataset", "info");
                 }
-                if (!expenses || expenses.length === 0) {
-                    if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
-                        expenses = JSON.parse(JSON.stringify(initialExpenses));
-                        saveToLocalStorage(expenses);
-                    }
+
+                // Fallback location budgets offline
+                const localBudgets = localStorage.getItem('camping_location_budgets');
+                if (localBudgets) {
+                    locationBudgets = JSON.parse(localBudgets);
+                } else {
+                    locationBudgets = [];
                 }
+                applyLoadedBudgets();
 
                 populateSuggestions();
                 renderLocationBudgets();
@@ -4080,91 +2410,10 @@
             }
         };
 
-        function decodeMojibake(str) {
-            if (!str || typeof str !== 'string') return str;
-            if (str.includes('à') || str.includes('¸') || str.includes('¹')) {
-                try {
-                    const bytes = new Uint8Array([...str].map(c => c.charCodeAt(0) & 0xFF));
-                    const dec = new TextDecoder('utf-8').decode(bytes);
-                    if (dec && !dec.includes('\uFFFD')) return dec;
-                } catch(e) {}
-            }
-            return str;
-        }
-
-        function sanitizeExpenses(list) {
-            if (!Array.isArray(list)) return [];
-            return list.map(item => ({
-                ...item,
-                item: decodeMojibake(item.item),
-                description: decodeMojibake(item.description),
-                location: decodeMojibake(item.location),
-                category: decodeMojibake(item.category),
-                pic: decodeMojibake(item.pic),
-                unit: decodeMojibake(item.unit),
-                invNo: decodeMojibake(item.invNo),
-                type: decodeMojibake(item.type),
-                budget: decodeMojibake(item.budget)
-            }));
-        }
-
         // Load startup data
         async function initApp() {
-            try { updateThemeIcon(); } catch(e) {}
-
-            // Auto-heal: Purge old corrupted cache from localStorage
-            try {
-                const rawCache = localStorage.getItem('camping_expenses');
-                if (rawCache && (rawCache.includes('à¸') || rawCache.includes('à¹') || rawCache.includes('à¸„'))) {
-                    localStorage.removeItem('camping_expenses');
-                }
-            } catch(e) {}
-
-            // 1. Instantly render local cache or initial dataset (0ms response time!)
-            let loaded = false;
-            const localData = localStorage.getItem('camping_expenses');
-            if (localData) {
-                try {
-                    const parsed = JSON.parse(localData);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        expenses = sanitizeExpenses(parsed);
-                        loaded = true;
-                    }
-                } catch (e) {}
-            }
-
-            if (!loaded && typeof initialExpenses !== 'undefined' && Array.isArray(initialExpenses) && initialExpenses.length > 0) {
-                expenses = sanitizeExpenses(JSON.parse(JSON.stringify(initialExpenses)));
-                saveToLocalStorage(expenses);
-            }
-
-            if (!expenses || !Array.isArray(expenses) || expenses.length === 0) {
-                if (typeof initialExpenses !== 'undefined' && Array.isArray(initialExpenses)) {
-                    expenses = sanitizeExpenses(JSON.parse(JSON.stringify(initialExpenses)));
-                    saveToLocalStorage(expenses);
-                } else {
-                    expenses = [];
-                }
-            }
-
-            try {
-                const localBudgets = localStorage.getItem('camping_location_budgets');
-                if (localBudgets) {
-                    locationBudgets = JSON.parse(localBudgets);
-                    applyLoadedBudgets();
-                }
-            } catch(e) {}
-
-            try { populateSuggestions(); } catch(e) {}
-            try { renderLocationBudgets(); } catch(e) {}
-            try { applyFilters(); } catch(e) {}
-            updateSyncStatus("connected");
-
-            // 2. Sync with Cloud D1 Database in background asynchronously
-            fetchExpenses().catch(err => {
-                console.error("Fetch background error:", err);
-                updateSyncStatus("connected");
-            });
+            updateThemeIcon();
+            await fetchExpenses();
         }
 
         // Populate dropdown suggest fields inside modals
@@ -4441,9 +2690,7 @@
 
         // Render all analytical Chart.js graphs
         function renderCharts() {
-            if (typeof Chart === 'undefined') return;
-            try {
-                const isLight = document.body.classList.contains('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
             const gridColor = isLight ? 'rgba(15, 23, 42, 0.06)' : 'rgba(255, 255, 255, 0.03)';
             const tickColor = isLight ? '#475569' : '#94a3b8';
             const legendColor = isLight ? '#1e293b' : '#94a3b8';
@@ -4939,9 +3186,6 @@
                     }
                 }
             });
-            } catch (chartErr) {
-                console.error("renderCharts non-fatal error:", chartErr);
-            }
         }
 
         // Sort toggle when clicking headers
@@ -5450,10 +3694,9 @@
         }
 
         // EXCEL TEMPLATE DOWNLOAD & EXCEL DATA IMPORT LOGIC
-        // Download Excel Template for import/bulk edit
         window.downloadExcelTemplate = function() {
             try {
-                // Gather unique options from current database for dropdown validation
+                // Gather unique options from current database
                 const locations = [...new Set(expenses.map(i => (i.location || '').trim()).filter(Boolean))].sort();
                 const categories = [...new Set(expenses.map(i => (i.category || '').trim()).filter(Boolean))].sort();
                 const pics = [...new Set(expenses.map(i => (i.pic || '').trim()).filter(Boolean))].sort();
@@ -5465,33 +3708,30 @@
                 const finalTypes = ['ค่าวัสดุ/อุปกรณ์', 'ค่าแรง', 'ค่าขนส่ง'];
                 const finalBudgets = ['Bonus', 'Dad'];
 
-                const headersText = [
-                    'รหัสรายการ (ID) *เว้นว่างไว้เพื่อสร้างรายการใหม่*',
-                    'รายการ (Item) *', 
-                    'รายละเอียด (Description)', 
-                    'วันที่ (Date YYYY-MM-DD) *', 
-                    'สถานที่ (Location) *', 
-                    'หมวดหมู่ (Category) *', 
-                    'ร้านค้า/ช่าง (Vendor/PIC) *', 
-                    'จำนวน (Qty) *', 
-                    'หน่วยนับ (Unit) *', 
-                    'ราคาต่อหน่วย (Price/Unit) *', 
-                    'ประเภทค่าใช้จ่าย (Type: ค่าวัสดุ/ค่าแรง/ค่าขนส่ง) *', 
-                    'งบประมาณ (Budget: Bonus/Dad) *', 
-                    'เลขที่ใบเสร็จ (Inv No.)'
-                ];
-
-                // Sheet 1: Blank Template for adding new items
-                const blankData = [
-                    headersText,
+                const headers = [
                     [
-                        '', // ID blank for auto-generate ID
+                        'รหัสรายการ (ID) *เว้นว่างไว้เพื่อสร้างรายการใหม่*',
+                        'รายการ (Item) *', 
+                        'รายละเอียด (Description)', 
+                        'วันที่ (Date YYYY-MM-DD) *', 
+                        'สถานที่ (Location) *', 
+                        'หมวดหมู่ (Category) *', 
+                        'ร้านค้า/ช่าง (Vendor/PIC) *', 
+                        'จำนวน (Qty) *', 
+                        'หน่วยนับ (Unit) *', 
+                        'ราคาต่อหน่วย (Price/Unit) *', 
+                        'ประเภทค่าใช้จ่าย (Type: ค่าวัสดุ/ค่าแรง/ค่าขนส่ง) *', 
+                        'งบประมาณ (Budget: Bonus/Dad) *', 
+                        'เลขที่ใบเสร็จ (Inv No.)'
+                    ],
+                    [
+                        '', // ID blank
                         'ปูน TOA', 
                         'ขนาด 50 กก.', 
-                        new Date().toISOString().split('T')[0], 
-                        finalLocs[0] || 'ออฟฟิศ', 
-                        finalCats[0] || 'งานเทพื้น', 
-                        finalPics[0] || '79 วัสดุก่อสร้าง', 
+                        '2026-06-06', 
+                        'ออฟฟิศ', 
+                        'งานเทพื้น', 
+                        '79 วัสดุก่อสร้าง', 
                         10, 
                         'กระสอบ', 
                         235.00, 
@@ -5500,30 +3740,11 @@
                         'IV-001'
                     ]
                 ];
-                const wsBlank = XLSX.utils.aoa_to_sheet(blankData);
 
-                // Sheet 2: Bulk edit sheet populated with existing expenses
-                const editData = [headersText];
-                expenses.forEach(item => {
-                    editData.push([
-                        item.id || '',
-                        item.item || '',
-                        item.description || '',
-                        item.date || '',
-                        item.location || '',
-                        item.category || '',
-                        item.pic || '',
-                        item.number || 0,
-                        item.unit || '',
-                        item.priceUnit || 0,
-                        item.type || '',
-                        item.budget || '',
-                        item.invNo || ''
-                    ]);
-                });
-                const wsEdit = XLSX.utils.aoa_to_sheet(editData);
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(headers);
 
-                // Sheet 3: Reference lists for dropdown validations
+                // Build Lists sheet
                 const listsData = [
                     ["Locations", "Categories", "PICs", "Types", "Budgets"]
                 ];
@@ -5539,54 +3760,51 @@
                 }
                 const wsLists = XLSX.utils.aoa_to_sheet(listsData);
                 
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, wsBlank, "เพิ่มรายการใหม่");
-                XLSX.utils.book_append_sheet(wb, wsEdit, "แก้ไขรายการเดิม");
+                // Add validation lists sheet to workbook
+                XLSX.utils.book_append_sheet(wb, ws, "Template");
                 XLSX.utils.book_append_sheet(wb, wsLists, "Lists");
 
-                // Assign data validation dropdowns to both data sheets
-                const validationRules = [
+                // Assign data validations to Template sheet
+                ws['!dataValidation'] = [
                     {
-                        sqref: 'E2:E10000', // Location
+                        sqref: 'E2:E1000', // Location is column E
                         formulae: [`Lists!\$A\$2:\$A\$${finalLocs.length + 1}`],
                         type: 'list',
                         showDropDown: true,
                         showErrorMessage: false
                     },
                     {
-                        sqref: 'F2:F10000', // Category
+                        sqref: 'F2:F1000', // Category is column F
                         formulae: [`Lists!\$B\$2:\$B\$${finalCats.length + 1}`],
                         type: 'list',
                         showDropDown: true,
                         showErrorMessage: false
                     },
                     {
-                        sqref: 'G2:G10000', // PIC
+                        sqref: 'G2:G1000', // PIC is column G
                         formulae: [`Lists!\$C\$2:\$C\$${finalPics.length + 1}`],
                         type: 'list',
                         showDropDown: true,
                         showErrorMessage: false
                     },
                     {
-                        sqref: 'K2:K10000', // Type
+                        sqref: 'K2:K1000', // Type is column K
                         formulae: [`Lists!\$D\$2:\$D\$4`],
                         type: 'list',
                         showDropDown: true,
                         showErrorMessage: false
                     },
                     {
-                        sqref: 'L2:L10000', // Budget
+                        sqref: 'L2:L1000', // Budget is column L
                         formulae: [`Lists!\$E\$2:\$E\$3`],
                         type: 'list',
                         showDropDown: true,
                         showErrorMessage: false
                     }
                 ];
-                wsBlank['!dataValidation'] = validationRules;
-                wsEdit['!dataValidation'] = validationRules;
 
-                XLSX.writeFile(wb, `camping_expenses_template_${new Date().toISOString().split('T')[0]}.xlsx`);
-                showToast("ดาวน์โหลด Template Excel สำหรับเพิ่ม/แก้ไขเรียบร้อย!", "success");
+                XLSX.writeFile(wb, "camping_expense_template.xlsx");
+                showToast("ดาวน์โหลดเทมเพลตสำเร็จ!", "success");
             } catch (err) {
                 console.error("Download template failed:", err);
                 showToast("ดาวน์โหลดเทมเพลตล้มเหลว: " + err.message, "error");
@@ -5619,15 +3837,16 @@
             // Parse other formats (e.g. DD/MM/YYYY)
             const parts = str.split(/[\/\-]/);
             if (parts.length === 3) {
+                // Guess if DD/MM/YYYY
                 let d = parseInt(parts[0]);
                 let m = parseInt(parts[1]);
                 let y = parseInt(parts[2]);
-                if (d > 12 && m <= 12) {
-                    // DD/MM/YYYY
-                } else if (m > 12 && d <= 12) {
+                if (d > 12 && m <= 12) { // Clearly DD/MM/YYYY
+                    // Do nothing, variables map correctly
+                } else if (m > 12 && d <= 12) { // MM/DD/YYYY
                     const tmp = d; d = m; m = tmp;
                 }
-                if (y < 2000) y += 2000;
+                if (y < 2000) y += 2000; // Guess year
                 return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
             }
             return str;
@@ -5641,139 +3860,144 @@
                     try {
                         const data = new Uint8Array(e.target.result);
                         const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        
+                        const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                        if (rawRows.length <= 1) {
+                            showToast("ไม่มีข้อมูลในไฟล์ Excel ที่นำเข้า", "warning");
+                            return;
+                        }
 
-                        const parsedExpenses = [];
-                        const uploadedIds = new Set();
+                        const headers = rawRows[0].map(h => (h || '').toString().trim().toLowerCase());
+                        const dataRows = rawRows.slice(1);
 
-                        // Determine next sequential ID for new items
+                         // Find column index based on keywords (bilingual mapping) with exclusion list
+                         const findColIndex = (keywords, excludeKeywords = []) => {
+                             return headers.findIndex(h => {
+                                 const matched = keywords.some(k => h.includes(k));
+                                 if (!matched) return false;
+                                 const excluded = excludeKeywords.some(ek => h.includes(ek));
+                                 return !excluded;
+                             });
+                         };
+ 
+                         const colIdx = {
+                             id: findColIndex(['รหัสรายการ', 'id', 'key', 'code', 'รหัส']),
+                             item: findColIndex(['รายการ', 'item', 'product', 'name'], ['รหัส', 'id', 'รายละเอียด', 'description']),
+                             description: findColIndex(['รายละเอียด', 'description', 'desc', 'spec']),
+                             date: findColIndex(['วันที่', 'date', 'time']),
+                             location: findColIndex(['สถานที่', 'location', 'zone', 'area']),
+                             category: findColIndex(['หมวดหมู่', 'category', 'group']),
+                             pic: findColIndex(['ร้านค้า', 'ช่าง', 'ผู้รับเงิน', 'ผู้รับผิดชอบ', 'vendor', 'pic']),
+                             number: findColIndex(['จำนวน', 'qty', 'quantity', 'amount', 'number']),
+                             unit: findColIndex(['หน่วย', 'unit']),
+                             priceUnit: findColIndex(['ราคาต่อหน่วย', 'ราคา', 'price_unit', 'price/unit', 'rate']),
+                             type: findColIndex(['ประเภท', 'type']),
+                             budget: findColIndex(['งบประมาณ', 'งบ', 'budget']),
+                             invNo: findColIndex(['เลขใบเสร็จ', 'เลขที่ใบเสร็จ', 'inv', 'invoice', 'inv_no'])
+                         };
+
+                        // Verify required fields
+                        if (colIdx.item === -1 || colIdx.date === -1) {
+                            showToast("ไฟล์ Excel ต้องมีคอลัมน์ รายการ (Item) และ วันที่ (Date)", "error");
+                            return;
+                        }
+
+                        // Generate sequential ID starting from max Axxx series
                         let nextNum = 1;
-                        const aSeries = expenses.filter(i => i.id && i.id.startsWith('A') && !isNaN(i.id.substring(1)));
+                        const aSeries = expenses.filter(i => i.id.startsWith('A') && !isNaN(i.id.substring(1)));
                         if (aSeries.length > 0) {
                             nextNum = Math.max(...aSeries.map(i => parseInt(i.id.substring(1)))) + 1;
                         }
 
-                        // Process all non-reference sheets
-                        for (const sheetName of workbook.SheetNames) {
-                            if (sheetName.toLowerCase().trim().includes('list')) continue;
+                        const parsedExpenses = [];
+                        const uploadedIds = new Set();
+                        
+                        for (let i = 0; i < dataRows.length; i++) {
+                            const row = dataRows[i];
+                            // Skip empty rows
+                            if (!row || row.length === 0 || !row[colIdx.item]) continue;
 
-                            const worksheet = workbook.Sheets[sheetName];
-                            const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                            if (!rawRows || rawRows.length <= 1) continue;
+                            let idVal = colIdx.id !== -1 ? (row[colIdx.id] || '').toString().trim() : '';
+                            const itemVal = row[colIdx.item];
+                            const descVal = colIdx.description !== -1 ? row[colIdx.description] : '';
+                            const dateRaw = colIdx.date !== -1 ? row[colIdx.date] : '';
+                            const locVal = colIdx.location !== -1 ? row[colIdx.location] : '-';
+                            const catVal = colIdx.category !== -1 ? row[colIdx.category] : '-';
+                            const picVal = colIdx.pic !== -1 ? row[colIdx.pic] : '-';
+                            const qtyVal = colIdx.number !== -1 ? parseFloat(row[colIdx.number]) : 1;
+                            const unitVal = colIdx.unit !== -1 ? row[colIdx.unit] : 'ชิ้น';
+                            const priceVal = colIdx.priceUnit !== -1 ? parseFloat(row[colIdx.priceUnit]) : 0;
+                            const invVal = colIdx.invNo !== -1 ? row[colIdx.invNo] : '';
+                            let typeVal = colIdx.type !== -1 ? row[colIdx.type] : 'ค่าวัสดุ/อุปกรณ์';
+                            let budgetVal = colIdx.budget !== -1 ? row[colIdx.budget] : 'Bonus';
 
-                            const headers = rawRows[0].map(h => (h || '').toString().trim().toLowerCase());
-                            const dataRows = rawRows.slice(1);
-
-                            // Find column index based on keywords (bilingual mapping) with exclusion list
-                            const findColIndex = (keywords, excludeKeywords = []) => {
-                                return headers.findIndex(h => {
-                                    const matched = keywords.some(k => h.includes(k));
-                                    if (!matched) return false;
-                                    const excluded = excludeKeywords.some(ek => h.includes(ek));
-                                    return !excluded;
-                                });
-                            };
-
-                            const colIdx = {
-                                id: findColIndex(['รหัสรายการ', 'id', 'key', 'code', 'รหัส']),
-                                item: findColIndex(['รายการ', 'item', 'product', 'name'], ['รหัส', 'id', 'รายละเอียด', 'description']),
-                                description: findColIndex(['รายละเอียด', 'description', 'desc', 'spec']),
-                                date: findColIndex(['วันที่', 'date', 'time']),
-                                location: findColIndex(['สถานที่', 'location', 'zone', 'area']),
-                                category: findColIndex(['หมวดหมู่', 'category', 'group']),
-                                pic: findColIndex(['ร้านค้า', 'ช่าง', 'ผู้รับเงิน', 'ผู้รับผิดชอบ', 'vendor', 'pic']),
-                                number: findColIndex(['จำนวน', 'qty', 'quantity', 'amount', 'number']),
-                                unit: findColIndex(['หน่วย', 'unit']),
-                                priceUnit: findColIndex(['ราคาต่อหน่วย', 'ราคา', 'price_unit', 'price/unit', 'rate']),
-                                type: findColIndex(['ประเภท', 'type']),
-                                budget: findColIndex(['งบประมาณ', 'งบ', 'budget']),
-                                invNo: findColIndex(['เลขใบเสร็จ', 'เลขที่ใบเสร็จ', 'inv', 'invoice', 'inv_no'])
-                            };
-
-                            // Verify required fields
-                            if (colIdx.item === -1 || colIdx.date === -1) {
-                                continue;
+                            // Normalize Date
+                            const dateVal = parseExcelDate(dateRaw);
+                            
+                            // Normalize Type
+                            typeVal = typeVal.toString().trim();
+                            if (typeVal.includes('แรง') || typeVal.toLowerCase().includes('labor')) {
+                                typeVal = 'ค่าแรง';
+                            } else if (typeVal.includes('ขนส่ง') || typeVal.toLowerCase().includes('trans') || typeVal.toLowerCase().includes('ship')) {
+                                typeVal = 'ค่าขนส่ง';
+                            } else {
+                                typeVal = 'ค่าวัสดุ/อุปกรณ์';
                             }
 
-                            for (let i = 0; i < dataRows.length; i++) {
-                                const row = dataRows[i];
-                                if (!row || row.length === 0 || !row[colIdx.item]) continue;
-
-                                let idVal = colIdx.id !== -1 ? (row[colIdx.id] || '').toString().trim() : '';
-                                const itemVal = row[colIdx.item];
-                                const descVal = colIdx.description !== -1 ? row[colIdx.description] : '';
-                                const dateRaw = colIdx.date !== -1 ? row[colIdx.date] : '';
-                                const locVal = colIdx.location !== -1 ? row[colIdx.location] : '-';
-                                const catVal = colIdx.category !== -1 ? row[colIdx.category] : '-';
-                                const picVal = colIdx.pic !== -1 ? row[colIdx.pic] : '-';
-                                const qtyVal = colIdx.number !== -1 ? parseFloat(row[colIdx.number]) : 1;
-                                const unitVal = colIdx.unit !== -1 ? row[colIdx.unit] : 'ชิ้น';
-                                const priceVal = colIdx.priceUnit !== -1 ? parseFloat(row[colIdx.priceUnit]) : 0;
-                                const invVal = colIdx.invNo !== -1 ? row[colIdx.invNo] : '';
-                                let typeVal = colIdx.type !== -1 ? row[colIdx.type] : 'ค่าวัสดุ/อุปกรณ์';
-                                let budgetVal = colIdx.budget !== -1 ? row[colIdx.budget] : 'Bonus';
-
-                                const dateVal = parseExcelDate(dateRaw);
-
-                                typeVal = (typeVal || '').toString().trim();
-                                if (typeVal.includes('แรง') || typeVal.toLowerCase().includes('labor')) {
-                                    typeVal = 'ค่าแรง';
-                                } else if (typeVal.includes('ขนส่ง') || typeVal.toLowerCase().includes('trans') || typeVal.toLowerCase().includes('ship')) {
-                                    typeVal = 'ค่าขนส่ง';
-                                } else {
-                                    typeVal = 'ค่าวัสดุ/อุปกรณ์';
-                                }
-
-                                budgetVal = (budgetVal || '').toString().trim().toLowerCase();
-                                if (budgetVal.includes('dad') || budgetVal.includes('พ่อ')) {
-                                    budgetVal = 'Dad';
-                                } else {
-                                    budgetVal = 'Bonus';
-                                }
-
-                                // ID check / assign
-                                if (!idVal) {
-                                    let newId = 'A' + (nextNum++).toString().padStart(3, '0');
-                                    while (expenses.some(x => x.id === newId) || uploadedIds.has(newId)) {
-                                        newId = 'A' + (nextNum++).toString().padStart(3, '0');
-                                    }
-                                    idVal = newId;
-                                } else {
-                                    if (uploadedIds.has(idVal)) {
-                                        showToast(`พบรหัสรายการซ้ำในไฟล์ Excel: ${idVal}`, "error");
-                                        return;
-                                    }
-                                }
-                                uploadedIds.add(idVal);
-
-                                const total = parseFloat(((isNaN(qtyVal) ? 1 : qtyVal) * (isNaN(priceVal) ? 0 : priceVal)).toFixed(2));
-
-                                parsedExpenses.push({
-                                    id: idVal,
-                                    item: itemVal.toString().trim(),
-                                    description: descVal ? descVal.toString().trim() : '',
-                                    date: dateVal,
-                                    location: locVal ? locVal.toString().trim() : '-',
-                                    category: catVal ? catVal.toString().trim() : '-',
-                                    pic: picVal ? picVal.toString().trim() : '-',
-                                    number: isNaN(qtyVal) ? 1 : qtyVal,
-                                    unit: unitVal ? unitVal.toString().trim() : 'ชิ้น',
-                                    priceUnit: isNaN(priceVal) ? 0 : priceVal,
-                                    total,
-                                    type: typeVal,
-                                    budget: budgetVal,
-                                    invNo: invVal ? invVal.toString().trim() : ''
-                                });
+                            // Normalize Budget
+                            budgetVal = budgetVal.toString().trim().toLowerCase();
+                            if (budgetVal.includes('dad') || budgetVal.includes('พ่อ')) {
+                                budgetVal = 'Dad';
+                            } else {
+                                budgetVal = 'Bonus';
                             }
+
+                            // ID check / assign
+                            if (!idVal) {
+                                let newId = 'A' + (nextNum++).toString().padStart(3, '0');
+                                while (expenses.some(x => x.id === newId) || uploadedIds.has(newId)) {
+                                    newId = 'A' + (nextNum++).toString().padStart(3, '0');
+                                }
+                                idVal = newId;
+                            } else {
+                                if (uploadedIds.has(idVal)) {
+                                    showToast(`พบรหัสรายการซ้ำในไฟล์ Excel: ${idVal}`, "error");
+                                    return;
+                                }
+                            }
+                            uploadedIds.add(idVal);
+
+                            const total = parseFloat((qtyVal * priceVal).toFixed(2));
+
+                            parsedExpenses.push({
+                                id: idVal,
+                                item: itemVal.toString().trim(),
+                                description: descVal ? descVal.toString().trim() : '',
+                                date: dateVal,
+                                location: locVal ? locVal.toString().trim() : '-',
+                                category: catVal ? catVal.toString().trim() : '-',
+                                pic: picVal ? picVal.toString().trim() : '-',
+                                number: isNaN(qtyVal) ? 1 : qtyVal,
+                                unit: unitVal ? unitVal.toString().trim() : 'ชิ้น',
+                                priceUnit: isNaN(priceVal) ? 0 : priceVal,
+                                total,
+                                type: typeVal,
+                                budget: budgetVal,
+                                invNo: invVal ? invVal.toString().trim() : ''
+                            });
                         }
 
                         if (parsedExpenses.length === 0) {
-                            showToast("ไม่พบข้อมูลที่สามารถนำเข้าได้ (โปรดตรวจสอบคอลัมน์ รายการ และ วันที่)", "warning");
+                            showToast("ไม่พบแถวข้อมูลที่สามารถนำเข้าได้", "warning");
                             return;
                         }
 
-                        // Save parsed data to pending state and open preview modal
-                        pendingImportExpenses = parsedExpenses;
-                        openImportPreviewModal(parsedExpenses);
+                        const success = await saveExpenseToCloud("batch-create", null, parsedExpenses);
+                        if (success) {
+                            showToast(`นำเข้าข้อมูลจาก Excel สำเร็จ ${parsedExpenses.length} รายการ!`, "success");
+                        }
                     } catch (err) {
                         console.error("Excel parse processing failed:", err);
                         showToast("เกิดข้อผิดพลาดในการประมวลผลข้อมูล Excel: " + err.message, "error");
@@ -5789,121 +4013,6 @@
                 document.getElementById('excelFileInput').value = '';
             }
         }
-
-        // EXCEL IMPORT PREVIEW MODAL CONTROLLER
-        let pendingImportExpenses = [];
-        const importPreviewModal = document.getElementById('importPreviewModal');
-
-        window.openImportPreviewModal = function(items) {
-            const updatedCount = items.filter(p => expenses.some(e => e.id === p.id)).length;
-            const createdCount = items.length - updatedCount;
-            const totalSum = items.reduce((sum, item) => sum + (item.total || 0), 0);
-
-            document.getElementById('previewTotalCount').textContent = `${items.length} รายการ`;
-            document.getElementById('previewUpdateCount').textContent = `${updatedCount} รายการ`;
-            document.getElementById('previewCreateCount').textContent = `${createdCount} รายการ`;
-            document.getElementById('previewTotalAmount').textContent = formatBaht(totalSum);
-
-            const tbody = document.getElementById('importPreviewTableBody');
-            tbody.innerHTML = '';
-
-            items.forEach(item => {
-                const isUpdate = expenses.some(e => e.id === item.id);
-                const statusBadge = isUpdate 
-                    ? `<span style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 11px;">[แก้ไข]</span>`
-                    : `<span style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 11px;">[สร้างใหม่]</span>`;
-
-                const budgetBadge = item.budget === 'Bonus'
-                    ? `<span class="badge badge-budget-bonus">Bonus</span>`
-                    : `<span class="badge badge-budget-dad">Dad</span>`;
-
-                const tr = document.createElement('tr');
-                tr.style.borderBottom = '1px solid rgba(255, 255, 255, 0.05)';
-                tr.innerHTML = `
-                    <td style="padding: 8px 10px; font-family: var(--font-display); color: var(--primary); font-weight: 600;">${item.id}</td>
-                    <td style="padding: 8px 10px; text-align: center;">${statusBadge}</td>
-                    <td style="padding: 8px 10px; white-space: nowrap;">${item.date || '-'}</td>
-                    <td style="padding: 8px 10px;">
-                        <div style="font-weight: 600; color: #fff;">${item.item || '-'}</div>
-                        ${item.description ? `<div style="font-size: 11px; color: var(--text-muted);">${item.description}</div>` : ''}
-                    </td>
-                    <td style="padding: 8px 10px;">${item.location || '-'}</td>
-                    <td style="padding: 8px 10px;">${item.category || '-'}</td>
-                    <td style="padding: 8px 10px;">${item.pic || '-'}</td>
-                    <td style="padding: 8px 10px; text-align: right; white-space: nowrap;">
-                        ${item.number || 0} ${item.unit || ''} <span style="font-size: 11px; color: var(--text-muted);">@ ${formatBaht(item.priceUnit || 0)}</span>
-                    </td>
-                    <td style="padding: 8px 10px; text-align: right; font-weight: 700; color: #fff;">${formatBaht(item.total || 0)}</td>
-                    <td style="padding: 8px 10px; text-align: center;">${budgetBadge}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            importPreviewModal.classList.add('active');
-        };
-
-        window.closeImportPreviewModal = function() {
-            importPreviewModal.classList.remove('active');
-            pendingImportExpenses = [];
-        };
-
-        document.getElementById('closeImportPreviewBtn').addEventListener('click', closeImportPreviewModal);
-        document.getElementById('cancelImportBtn').addEventListener('click', closeImportPreviewModal);
-
-        document.getElementById('confirmImportBtn').addEventListener('click', async () => {
-            if (!pendingImportExpenses || pendingImportExpenses.length === 0) return;
-            const confirmBtn = document.getElementById('confirmImportBtn');
-            const originalText = confirmBtn.innerHTML;
-
-            try {
-                confirmBtn.disabled = true;
-                confirmBtn.innerHTML = '⌛ กำลังบันทึกข้อมูลลงระบบ...';
-
-                const success = await saveExpenseToCloud("batch-create", null, pendingImportExpenses);
-                if (success) {
-                    const updatedCount = pendingImportExpenses.filter(p => expenses.some(e => e.id === p.id)).length;
-                    const createdCount = pendingImportExpenses.length - updatedCount;
-                    let msg = `นำเข้าข้อมูลจาก Excel สำเร็จ ${pendingImportExpenses.length} รายการ!`;
-                    if (updatedCount > 0 && createdCount > 0) {
-                        msg += ` (แก้ไขรายการเดิม ${updatedCount} รายการ, เพิ่มใหม่ ${createdCount} รายการ)`;
-                    } else if (updatedCount > 0) {
-                        msg += ` (แก้ไขรายการเดิม ${updatedCount} รายการ)`;
-                    } else if (createdCount > 0) {
-                        msg += ` (เพิ่มรายการใหม่ ${createdCount} รายการ)`;
-                    }
-                    showToast(msg, "success");
-                    closeImportPreviewModal();
-                }
-            } catch (err) {
-                console.error("Confirm import failed:", err);
-                showToast("บันทึกข้อมูลนำเข้าล้มเหลว: " + err.message, "error");
-            } finally {
-                confirmBtn.disabled = false;
-                confirmBtn.innerHTML = originalText;
-            }
-        });
-
-        // Restore default 87 expenses dataset
-        window.restoreDefaultExpenses = function() {
-            try {
-                if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
-                    expenses = JSON.parse(JSON.stringify(initialExpenses));
-                    saveToLocalStorage(expenses);
-                    populateSuggestions();
-                    renderLocationBudgets();
-                    applyFilters();
-                    updateSyncStatus("connected");
-                    showToast("กู้คืนข้อมูลเริ่มต้น 87 รายการสำเร็จเรียบร้อยแล้ว!", "success");
-                    // Background sync with cloud
-                    saveExpenseToCloud("reset", null, initialExpenses).catch(console.error);
-                } else {
-                    showToast("ไม่พบชุดข้อมูลเริ่มต้น", "error");
-                }
-            } catch (err) {
-                console.error("Restore failed:", err);
-                showToast("กู้คืนข้อมูลล้มเหลว: " + err.message, "error");
-            }
-        };
 
         // Copy summary in LINE friendly format
         window.copyLineSummary = function() {
@@ -6005,34 +4114,35 @@
 
         // Theme Helper functions
         function updateThemeIcon() {
-            const savedTheme = localStorage.getItem('camping_theme');
-            if (savedTheme === 'dark') {
-                document.body.classList.add('dark-mode');
-                document.body.classList.remove('light-mode');
-            } else if (savedTheme === 'light') {
-                document.body.classList.remove('dark-mode');
-                document.body.classList.add('light-mode');
-            }
-            const isDark = document.body.classList.contains('dark-mode');
+            const isLight = document.body.classList.contains('light-mode');
             const icon = document.getElementById('themeToggleIcon');
             if (icon) {
-                if (isDark) {
-                    icon.innerHTML = `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`;
-                    document.getElementById('themeToggleBtn').title = "Switch to Light Mode";
-                } else {
+                if (isLight) {
                     icon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
                     document.getElementById('themeToggleBtn').title = "Switch to Dark Mode";
+                } else {
+                    icon.innerHTML = `
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    `;
+                    document.getElementById('themeToggleBtn').title = "Switch to Light Mode";
                 }
             }
         }
 
         // Theme Toggle Listener
         document.getElementById('themeToggleBtn').addEventListener('click', () => {
-            const isDark = document.body.classList.toggle('dark-mode');
-            if (isDark) document.body.classList.remove('light-mode');
-            localStorage.setItem('camping_theme', isDark ? 'dark' : 'light');
+            const isLight = document.body.classList.toggle('light-mode');
+            localStorage.setItem('camping_theme', isLight ? 'light' : 'dark');
             updateThemeIcon();
-            try { renderCharts(); } catch(e) {}
+            renderCharts();
         });
 
 
@@ -6164,11 +4274,9 @@
         };
 
         // Initialize App
-        if (document.readyState === 'loading') {
-            window.addEventListener('DOMContentLoaded', () => { initApp(); });
-        } else {
+        window.addEventListener('DOMContentLoaded', () => {
             initApp();
-        }
+        });
     </script>
 </body>
 </html>
