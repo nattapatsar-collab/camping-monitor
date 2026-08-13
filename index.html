@@ -1472,9 +1472,8 @@
 </head>
 <body>
     <script>
-        // Apply theme immediately to prevent flashing
-        if (localStorage.getItem('camping_theme') === 'light' || 
-            (!localStorage.getItem('camping_theme') && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+        // Apply theme immediately to prevent flashing: Default to Clean Light Mode!
+        if (localStorage.getItem('camping_theme') !== 'dark') {
             document.body.classList.add('light-mode');
         }
     </script>
@@ -2000,19 +1999,19 @@
 
     <!-- QUICK BUDGET ADJUSTER MODAL -->
     <div class="modal-overlay" id="quickBudgetModal">
-        <div class="modal-card" style="max-width: 480px;">
+        <div class="glass-panel modal-container" style="max-width: 480px; padding: 28px;">
             <div class="modal-header">
-                <h3 class="modal-title" id="quickBudgetModalTitle">⚙️ ปรับวงเงินงบประมาณรายเดือน</h3>
+                <h3 class="modal-title" id="quickBudgetModalTitle" style="color: var(--text-main); font-weight: 700;">⚙️ ปรับวงเงินงบประมาณรายเดือน</h3>
                 <button class="modal-close" onclick="closeQuickBudgetModal()">&times;</button>
             </div>
-            <div style="margin-bottom: 16px; background: rgba(0,0,0,0.15); padding: 14px; border-radius: 12px;">
-                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">วงเงินเดิมในระบบปัจจุบัน:</div>
-                <div style="font-size: 22px; font-weight: 700; color: var(--primary);" id="quickBudgetOriginalLimitDisplay">฿500,000.00</div>
+            <div style="margin-bottom: 18px; background: rgba(0, 0, 0, 0.04); border: 1px solid var(--panel-border); padding: 16px; border-radius: 12px;">
+                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px; font-weight: 500;">วงเงินเดิมในระบบปัจจุบัน:</div>
+                <div style="font-size: 26px; font-weight: 700; color: var(--primary);" id="quickBudgetOriginalLimitDisplay">฿500,000.00</div>
             </div>
 
-            <div class="form-group" style="margin-bottom: 16px;">
-                <label class="form-label">กดปุ่มเพิ่มวงเงินงบประจำเดือนด่วน (+ Top-up):</label>
-                <div class="date-presets" style="gap: 8px; margin-top: 6px;">
+            <div class="form-group" style="margin-bottom: 18px;">
+                <label class="form-label" style="color: var(--text-main); font-weight: 600;">กดปุ่มเพิ่มวงเงินงบประจำเดือนด่วน (+ Top-up):</label>
+                <div class="date-presets" style="gap: 8px; margin-top: 8px; flex-wrap: wrap;">
                     <button class="preset-btn" onclick="addQuickBudgetAmount(50000)">+ ฿50,000</button>
                     <button class="preset-btn" onclick="addQuickBudgetAmount(100000)">+ ฿100,000</button>
                     <button class="preset-btn" onclick="addQuickBudgetAmount(200000)">+ ฿200,000</button>
@@ -2021,8 +2020,8 @@
             </div>
 
             <div class="form-group" style="margin-bottom: 24px;">
-                <label class="form-label" id="quickBudgetInputLabel">กำหนดวงเงินรวมใหม่ (บาท):</label>
-                <input type="number" class="form-input" id="quickBudgetNewLimitInput" step="1000" min="0" placeholder="ระบุจำนวนเงินรวม">
+                <label class="form-label" id="quickBudgetInputLabel" style="color: var(--text-main); font-weight: 600;">กำหนดวงเงินรวมใหม่ (บาท):</label>
+                <input type="number" class="form-input" id="quickBudgetNewLimitInput" step="1000" min="0" placeholder="ระบุจำนวนเงินรวม" style="font-size: 16px; font-weight: 600; padding: 10px 14px;">
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 12px;">
@@ -2522,6 +2521,12 @@
 
         // Load startup data
         async function initApp() {
+            const savedTheme = localStorage.getItem('camping_theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.remove('light-mode');
+            } else {
+                document.body.classList.add('light-mode');
+            }
             updateThemeIcon();
             await fetchExpenses();
         }
