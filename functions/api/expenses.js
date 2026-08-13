@@ -20,6 +20,15 @@ export async function onRequestGet(context) {
 
         const url = new URL(context.request.url);
         if (url.searchParams.get("type") === "budgets") {
+            try {
+                await db.prepare(`
+                    INSERT INTO location_budgets (location, dad_budget, bonus_budget)
+                    VALUES ('__overall__', 100000, 500000)
+                    ON CONFLICT(location) DO UPDATE SET bonus_budget = 500000
+                    WHERE bonus_budget < 500000
+                `).run();
+            } catch (e) {}
+
             const { results } = await db.prepare("SELECT * FROM location_budgets").all();
             return new Response(JSON.stringify(results), {
                 headers: { "Content-Type": "application/json" }

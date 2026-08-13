@@ -2095,7 +2095,11 @@
             const overall = locationBudgets.find(b => b.location === '__overall__');
             if (overall) {
                 BUDGET_LIMITS.Dad = parseFloat(overall.dad_budget) || 100000.00;
-                BUDGET_LIMITS.Bonus = parseFloat(overall.bonus_budget) || 500000.00;
+                let bVal = parseFloat(overall.bonus_budget);
+                if (!bVal || bVal < 500000) {
+                    bVal = 500000.00;
+                }
+                BUDGET_LIMITS.Bonus = bVal;
             } else {
                 BUDGET_LIMITS.Dad = 100000.00;
                 BUDGET_LIMITS.Bonus = 500000.00;
