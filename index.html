@@ -2157,7 +2157,7 @@
 
                 const data = await res.json();
                 if (Array.isArray(data) && data.length > 0) {
-                    expenses = data;
+                    expenses = sanitizeExpenses(data);
                     saveToLocalStorage(expenses);
                 }
 
@@ -2452,9 +2452,45 @@
             }
         };
 
+        function decodeMojibake(str) {
+            if (!str || typeof str !== 'string') return str;
+            if (str.includes('à') || str.includes('¸') || str.includes('¹')) {
+                try {
+                    const bytes = new Uint8Array([...str].map(c => c.charCodeAt(0) & 0xFF));
+                    const dec = new TextDecoder('utf-8').decode(bytes);
+                    if (dec && !dec.includes('\uFFFD')) return dec;
+                } catch(e) {}
+            }
+            return str;
+        }
+
+        function sanitizeExpenses(list) {
+            if (!Array.isArray(list)) return [];
+            return list.map(item => ({
+                ...item,
+                item: decodeMojibake(item.item),
+                description: decodeMojibake(item.description),
+                location: decodeMojibake(item.location),
+                category: decodeMojibake(item.category),
+                pic: decodeMojibake(item.pic),
+                unit: decodeMojibake(item.unit),
+                invNo: decodeMojibake(item.invNo),
+                type: decodeMojibake(item.type),
+                budget: decodeMojibake(item.budget)
+            }));
+        }
+
         // Load startup data
         async function initApp() {
             try { updateThemeIcon(); } catch(e) {}
+
+            // Auto-heal: Purge old corrupted cache from localStorage
+            try {
+                const rawCache = localStorage.getItem('camping_expenses');
+                if (rawCache && (rawCache.includes('à¸') || rawCache.includes('à¹') || rawCache.includes('à¸„'))) {
+                    localStorage.removeItem('camping_expenses');
+                }
+            } catch(e) {}
 
             // 1. Instantly render local cache or initial dataset (0ms response time!)
             let loaded = false;
@@ -2463,20 +2499,20 @@
                 try {
                     const parsed = JSON.parse(localData);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        expenses = parsed;
+                        expenses = sanitizeExpenses(parsed);
                         loaded = true;
                     }
                 } catch (e) {}
             }
 
             if (!loaded && typeof initialExpenses !== 'undefined' && Array.isArray(initialExpenses) && initialExpenses.length > 0) {
-                expenses = JSON.parse(JSON.stringify(initialExpenses));
+                expenses = sanitizeExpenses(JSON.parse(JSON.stringify(initialExpenses)));
                 saveToLocalStorage(expenses);
             }
 
             if (!expenses || !Array.isArray(expenses) || expenses.length === 0) {
                 if (typeof initialExpenses !== 'undefined' && Array.isArray(initialExpenses)) {
-                    expenses = JSON.parse(JSON.stringify(initialExpenses));
+                    expenses = sanitizeExpenses(JSON.parse(JSON.stringify(initialExpenses)));
                     saveToLocalStorage(expenses);
                 } else {
                     expenses = [];
