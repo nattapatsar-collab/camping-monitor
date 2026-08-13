@@ -1,3 +1,15 @@
+function fixEncoding(str) {
+    if (!str || typeof str !== 'string') return str;
+    if (str.includes('à') || str.includes('¸') || str.includes('¹')) {
+        try {
+            const bytes = new Uint8Array([...str].map(c => c.charCodeAt(0) & 0xFF));
+            const decoded = new TextDecoder('utf-8').decode(bytes);
+            if (decoded && !decoded.includes('\uFFFD')) return decoded;
+        } catch(e) {}
+    }
+    return str;
+}
+
 // GET Handler: Retrieve all expenses or budgets from Cloudflare D1
 export async function onRequestGet(context) {
     const db = context.env.DB;
@@ -27,8 +39,21 @@ export async function onRequestGet(context) {
         }
 
         const { results } = await db.prepare("SELECT * FROM expenses ORDER BY date DESC, id DESC").all();
-        return new Response(JSON.stringify(results), {
-            headers: { "Content-Type": "application/json" }
+        const cleanResults = (results || []).map(row => ({
+            ...row,
+            item: fixEncoding(row.item),
+            description: fixEncoding(row.description),
+            location: fixEncoding(row.location),
+            category: fixEncoding(row.category),
+            pic: fixEncoding(row.pic),
+            unit: fixEncoding(row.unit),
+            invNo: fixEncoding(row.invNo),
+            type: fixEncoding(row.type),
+            budget: fixEncoding(row.budget)
+        }));
+
+        return new Response(JSON.stringify(cleanResults), {
+            headers: { "Content-Type": "application/json; charset=utf-8" }
         });
     } catch (err) {
         return new Response(JSON.stringify({ error: "Database read error: " + err.message }), {
