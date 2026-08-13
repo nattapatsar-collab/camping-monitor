@@ -2560,9 +2560,10 @@
             populateSuggestions();
             renderLocationBudgets();
             applyFilters();
+            updateSyncStatus("connected");
 
-            // 2. Sync with Cloud D1 Database in background
-            await fetchExpenses();
+            // 2. Sync with Cloud D1 Database in background asynchronously
+            fetchExpenses().catch(console.error);
         }
 
         // Populate dropdown suggest fields inside modals
