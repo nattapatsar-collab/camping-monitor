@@ -2119,39 +2119,12 @@
             }, 3000);
         }
 
-        // Self-Healing Encoding Auto-repair (decodes Win-1252 / ISO-8859-1 double-encoded UTF-8 strings)
-        function fixEncoding(str) {
-            if (!str || typeof str !== 'string') return str;
-            if (str.includes('à¸') || str.includes('à¹') || str.includes('à¸„')) {
-                try {
-                    const bytes = new Uint8Array([...str].map(c => c.charCodeAt(0)));
-                    const decoded = new TextDecoder('utf-8').decode(bytes);
-                    if (decoded && !decoded.includes('')) return decoded;
-                } catch(e) {}
-            }
-            return str;
-        }
-
-        function fixExpenseRecord(item) {
-            if (!item || typeof item !== 'object') return item;
-            return {
-                ...item,
-                item: fixEncoding(item.item || ''),
-                description: fixEncoding(item.description || ''),
-                location: fixEncoding(item.location || ''),
-                category: fixEncoding(item.category || ''),
-                pic: fixEncoding(item.pic || ''),
-                unit: fixEncoding(item.unit || ''),
-                invNo: fixEncoding(item.invNo || ''),
-                type: fixEncoding(item.type || ''),
-                budget: fixEncoding(item.budget || '')
-            };
-        }
-
         // API Sync Status Helper
         function updateSyncStatus(state, extra = "") {
             const dot = document.getElementById('syncStatusDot');
             const text = document.getElementById('syncStatusText');
+
+            if (!dot || !text) return;
 
             if (state === "connected") {
                 dot.className = "status-dot connected";
@@ -2188,7 +2161,7 @@
 
                 const data = await res.json();
                 if (Array.isArray(data) && data.length > 0) {
-                    expenses = data.map(fixExpenseRecord);
+                    expenses = data;
                     saveToLocalStorage(expenses);
                 }
 
@@ -2485,50 +2458,53 @@
 
         // Load startup data
         async function initApp() {
-            updateThemeIcon();
+            try { updateThemeIcon(); } catch(e) {}
 
             // 1. Instantly render local cache or initial dataset (0ms response time!)
+            let loaded = false;
             const localData = localStorage.getItem('camping_expenses');
             if (localData) {
                 try {
                     const parsed = JSON.parse(localData);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        expenses = parsed.map(fixExpenseRecord);
-                    } else if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
-                        expenses = JSON.parse(JSON.stringify(initialExpenses)).map(fixExpenseRecord);
+                        expenses = parsed;
+                        loaded = true;
                     }
-                } catch (e) {
-                    if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
-                        expenses = JSON.parse(JSON.stringify(initialExpenses)).map(fixExpenseRecord);
-                    }
-                }
-            } else if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
-                expenses = JSON.parse(JSON.stringify(initialExpenses)).map(fixExpenseRecord);
+                } catch (e) {}
             }
 
-            // Guarantee expenses array is NEVER empty
+            if (!loaded && typeof initialExpenses !== 'undefined' && Array.isArray(initialExpenses) && initialExpenses.length > 0) {
+                expenses = JSON.parse(JSON.stringify(initialExpenses));
+                saveToLocalStorage(expenses);
+            }
+
             if (!expenses || !Array.isArray(expenses) || expenses.length === 0) {
-                if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
-                    expenses = JSON.parse(JSON.stringify(initialExpenses)).map(fixExpenseRecord);
+                if (typeof initialExpenses !== 'undefined' && Array.isArray(initialExpenses)) {
+                    expenses = JSON.parse(JSON.stringify(initialExpenses));
                     saveToLocalStorage(expenses);
+                } else {
+                    expenses = [];
                 }
             }
 
-            const localBudgets = localStorage.getItem('camping_location_budgets');
-            if (localBudgets) {
-                try {
+            try {
+                const localBudgets = localStorage.getItem('camping_location_budgets');
+                if (localBudgets) {
                     locationBudgets = JSON.parse(localBudgets);
                     applyLoadedBudgets();
-                } catch(e) {}
-            }
+                }
+            } catch(e) {}
 
-            populateSuggestions();
-            renderLocationBudgets();
-            applyFilters();
+            try { populateSuggestions(); } catch(e) {}
+            try { renderLocationBudgets(); } catch(e) {}
+            try { applyFilters(); } catch(e) {}
             updateSyncStatus("connected");
 
             // 2. Sync with Cloud D1 Database in background asynchronously
-            fetchExpenses().catch(console.error);
+            fetchExpenses().catch(err => {
+                console.error("Fetch background error:", err);
+                updateSyncStatus("connected");
+            });
         }
 
         // Populate dropdown suggest fields inside modals
