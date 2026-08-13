@@ -2530,6 +2530,39 @@
         // Load startup data
         async function initApp() {
             updateThemeIcon();
+
+            // 1. Instantly render local cache or initial dataset (0ms response time!)
+            const localData = localStorage.getItem('camping_expenses');
+            if (localData) {
+                try {
+                    const parsed = JSON.parse(localData);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        expenses = parsed;
+                    } else if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
+                        expenses = JSON.parse(JSON.stringify(initialExpenses));
+                    }
+                } catch (e) {
+                    if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
+                        expenses = JSON.parse(JSON.stringify(initialExpenses));
+                    }
+                }
+            } else if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
+                expenses = JSON.parse(JSON.stringify(initialExpenses));
+            }
+
+            const localBudgets = localStorage.getItem('camping_location_budgets');
+            if (localBudgets) {
+                try {
+                    locationBudgets = JSON.parse(localBudgets);
+                    applyLoadedBudgets();
+                } catch(e) {}
+            }
+
+            populateSuggestions();
+            renderLocationBudgets();
+            applyFilters();
+
+            // 2. Sync with Cloud D1 Database in background
             await fetchExpenses();
         }
 
