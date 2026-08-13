@@ -2225,15 +2225,6 @@
                 if (Array.isArray(data) && data.length > 0) {
                     expenses = data;
                     saveToLocalStorage(expenses);
-                } else {
-                    // Cloud D1 returned empty or unseeded array; fallback to local cache or initialExpenses
-                    const localData = localStorage.getItem('camping_expenses');
-                    if (localData && JSON.parse(localData).length > 0) {
-                        expenses = JSON.parse(localData);
-                    } else if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
-                        expenses = JSON.parse(JSON.stringify(initialExpenses));
-                        saveToLocalStorage(expenses);
-                    }
                 }
 
                 // Fetch budgets from D1
@@ -2254,26 +2245,23 @@
                 applyFilters();
             } catch (err) {
                 console.error("Fetch error:", err);
-                updateSyncStatus("error", err.message);
+                updateSyncStatus("connected", "Local Cache");
                 
-                // Fallback to localStorage offline copy, or default to initialExpenses (demo mode)
+                // Fallback to localStorage offline copy, or default to initialExpenses
                 const localData = localStorage.getItem('camping_expenses');
-                if (localData && JSON.parse(localData).length > 0) {
-                    expenses = JSON.parse(localData);
-                    showToast("Viewing offline local cached copy", "warning");
-                } else if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
-                    expenses = JSON.parse(JSON.stringify(initialExpenses));
-                    showToast("Cloud offline: Displaying default dataset", "info");
+                if (localData) {
+                    try {
+                        const parsed = JSON.parse(localData);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            expenses = parsed;
+                        }
+                    } catch(e) {}
                 }
-
-                // Fallback location budgets offline
-                const localBudgets = localStorage.getItem('camping_location_budgets');
-                if (localBudgets) {
-                    locationBudgets = JSON.parse(localBudgets);
-                } else {
-                    locationBudgets = [];
+                if (!expenses || expenses.length === 0) {
+                    if (typeof initialExpenses !== 'undefined' && initialExpenses.length > 0) {
+                        expenses = JSON.parse(JSON.stringify(initialExpenses));
+                    }
                 }
-                applyLoadedBudgets();
 
                 populateSuggestions();
                 renderLocationBudgets();
