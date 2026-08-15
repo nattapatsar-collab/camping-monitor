@@ -18,6 +18,15 @@ export async function onRequestGet(context) {
             )
         `).run();
 
+        // Ensure receipts table exists
+        await db.prepare(`
+            CREATE TABLE IF NOT EXISTS receipts (
+                invNo TEXT PRIMARY KEY,
+                receipt_url TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+        `).run();
+
         const url = new URL(context.request.url);
         if (url.searchParams.get("type") === "budgets") {
             try {
@@ -30,6 +39,13 @@ export async function onRequestGet(context) {
             } catch (e) {}
 
             const { results } = await db.prepare("SELECT * FROM location_budgets").all();
+            return new Response(JSON.stringify(results), {
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+
+        if (url.searchParams.get("type") === "receipts") {
+            const { results } = await db.prepare("SELECT * FROM receipts").all();
             return new Response(JSON.stringify(results), {
                 headers: { "Content-Type": "application/json" }
             });
@@ -214,6 +230,41 @@ export async function onRequestPost(context) {
             await db.batch(statements);
 
             return new Response(JSON.stringify({ success: true }), {
+                headers: { "Content-Type": "application/json" }
+            });
+        }
+
+        // Action: Save Receipt Attachment (mapped to invNo)
+        if (action === "save-receipt") {
+            const { invNo, receiptUrl } = payload;
+            if (!invNo) {
+                return new Response(JSON.stringify({ error: "Missing invNo for save-receipt" }), {
+                    status: 400,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            await db.prepare(`
+                CREATE TABLE IF NOT EXISTS receipts (
+                    invNo TEXT PRIMARY KEY,
+                    receipt_url TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                )
+            `).run();
+
+            if (!receiptUrl) {
+                await db.prepare("DELETE FROM receipts WHERE invNo = ?").bind(invNo).run();
+            } else {
+                await db.prepare(`
+                    INSERT INTO receipts (invNo, receipt_url, updated_at)
+                    VALUES (?, ?, datetime('now'))
+                    ON CONFLICT(invNo) DO UPDATE SET 
+                        receipt_url = excluded.receipt_url,
+                        updated_at = excluded.updated_at
+                `).bind(invNo, receiptUrl).run();
+            }
+
+            return new Response(JSON.stringify({ success: true, invNo }), {
                 headers: { "Content-Type": "application/json" }
             });
         }
