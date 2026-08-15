@@ -824,6 +824,10 @@
             z-index: 350 !important;
         }
 
+        #passcodeConfirmModal.active {
+            z-index: 450 !important;
+        }
+
         .modal-container {
             width: 100%;
             max-width: 600px;
@@ -2170,6 +2174,26 @@
         </div>
     </div>
 
+    <!-- PASSCODE CONFIRMATION MODAL -->
+    <div class="modal-overlay" id="passcodeConfirmModal">
+        <div class="glass-panel modal-container" style="max-width: 420px; padding: 24px;">
+            <div class="modal-header">
+                <h3 class="modal-title" style="color: var(--text-main); font-weight: 700;">🔒 ยืนยันรหัสผ่านความปลอดภัย</h3>
+                <button class="modal-close" onclick="closePasscodeModal()">&times;</button>
+            </div>
+            <div style="margin-bottom: 16px; font-size: 13px; color: var(--text-muted);" id="passcodePromptText">
+                กรุณากรอกรหัสผ่านเพื่อยืนยันการลบไฟล์ใบเสร็จ:
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <input type="password" class="form-input" id="passcodeConfirmInput" placeholder="กรอกรหัสผ่าน (20147)" style="font-size: 18px; letter-spacing: 2px; text-align: center; font-weight: 700;">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn btn-secondary" onclick="closePasscodeModal()">ยกเลิก</button>
+                <button class="btn btn-primary" id="passcodeConfirmSubmitBtn" style="background: var(--danger); border-color: var(--danger);">🗑️ ยืนยันการลบ</button>
+            </div>
+        </div>
+    </div>
+
     <!-- CLIENT APP LOGIC -->
     <script>
         // Placeholder for initial dataset from backend JSON generator
@@ -2909,7 +2933,17 @@
             }
         };
 
-        window.deleteCurrentReceipt = async function(invNoParam = '') {
+        let pendingDeleteInvNo = '';
+
+        window.closePasscodeModal = function() {
+            const modal = document.getElementById('passcodeConfirmModal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            }
+        };
+
+        window.deleteCurrentReceipt = function(invNoParam = '') {
             const targetInvNo = (invNoParam || activeReceiptInvNo || '').trim();
             if (!targetInvNo) {
                 showToast("ไม่ได้ระบุเลขที่ใบเสร็จที่จะลบ", "error");
@@ -2917,24 +2951,41 @@
             }
 
             const matchedKey = Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === targetInvNo.toLowerCase()) || targetInvNo;
+            pendingDeleteInvNo = matchedKey;
 
-            // Passcode Verification (20147 required)
-            let passcode = localStorage.getItem('edit_passcode') || '';
-            if (passcode !== '20147') {
-                const entered = prompt(`🔒 ยืนยันการลบไฟล์ใบเสร็จ [${matchedKey}]\nกรุณากรอกรหัสผ่านเพื่อดำเนินการ (Passcode):`);
-                if (entered === null) {
-                    showToast("ยกเลิกการลบไฟล์ใบเสร็จ", "warning");
-                    return;
-                }
-                if (entered.trim() !== '20147') {
-                    showToast("รหัสผ่านไม่ถูกต้อง! ไม่สามารถลบไฟล์ใบเสร็จได้ (ต้องใช้รหัส 20147)", "error");
-                    return;
-                }
-                passcode = '20147';
-                localStorage.setItem('edit_passcode', '20147');
-            } else {
-                if (!confirm(`คุณต้องการลบไฟล์ใบเสร็จสำหรับเลขที่ "${matchedKey}" ใช่หรือไม่?`)) return;
+            const promptText = document.getElementById('passcodePromptText');
+            const passInput = document.getElementById('passcodeConfirmInput');
+            const submitBtn = document.getElementById('passcodeConfirmSubmitBtn');
+            const modal = document.getElementById('passcodeConfirmModal');
+
+            if (promptText) promptText.textContent = `กรุณากรอกรหัสผ่านเพื่อยืนยันการลบใบเสร็จ [${matchedKey}]:`;
+            if (passInput) passInput.value = '';
+            
+            if (submitBtn) {
+                submitBtn.onclick = () => executeReceiptDeletion();
             }
+
+            if (modal) {
+                modal.style.display = 'flex';
+                modal.classList.add('active');
+                if (passInput) setTimeout(() => passInput.focus(), 100);
+            }
+        };
+
+        async function executeReceiptDeletion() {
+            const passInput = document.getElementById('passcodeConfirmInput');
+            const entered = (passInput ? passInput.value : '').trim();
+
+            if (entered !== '20147') {
+                showToast("รหัสผ่านไม่ถูกต้อง! ไม่สามารถลบไฟล์ใบเสร็จได้ (ต้องใช้รหัส 20147)", "error");
+                return;
+            }
+
+            localStorage.setItem('edit_passcode', '20147');
+            closePasscodeModal();
+
+            const matchedKey = pendingDeleteInvNo;
+            if (!matchedKey) return;
 
             // Delete from JS state
             delete receiptsMap[matchedKey];
@@ -2953,16 +3004,15 @@
             closeReceiptViewerModal();
             closeAttachReceiptModal();
             renderTable();
-            showToast(`🗑️ ลบไฟล์ใบเสร็จ ${matchedKey} เรียบร้อยแล้ว`, "success");
+            showToast(`🗑️ ลบไฟล์ใบเสร็จ ${matchedKey} เรียบร้อยแล้ว!`, "success");
 
             // Sync deletion to Cloud D1 Database
             try {
-                const passcode = localStorage.getItem('edit_passcode') || '20147';
                 await fetch("/api/expenses", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": "Bearer " + passcode
+                        "Authorization": "Bearer 20147"
                     },
                     body: JSON.stringify({
                         action: "save-receipt",
@@ -2973,7 +3023,7 @@
             } catch(e) {
                 console.error("Failed to sync receipt delete:", e);
             }
-        };
+        }
 
         window.openAttachReceiptModal = function(invNo = '', itemId = '') {
             activeReceiptInvNo = (invNo || '').trim();
