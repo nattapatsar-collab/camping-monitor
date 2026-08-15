@@ -2126,8 +2126,8 @@
                 <label class="form-label" style="font-weight: 600; color: var(--text-main);">อัปโหลดรูปภาพ / ไฟล์ใบเสร็จ (JPG, PNG, PDF):</label>
                 <div id="receiptDropZone" style="border: 2px dashed var(--panel-border); border-radius: 12px; padding: 24px; text-align: center; background: rgba(0,0,0,0.02); cursor: pointer; transition: all 0.2s ease;">
                     <div style="font-size: 32px; margin-bottom: 6px;">📸</div>
-                    <div style="font-size: 14px; font-weight: 600; color: var(--primary);">คลิกเพื่อเลือกไฟล์ หรือ ถ่ายรูปใบเสร็จ</div>
-                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">รองรับภาพถ่ายจากมือถือ, ไฟล์ภาพ JPG, PNG และ PDF</div>
+                    <div style="font-size: 14px; font-weight: 600; color: var(--primary);">คลิกเลือกไฟล์, ถ่ายรูป หรือ กด Ctrl+V วางรูปสลิป</div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">รองรับก๊อปปี้วางรูปสลิปจาก Clipboard (Ctrl+V / Copy-Paste), JPG, PNG และ PDF</div>
                     <input type="file" id="receiptFileInput" accept="image/*,application/pdf" style="display: none;">
                 </div>
                 <div id="receiptFilePreview" style="margin-top: 12px; display: none; text-align: center;">
@@ -2953,6 +2953,45 @@
                     }
                 };
             }
+
+            // Attach global Clipboard Paste listener for receipt images (Ctrl+V / Cmd+V)
+            window.addEventListener('paste', async (e) => {
+                const attachModal = document.getElementById('attachReceiptModal');
+                const isAttachOpen = attachModal && attachModal.classList.contains('active');
+
+                const items = (e.clipboardData || e.originalEvent.clipboardData)?.items;
+                if (!items) return;
+
+                for (const item of items) {
+                    if (item.type && item.type.indexOf('image') !== -1) {
+                        e.preventDefault();
+                        const file = item.getAsFile();
+                        if (!file) continue;
+
+                        try {
+                            const compressedBase64 = await compressImage(file);
+                            pendingReceiptBase64 = compressedBase64;
+
+                            if (!isAttachOpen) {
+                                openAttachReceiptModal('');
+                            }
+
+                            const previewBox = document.getElementById('receiptFilePreview');
+                            const previewThumb = document.getElementById('receiptPreviewThumb');
+                            const previewName = document.getElementById('receiptFilePreviewName');
+
+                            if (previewThumb) previewThumb.src = compressedBase64;
+                            if (previewName) previewName.textContent = `📋 วางรูปสลิปจาก Clipboard สำเร็จ! (${(file.size / 1024).toFixed(1)} KB)`;
+                            if (previewBox) previewBox.style.display = 'block';
+
+                            showToast("วางภาพสลิปใบเสร็จจาก Clipboard เรียบร้อยแล้ว!", "success");
+                        } catch(err) {
+                            showToast("อ่านไฟล์รูปภาพจาก Clipboard ไม่สำเร็จ: " + err.message, "error");
+                        }
+                        break;
+                    }
+                }
+            });
 
             await fetchExpenses();
         }
