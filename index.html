@@ -3105,10 +3105,18 @@
                 tr.setAttribute('data-id', item.id);
                 tr.classList.add('clickable-row');
                 tr.addEventListener('click', (e) => {
-                    // Ignore clicks on edit/delete action buttons
-                    if (e.target.closest('.icon-btn')) return;
+                    // Ignore clicks on edit/delete action buttons or receipt badges
+                    if (e.target.closest('.icon-btn') || e.target.closest('.receipt-badge')) return;
                     openDetailsModal(item);
                 });
+                
+                const invText = (item.invNo || '').trim();
+                const hasReceipt = invText && receiptsMap[invText];
+                const receiptBadgeHtml = invText 
+                    ? (hasReceipt 
+                        ? `<button class="receipt-badge attached" onclick="event.stopPropagation(); viewReceiptByInvNo('${invText}')" title="คลิกเพื่อดูรูปใบเสร็จแนบ">🧾 ดูใบเสร็จ</button>` 
+                        : `<button class="receipt-badge add-receipt" onclick="event.stopPropagation(); openAttachReceiptModal('${invText}')" title="คลิกเพื่อแนบรูปใบเสร็จ">+ แนบใบเสร็จ</button>`)
+                    : `<button class="receipt-badge add-receipt" onclick="event.stopPropagation(); openAttachReceiptModal('')" title="คลิกเพื่อแนบใบเสร็จ">+ แนบใบเสร็จ</button>`;
                 
                 tr.innerHTML = `
                     <td data-label="ID" class="bold" style="color: var(--primary); font-family: var(--font-display);">${item.id || ''}</td>
