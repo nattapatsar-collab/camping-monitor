@@ -2145,9 +2145,12 @@
                 <input type="url" class="form-input" id="attachReceiptUrlInput" placeholder="https://example.com/receipt.jpg" style="font-size: 13px;">
             </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 12px;">
-                <button class="btn btn-secondary" onclick="closeAttachReceiptModal()">ยกเลิก</button>
-                <button class="btn btn-primary" onclick="saveAttachedReceipt()">💾 บันทึกแนบใบเสร็จ</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px;">
+                <button class="btn" id="attachReceiptDeleteBtn" style="background: var(--danger-glow); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); padding: 8px 14px; font-size: 12px; display: none;" onclick="deleteCurrentReceipt()">🗑️ ลบรูปใบเสร็จนี้</button>
+                <div style="display: flex; gap: 12px; margin-left: auto;">
+                    <button class="btn btn-secondary" onclick="closeAttachReceiptModal()">ยกเลิก</button>
+                    <button class="btn btn-primary" onclick="saveAttachedReceipt()">💾 บันทึกแนบใบเสร็จ</button>
+                </div>
             </div>
         </div>
     </div>
@@ -2803,23 +2806,54 @@
             if (modal) modal.classList.remove('active');
         };
 
-        window.deleteCurrentReceipt = async function() {
-            if (!activeReceiptInvNo) return;
-            if (!confirm(`คุณต้องการลบไฟล์ใบเสร็จสำหรับเลขที่ ${activeReceiptInvNo} ใช่หรือไม่?`)) return;
+        window.deleteCurrentReceipt = async function(invNoParam = '') {
+            const targetInvNo = (invNoParam || activeReceiptInvNo || '').trim();
+            if (!targetInvNo) {
+                showToast("ไม่ได้ระบุเลขที่ใบเสร็จที่จะลบ", "error");
+                return;
+            }
 
-            const matchedKey = Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === activeReceiptInvNo.toLowerCase()) || activeReceiptInvNo;
+            const matchedKey = Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === targetInvNo.toLowerCase()) || targetInvNo;
+
+            // Passcode Verification (20147 required)
+            let passcode = localStorage.getItem('edit_passcode') || '';
+            if (passcode !== '20147') {
+                const entered = prompt(`🔒 ยืนยันการลบไฟล์ใบเสร็จ [${matchedKey}]\nกรุณากรอกรหัสผ่านเพื่อดำเนินการ (Passcode):`);
+                if (entered === null) {
+                    showToast("ยกเลิกการลบไฟล์ใบเสร็จ", "warning");
+                    return;
+                }
+                if (entered.trim() !== '20147') {
+                    showToast("รหัสผ่านไม่ถูกต้อง! ไม่สามารถลบไฟล์ใบเสร็จได้ (ต้องใช้รหัส 20147)", "error");
+                    return;
+                }
+                passcode = '20147';
+                localStorage.setItem('edit_passcode', '20147');
+            } else {
+                if (!confirm(`คุณต้องการลบไฟล์ใบเสร็จสำหรับเลขที่ "${matchedKey}" ใช่หรือไม่?`)) return;
+            }
+
+            // Remove from receiptsMap state
             delete receiptsMap[matchedKey];
+            Object.keys(receiptsMap).forEach(k => {
+                if (k.trim().toLowerCase() === matchedKey.toLowerCase()) {
+                    delete receiptsMap[k];
+                }
+            });
             localStorage.setItem('camping_receipts', JSON.stringify(receiptsMap));
-            closeReceiptViewerModal();
-            renderTable();
-            showToast(`ลบไฟล์ใบเสร็จ ${matchedKey} เรียบร้อยแล้ว`, "success");
 
+            closeReceiptViewerModal();
+            closeAttachReceiptModal();
+            renderTable();
+            showToast(`🗑️ ลบไฟล์ใบเสร็จ ${matchedKey} เรียบร้อยแล้ว`, "success");
+
+            // Sync deletion to Cloud D1 Database
             try {
                 await fetch("/api/expenses", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": "Bearer 123456"
+                        "Authorization": "Bearer " + passcode
                     },
                     body: JSON.stringify({
                         action: "save-receipt",
@@ -2827,7 +2861,9 @@
                         receiptUrl: ""
                     })
                 });
-            } catch(e) {}
+            } catch(e) {
+                console.error("Failed to sync receipt delete:", e);
+            }
         };
 
         window.openAttachReceiptModal = function(invNo = '', itemId = '') {
@@ -2840,6 +2876,7 @@
             const urlInput = document.getElementById('attachReceiptUrlInput');
             const previewBox = document.getElementById('receiptFilePreview');
             const previewThumb = document.getElementById('receiptPreviewThumb');
+            const deleteBtn = document.getElementById('attachReceiptDeleteBtn');
 
             // Auto suggest item's invNo if available
             if (!activeReceiptInvNo && activeAttachItemId) {
@@ -2862,9 +2899,11 @@
                     if (previewThumb) previewThumb.src = existingUrl;
                     const previewName = document.getElementById('receiptFilePreviewName');
                     if (previewName) previewName.textContent = 'มีไฟล์ใบเสร็จแนบอยู่แล้วในระบบ (คลิกเลือกใหม่เพื่อเปลี่ยนภาพ)';
+                    if (deleteBtn) deleteBtn.style.display = 'inline-flex';
                 } else {
                     previewBox.style.display = 'none';
                     if (previewThumb) previewThumb.src = '';
+                    if (deleteBtn) deleteBtn.style.display = 'none';
                 }
             }
 
