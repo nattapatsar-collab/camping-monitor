@@ -2646,8 +2646,10 @@
             } catch(e) {}
         };
 
-        // Helper: Canvas Image Compression for Receipts
-        function compressImage(file, maxWidth = 1200, quality = 0.8) {
+        let activeAttachItemId = '';
+
+        // Helper: Canvas Image Compression for Receipts (Optimized ~80KB high resolution)
+        function compressImage(file, maxWidth = 1000, quality = 0.75) {
             return new Promise((resolve, reject) => {
                 if (!file.type.startsWith('image/')) {
                     const reader = new FileReader();
@@ -2702,11 +2704,27 @@
         }
 
         window.viewReceiptByInvNo = function(invNo) {
-            if (!invNo || !receiptsMap[invNo]) {
-                showToast("ไม่พบไฟล์ใบเสร็จสำหรับเลขที่นี้", "warning");
+            const cleanInvNo = (invNo || '').trim();
+            if (!cleanInvNo) {
+                showToast("ไม่ได้ระบุเลขที่ใบเสร็จ", "warning");
                 return;
             }
-            activeReceiptInvNo = invNo;
+
+            // Case-insensitive & whitespace-flexible key lookup
+            const matchedKey = Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === cleanInvNo.toLowerCase()) || cleanInvNo;
+            const receiptUrl = receiptsMap[matchedKey];
+
+            if (!receiptUrl) {
+                showToast(`ไม่พบไฟล์ใบเสร็จสำหรับเลขที่ "${cleanInvNo}"`, "warning");
+                return;
+            }
+            
+            activeReceiptInvNo = matchedKey;
+            
+            // Close details modal if open so viewer is cleanly visible
+            const detailsModal = document.getElementById('detailsModal');
+            if (detailsModal) detailsModal.classList.remove('active');
+
             const modal = document.getElementById('receiptViewerModal');
             const titleEl = document.getElementById('receiptViewerTitle');
             const invEl = document.getElementById('receiptViewerInvNo');
@@ -2716,11 +2734,10 @@
             const itemsListEl = document.getElementById('receiptViewerItemsList');
             const downloadLink = document.getElementById('receiptDownloadLink');
 
-            const receiptUrl = receiptsMap[invNo];
-            if (titleEl) titleEl.textContent = `🧾 ใบเสร็จแนบ: ${invNo}`;
-            if (invEl) invEl.textContent = invNo;
+            if (titleEl) titleEl.textContent = `🧾 ใบเสร็จแนบ: ${matchedKey}`;
+            if (invEl) invEl.textContent = matchedKey;
 
-            const matchingItems = expenses.filter(i => (i.invNo || '').trim() === invNo.trim());
+            const matchingItems = expenses.filter(i => (i.invNo || '').trim().toLowerCase() === matchedKey.toLowerCase());
             const totalSum = matchingItems.reduce((acc, curr) => acc + (parseFloat(curr.total) || 0), 0);
             if (sumEl) sumEl.textContent = formatBaht(totalSum);
 
@@ -2730,10 +2747,10 @@
                         <span>• <b>[${i.id}]</b> ${i.item} (${i.location})</span>
                         <span style="font-weight:600; color: var(--primary);">${formatBaht(i.total)}</span>
                     </div>
-                `).join('') || '<div>ไม่มีรายการระบุ</div>';
+                `).join('') || '<div style="color: var(--text-muted);">ไม่มีรายการค่าใช้จ่ายที่ผูกกับบิลนี้</div>';
             }
 
-            if (receiptUrl.startsWith('data:application/pdf') || receiptUrl.endsWith('.pdf')) {
+            if (receiptUrl.startsWith('data:application/pdf') || receiptUrl.toLowerCase().endsWith('.pdf')) {
                 if (imgEl) imgEl.style.display = 'none';
                 if (pdfEl) {
                     pdfEl.style.display = 'block';
@@ -2749,7 +2766,7 @@
 
             if (downloadLink) {
                 downloadLink.href = receiptUrl;
-                downloadLink.download = `Receipt_${invNo}.jpg`;
+                downloadLink.download = `Receipt_${matchedKey.replace(/[^a-zA-Z0-9_-]/g, '_')}.jpg`;
             }
 
             if (modal) modal.classList.add('active');
@@ -2764,11 +2781,12 @@
             if (!activeReceiptInvNo) return;
             if (!confirm(`คุณต้องการลบไฟล์ใบเสร็จสำหรับเลขที่ ${activeReceiptInvNo} ใช่หรือไม่?`)) return;
 
-            delete receiptsMap[activeReceiptInvNo];
+            const matchedKey = Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === activeReceiptInvNo.toLowerCase()) || activeReceiptInvNo;
+            delete receiptsMap[matchedKey];
             localStorage.setItem('camping_receipts', JSON.stringify(receiptsMap));
             closeReceiptViewerModal();
             renderTable();
-            showToast(`ลบไฟล์ใบเสร็จ ${activeReceiptInvNo} เรียบร้อยแล้ว`, "success");
+            showToast(`ลบไฟล์ใบเสร็จ ${matchedKey} เรียบร้อยแล้ว`, "success");
 
             try {
                 await fetch("/api/expenses", {
@@ -2779,26 +2797,50 @@
                     },
                     body: JSON.stringify({
                         action: "save-receipt",
-                        invNo: activeReceiptInvNo,
+                        invNo: matchedKey,
                         receiptUrl: ""
                     })
                 });
             } catch(e) {}
         };
 
-        window.openAttachReceiptModal = function(invNo = '') {
-            activeReceiptInvNo = invNo;
+        window.openAttachReceiptModal = function(invNo = '', itemId = '') {
+            activeReceiptInvNo = (invNo || '').trim();
+            activeAttachItemId = itemId || '';
             pendingReceiptBase64 = '';
+            
             const modal = document.getElementById('attachReceiptModal');
             const invInput = document.getElementById('attachReceiptInvNoInput');
             const urlInput = document.getElementById('attachReceiptUrlInput');
             const previewBox = document.getElementById('receiptFilePreview');
             const previewThumb = document.getElementById('receiptPreviewThumb');
 
-            if (invInput) invInput.value = invNo;
-            if (urlInput) urlInput.value = receiptsMap[invNo] && !receiptsMap[invNo].startsWith('data:') ? receiptsMap[invNo] : '';
-            if (previewBox) previewBox.style.display = 'none';
-            if (previewThumb) previewThumb.src = '';
+            // Auto suggest item's invNo if available
+            if (!activeReceiptInvNo && activeAttachItemId) {
+                const foundItem = expenses.find(x => x.id === activeAttachItemId);
+                if (foundItem && foundItem.invNo) {
+                    activeReceiptInvNo = foundItem.invNo.trim();
+                }
+            }
+
+            if (invInput) invInput.value = activeReceiptInvNo;
+
+            const matchedKey = Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === activeReceiptInvNo.toLowerCase());
+            const existingUrl = matchedKey ? receiptsMap[matchedKey] : '';
+
+            if (urlInput) urlInput.value = (existingUrl && !existingUrl.startsWith('data:')) ? existingUrl : '';
+            
+            if (previewBox) {
+                if (existingUrl) {
+                    previewBox.style.display = 'block';
+                    if (previewThumb) previewThumb.src = existingUrl;
+                    const previewName = document.getElementById('receiptFilePreviewName');
+                    if (previewName) previewName.textContent = 'มีไฟล์ใบเสร็จแนบอยู่แล้วในระบบ (คลิกเลือกใหม่เพื่อเปลี่ยนภาพ)';
+                } else {
+                    previewBox.style.display = 'none';
+                    if (previewThumb) previewThumb.src = '';
+                }
+            }
 
             if (modal) modal.classList.add('active');
         };
@@ -2812,13 +2854,24 @@
             const invInput = document.getElementById('attachReceiptInvNoInput');
             const urlInput = document.getElementById('attachReceiptUrlInput');
             
-            const targetInvNo = (invInput ? invInput.value : '').trim();
+            let targetInvNo = (invInput ? invInput.value : '').trim();
+
+            if (!targetInvNo && activeAttachItemId) {
+                targetInvNo = "INV-" + activeAttachItemId;
+            }
+
             if (!targetInvNo) {
                 showToast("กรุณาระบุเลขที่ใบเสร็จ / ใบเสนอราคา (INV. No.)", "error");
                 return;
             }
 
             let finalReceiptData = pendingReceiptBase64 || (urlInput ? urlInput.value : '').trim();
+            const matchedKey = Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === targetInvNo.toLowerCase());
+            
+            if (!finalReceiptData && matchedKey) {
+                finalReceiptData = receiptsMap[matchedKey];
+            }
+
             if (!finalReceiptData) {
                 showToast("กรุณาเลือกไฟล์ภาพถ่ายใบเสร็จ หรือวาง URL ของใบเสร็จ", "error");
                 return;
@@ -2826,9 +2879,30 @@
 
             receiptsMap[targetInvNo] = finalReceiptData;
             localStorage.setItem('camping_receipts', JSON.stringify(receiptsMap));
+
+            // Update item.invNo if attached to an item without invNo
+            if (activeAttachItemId) {
+                const itemToUpdate = expenses.find(x => x.id === activeAttachItemId);
+                if (itemToUpdate && (!itemToUpdate.invNo || itemToUpdate.invNo.trim() !== targetInvNo)) {
+                    itemToUpdate.invNo = targetInvNo;
+                    saveToLocalStorage(expenses);
+                    
+                    try {
+                        await fetch("/api/expenses", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": "Bearer 123456"
+                            },
+                            body: JSON.stringify({ action: "update", expense: itemToUpdate })
+                        });
+                    } catch(e) {}
+                }
+            }
+
             closeAttachReceiptModal();
             renderTable();
-            showToast(`แนบไฟล์ใบเสร็จสำหรับ ${targetInvNo} สำเร็จเรียบร้อยแล้ว!`, "success");
+            showToast(`บันทึกแนบไฟล์ใบเสร็จสำหรับ ${targetInvNo} สำเร็จเรียบร้อยแล้ว!`, "success");
 
             try {
                 await fetch("/api/expenses", {
@@ -3111,12 +3185,15 @@
                 });
                 
                 const invText = (item.invNo || '').trim();
-                const hasReceipt = invText && receiptsMap[invText];
+                const matchedKey = invText ? Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === invText.toLowerCase()) : null;
+                const hasReceipt = Boolean(matchedKey && receiptsMap[matchedKey]);
+                
+                const safeInvText = invText.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 const receiptBadgeHtml = invText 
                     ? (hasReceipt 
-                        ? `<button class="receipt-badge attached" onclick="event.stopPropagation(); viewReceiptByInvNo('${invText}')" title="คลิกเพื่อดูรูปใบเสร็จแนบ">🧾 ดูใบเสร็จ</button>` 
-                        : `<button class="receipt-badge add-receipt" onclick="event.stopPropagation(); openAttachReceiptModal('${invText}')" title="คลิกเพื่อแนบรูปใบเสร็จ">+ แนบใบเสร็จ</button>`)
-                    : `<button class="receipt-badge add-receipt" onclick="event.stopPropagation(); openAttachReceiptModal('')" title="คลิกเพื่อแนบใบเสร็จ">+ แนบใบเสร็จ</button>`;
+                        ? `<button class="receipt-badge attached" onclick="event.stopPropagation(); viewReceiptByInvNo('${safeInvText}')" title="คลิกเพื่อดูรูปใบเสร็จแนบ">🧾 ดูใบเสร็จ</button>` 
+                        : `<button class="receipt-badge add-receipt" onclick="event.stopPropagation(); openAttachReceiptModal('${safeInvText}', '${item.id}')" title="คลิกเพื่อแนบรูปใบเสร็จ">+ แนบใบเสร็จ</button>`)
+                    : `<button class="receipt-badge add-receipt" onclick="event.stopPropagation(); openAttachReceiptModal('', '${item.id}')" title="คลิกเพื่อแนบใบเสร็จ">+ แนบใบเสร็จ</button>`;
                 
                 tr.innerHTML = `
                     <td data-label="ID" class="bold" style="color: var(--primary); font-family: var(--font-display);">${item.id || ''}</td>
@@ -3832,16 +3909,18 @@
             badgesDiv.innerHTML += budgetBadge;
 
             const invText = (item.invNo || '').trim();
-            const hasReceipt = invText && receiptsMap[invText];
+            const matchedKey = invText ? Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === invText.toLowerCase()) : null;
+            const hasReceipt = Boolean(matchedKey && receiptsMap[matchedKey]);
             const invEl = document.getElementById('detailInvNo');
             const receiptBtnContainer = document.getElementById('detailReceiptBtnContainer');
 
+            const safeInvText = invText.replace(/'/g, "\\'").replace(/"/g, '&quot;');
             if (invEl) invEl.textContent = invText || 'ไม่ได้ระบุเลขที่บิล';
             if (receiptBtnContainer) {
-                if (invText && hasReceipt) {
-                    receiptBtnContainer.innerHTML = `<button class="receipt-badge attached" onclick="closeDetailsModal(); viewReceiptByInvNo('${invText}')">🧾 ดูรูปใบเสร็จแนบ</button>`;
+                if (hasReceipt) {
+                    receiptBtnContainer.innerHTML = `<button class="receipt-badge attached" onclick="closeDetailsModal(); viewReceiptByInvNo('${safeInvText}')">🧾 ดูรูปใบเสร็จแนบ</button>`;
                 } else {
-                    receiptBtnContainer.innerHTML = `<button class="receipt-badge add-receipt" onclick="closeDetailsModal(); openAttachReceiptModal('${invText}')">+ แนบรูปใบเสร็จ</button>`;
+                    receiptBtnContainer.innerHTML = `<button class="receipt-badge add-receipt" onclick="closeDetailsModal(); openAttachReceiptModal('${safeInvText}', '${item.id}')">+ แนบรูปใบเสร็จ</button>`;
                 }
             }
 
