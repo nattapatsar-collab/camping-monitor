@@ -2708,14 +2708,77 @@
             });
         }
 
-        // Fetch receipts mapping from D1 & LocalStorage
+        // IndexedDB Receipts Storage (Unlimited capacity, bypasses 5MB LocalStorage limit)
+        function getReceiptsDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open("CampingReceiptsDB", 1);
+                req.onupgradeneeded = e => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains("receipts")) {
+                        db.createObjectStore("receipts");
+                    }
+                };
+                req.onsuccess = e => resolve(e.target.result);
+                req.onerror = e => reject(e.target.error);
+            });
+        }
+
+        async function saveReceiptToDB(invNo, dataUrl) {
+            if (!invNo) return;
+            try {
+                const db = await getReceiptsDB();
+                const tx = db.transaction("receipts", "readwrite");
+                const store = tx.objectStore("receipts");
+                const key = invNo.trim().toLowerCase();
+                if (dataUrl) {
+                    store.put(dataUrl, key);
+                } else {
+                    store.delete(key);
+                }
+            } catch(e) {
+                console.warn("IndexedDB Save error:", e);
+            }
+        }
+
+        async function loadReceiptsFromDB() {
+            try {
+                const db = await getReceiptsDB();
+                const tx = db.transaction("receipts", "readonly");
+                const store = tx.objectStore("receipts");
+                return new Promise((resolve) => {
+                    const req = store.openCursor();
+                    const map = {};
+                    req.onsuccess = e => {
+                        const cursor = e.target.result;
+                        if (cursor) {
+                            map[cursor.key] = cursor.value;
+                            cursor.continue();
+                        } else {
+                            resolve(map);
+                        }
+                    };
+                    req.onerror = () => resolve({});
+                });
+            } catch(e) {
+                return {};
+            }
+        }
+
+        // Fetch receipts mapping from IndexedDB, D1 & LocalStorage
         async function fetchReceipts() {
             try {
+                // 1. Load from IndexedDB
+                const idbData = await loadReceiptsFromDB();
+                Object.assign(receiptsMap, idbData);
+
+                // 2. Load from LocalStorage
                 const localData = localStorage.getItem('camping_receipts');
                 if (localData) {
-                    receiptsMap = JSON.parse(localData) || {};
+                    const parsed = JSON.parse(localData) || {};
+                    Object.assign(receiptsMap, parsed);
                 }
 
+                // 3. Load from Cloud D1 API
                 const res = await fetch("/api/expenses?type=receipts");
                 if (res.ok) {
                     const data = await res.json();
@@ -2723,9 +2786,10 @@
                         data.forEach(item => {
                             if (item.invNo && item.receipt_url) {
                                 receiptsMap[item.invNo.trim()] = item.receipt_url;
+                                receiptsMap[item.invNo.trim().toLowerCase()] = item.receipt_url;
+                                saveReceiptToDB(item.invNo, item.receipt_url);
                             }
                         });
-                        localStorage.setItem('camping_receipts', JSON.stringify(receiptsMap));
                     }
                 }
             } catch(e) {
@@ -2872,14 +2936,19 @@
                 if (!confirm(`คุณต้องการลบไฟล์ใบเสร็จสำหรับเลขที่ "${matchedKey}" ใช่หรือไม่?`)) return;
             }
 
-            // Remove from receiptsMap state
+            // Delete from JS state
             delete receiptsMap[matchedKey];
             Object.keys(receiptsMap).forEach(k => {
                 if (k.trim().toLowerCase() === matchedKey.toLowerCase()) {
                     delete receiptsMap[k];
                 }
             });
-            localStorage.setItem('camping_receipts', JSON.stringify(receiptsMap));
+
+            // Delete from IndexedDB & LocalStorage
+            await saveReceiptToDB(matchedKey, "");
+            try {
+                localStorage.setItem('camping_receipts', JSON.stringify(receiptsMap));
+            } catch(e) {}
 
             closeReceiptViewerModal();
             closeAttachReceiptModal();
@@ -2888,6 +2957,7 @@
 
             // Sync deletion to Cloud D1 Database
             try {
+                const passcode = localStorage.getItem('edit_passcode') || '20147';
                 await fetch("/api/expenses", {
                     method: "POST",
                     headers: {
@@ -2987,8 +3057,19 @@
                 return;
             }
 
+            // Save to JS state
             receiptsMap[targetInvNo] = finalReceiptData;
-            localStorage.setItem('camping_receipts', JSON.stringify(receiptsMap));
+            receiptsMap[targetInvNo.toLowerCase()] = finalReceiptData;
+
+            // Save to IndexedDB (Unlimited capacity)
+            await saveReceiptToDB(targetInvNo, finalReceiptData);
+
+            // Safe LocalStorage backup
+            try {
+                localStorage.setItem('camping_receipts', JSON.stringify(receiptsMap));
+            } catch(e) {
+                console.warn("LocalStorage full, saved in IndexedDB instead:", e);
+            }
 
             // Update item.invNo if attached to an item without invNo
             if (activeAttachItemId) {
@@ -2998,11 +3079,12 @@
                     saveToLocalStorage(expenses);
                     
                     try {
+                        const passcode = localStorage.getItem('edit_passcode') || '20147';
                         await fetch("/api/expenses", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
-                                "Authorization": "Bearer 123456"
+                                "Authorization": "Bearer " + passcode
                             },
                             body: JSON.stringify({ action: "update", expense: itemToUpdate })
                         });
@@ -3015,11 +3097,12 @@
             showToast(`บันทึกแนบไฟล์ใบเสร็จสำหรับ ${targetInvNo} สำเร็จเรียบร้อยแล้ว!`, "success");
 
             try {
+                const passcode = localStorage.getItem('edit_passcode') || '20147';
                 await fetch("/api/expenses", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": "Bearer 123456"
+                        "Authorization": "Bearer " + passcode
                     },
                     body: JSON.stringify({
                         action: "save-receipt",
