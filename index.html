@@ -2093,7 +2093,9 @@
 
             <!-- Receipt Image Container -->
             <div style="width: 100%; max-height: 440px; overflow: auto; background: rgba(0,0,0,0.05); border-radius: 12px; border: 1px solid var(--panel-border); display: flex; align-items: center; justify-content: center; padding: 12px; margin-bottom: 16px;">
-                <img id="receiptViewerImg" src="" alt="Receipt Image" style="max-width: 100%; max-height: 410px; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.12);">
+                <a id="receiptImgLink" href="#" target="_blank" title="คลิกเพื่อเปิดดูรูปขนาดเต็มในแท็บใหม่" style="display: flex; justify-content: center; align-items: center; width: 100%;">
+                    <img id="receiptViewerImg" src="" alt="Receipt Image" style="max-width: 100%; max-height: 410px; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); cursor: zoom-in;">
+                </a>
                 <iframe id="receiptViewerPdf" src="" style="width: 100%; height: 410px; border: none; display: none;"></iframe>
             </div>
 
@@ -2738,6 +2740,9 @@
                 try {
                     const localData = JSON.parse(localStorage.getItem('camping_receipts') || '{}');
                     matchedKey = Object.keys(localData).find(k => k.trim().toLowerCase() === cleanInvNo.toLowerCase());
+                    if (!matchedKey && itemId) {
+                        matchedKey = Object.keys(localData).find(k => k.trim().toLowerCase() === ("inv-" + itemId).toLowerCase());
+                    }
                     if (matchedKey) {
                         receiptUrl = localData[matchedKey];
                         receiptsMap[matchedKey] = receiptUrl;
@@ -2746,7 +2751,7 @@
             }
 
             if (!receiptUrl) {
-                showToast(`ไม่พบไฟล์ใบเสร็จสำหรับเลขที่ "${cleanInvNo || itemId}"`, "warning");
+                showToast(`ไม่พบไฟล์ใบเสร็จสำหรับรายการนี้ (ระบบเปิดหน้าต่างแนบไฟล์ให้คุณ)`, "warning");
                 openAttachReceiptModal(cleanInvNo, itemId);
                 return;
             }
@@ -2754,13 +2759,17 @@
             activeReceiptInvNo = matchedKey || cleanInvNo;
 
             const detailsModal = document.getElementById('detailsModal');
-            if (detailsModal) detailsModal.classList.remove('active');
+            if (detailsModal) {
+                detailsModal.classList.remove('active');
+                detailsModal.style.display = 'none';
+            }
 
             const modal = document.getElementById('receiptViewerModal');
             const titleEl = document.getElementById('receiptViewerTitle');
             const invEl = document.getElementById('receiptViewerInvNo');
             const sumEl = document.getElementById('receiptViewerTotalSum');
             const imgEl = document.getElementById('receiptViewerImg');
+            const imgLink = document.getElementById('receiptImgLink');
             const pdfEl = document.getElementById('receiptViewerPdf');
             const itemsListEl = document.getElementById('receiptViewerItemsList');
             const downloadLink = document.getElementById('receiptDownloadLink');
@@ -2768,7 +2777,7 @@
             if (titleEl) titleEl.textContent = `🧾 ใบเสร็จแนบ: ${activeReceiptInvNo}`;
             if (invEl) invEl.textContent = activeReceiptInvNo;
 
-            const matchingItems = expenses.filter(i => (i.invNo || '').trim().toLowerCase() === activeReceiptInvNo.toLowerCase());
+            const matchingItems = expenses.filter(i => (i.invNo || '').trim().toLowerCase() === activeReceiptInvNo.toLowerCase() || i.id === itemId);
             const totalSum = matchingItems.reduce((acc, curr) => acc + (parseFloat(curr.total) || 0), 0);
             if (sumEl) sumEl.textContent = formatBaht(totalSum);
 
@@ -2793,6 +2802,9 @@
                     imgEl.style.display = 'block';
                     imgEl.src = receiptUrl;
                 }
+                if (imgLink) {
+                    imgLink.href = receiptUrl;
+                }
             }
 
             if (downloadLink) {
@@ -2800,12 +2812,18 @@
                 downloadLink.download = `Receipt_${activeReceiptInvNo.replace(/[^a-zA-Z0-9_-]/g, '_')}.jpg`;
             }
 
-            if (modal) modal.classList.add('active');
+            if (modal) {
+                modal.style.display = 'flex';
+                modal.classList.add('active');
+            }
         };
 
         window.closeReceiptViewerModal = function() {
             const modal = document.getElementById('receiptViewerModal');
-            if (modal) modal.classList.remove('active');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            }
         };
 
         window.deleteCurrentReceipt = async function(invNoParam = '') {
@@ -2909,12 +2927,18 @@
                 }
             }
 
-            if (modal) modal.classList.add('active');
+            if (modal) {
+                modal.style.display = 'flex';
+                modal.classList.add('active');
+            }
         };
 
         window.closeAttachReceiptModal = function() {
             const modal = document.getElementById('attachReceiptModal');
-            if (modal) modal.classList.remove('active');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            }
         };
 
         window.saveAttachedReceipt = async function() {
@@ -3065,6 +3089,7 @@
                 overlay.addEventListener('click', (e) => {
                     if (e.target === overlay) {
                         overlay.classList.remove('active');
+                        overlay.style.display = 'none';
                     }
                 });
             });
@@ -3308,8 +3333,8 @@
                 const safeInvText = invText.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
                 const receiptBadgeHtml = hasReceipt
-                    ? `<button class="receipt-badge attached" onclick="event.stopPropagation(); viewReceiptByInvNo('${safeInvText}', '${item.id}')" title="คลิกเพื่อดูรูปใบเสร็จแนบ">🧾 ดูใบเสร็จ</button>`
-                    : `<button class="receipt-badge add-receipt" onclick="event.stopPropagation(); openAttachReceiptModal('${safeInvText}', '${item.id}')" title="คลิกเพื่อแนบรูปใบเสร็จ">+ แนบใบเสร็จ</button>`;
+                    ? `<button class="receipt-badge attached" onclick="viewReceiptByInvNo('${safeInvText}', '${item.id}')" title="คลิกเพื่อดูรูปใบเสร็จแนบ">🧾 ดูใบเสร็จ</button>`
+                    : `<button class="receipt-badge add-receipt" onclick="openAttachReceiptModal('${safeInvText}', '${item.id}')" title="คลิกเพื่อแนบรูปใบเสร็จ">+ แนบใบเสร็จ</button>`;
                 
                 tr.innerHTML = `
                     <td data-label="ID" class="bold" style="color: var(--primary); font-family: var(--font-display);">${item.id || ''}</td>
