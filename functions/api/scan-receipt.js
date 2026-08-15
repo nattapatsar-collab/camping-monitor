@@ -57,18 +57,36 @@ export async function onRequestPost(context) {
             }
         };
 
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        const geminiResponse = await fetch(geminiUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(requestPayload)
-        });
+        const modelsToTry = [
+            "gemini-1.5-flash",
+            "gemini-2.0-flash-exp",
+            "gemini-1.5-pro"
+        ];
 
-        if (!geminiResponse.ok) {
-            const errorText = await geminiResponse.text();
-            throw new Error(`Gemini API returned status ${geminiResponse.status}: ${errorText}`);
+        let geminiResponse = null;
+        let lastErrorText = "";
+
+        for (const modelName of modelsToTry) {
+            const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+            const resp = await fetch(geminiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(requestPayload)
+            });
+
+            if (resp.ok) {
+                geminiResponse = resp;
+                break;
+            } else {
+                lastErrorText = await resp.text();
+                console.warn(`Model ${modelName} returned error: ${lastErrorText}`);
+            }
+        }
+
+        if (!geminiResponse) {
+            throw new Error(`Gemini API error: ${lastErrorText}`);
         }
 
         const result = await geminiResponse.json();
