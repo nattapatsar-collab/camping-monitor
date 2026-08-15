@@ -818,6 +818,10 @@
             pointer-events: auto;
         }
 
+        #receiptViewerModal, #attachReceiptModal {
+            z-index: 300 !important;
+        }
+
         .modal-container {
             width: 100%;
             max-width: 600px;
@@ -2703,25 +2707,47 @@
             }
         }
 
-        window.viewReceiptByInvNo = function(invNo) {
-            const cleanInvNo = (invNo || '').trim();
-            if (!cleanInvNo) {
-                showToast("ไม่ได้ระบุเลขที่ใบเสร็จ", "warning");
-                return;
+        window.viewReceiptByInvNo = function(invNo = '', itemId = '') {
+            let cleanInvNo = (invNo || '').trim();
+            
+            if (!cleanInvNo && itemId) {
+                const foundItem = expenses.find(x => x.id === itemId);
+                if (foundItem && foundItem.invNo) {
+                    cleanInvNo = foundItem.invNo.trim();
+                } else {
+                    cleanInvNo = "INV-" + itemId;
+                }
             }
 
-            // Case-insensitive & whitespace-flexible key lookup
-            const matchedKey = Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === cleanInvNo.toLowerCase()) || cleanInvNo;
-            const receiptUrl = receiptsMap[matchedKey];
+            // Flexible key lookup in receiptsMap
+            let matchedKey = Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === cleanInvNo.toLowerCase());
+            
+            if (!matchedKey && itemId) {
+                matchedKey = Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === ("inv-" + itemId).toLowerCase());
+            }
+
+            let receiptUrl = matchedKey ? receiptsMap[matchedKey] : null;
+
+            // Fallback: check localStorage directly
+            if (!receiptUrl) {
+                try {
+                    const localData = JSON.parse(localStorage.getItem('camping_receipts') || '{}');
+                    matchedKey = Object.keys(localData).find(k => k.trim().toLowerCase() === cleanInvNo.toLowerCase());
+                    if (matchedKey) {
+                        receiptUrl = localData[matchedKey];
+                        receiptsMap[matchedKey] = receiptUrl;
+                    }
+                } catch(e) {}
+            }
 
             if (!receiptUrl) {
-                showToast(`ไม่พบไฟล์ใบเสร็จสำหรับเลขที่ "${cleanInvNo}"`, "warning");
+                showToast(`ไม่พบไฟล์ใบเสร็จสำหรับเลขที่ "${cleanInvNo || itemId}"`, "warning");
+                openAttachReceiptModal(cleanInvNo, itemId);
                 return;
             }
-            
-            activeReceiptInvNo = matchedKey;
-            
-            // Close details modal if open so viewer is cleanly visible
+
+            activeReceiptInvNo = matchedKey || cleanInvNo;
+
             const detailsModal = document.getElementById('detailsModal');
             if (detailsModal) detailsModal.classList.remove('active');
 
@@ -2734,10 +2760,10 @@
             const itemsListEl = document.getElementById('receiptViewerItemsList');
             const downloadLink = document.getElementById('receiptDownloadLink');
 
-            if (titleEl) titleEl.textContent = `🧾 ใบเสร็จแนบ: ${matchedKey}`;
-            if (invEl) invEl.textContent = matchedKey;
+            if (titleEl) titleEl.textContent = `🧾 ใบเสร็จแนบ: ${activeReceiptInvNo}`;
+            if (invEl) invEl.textContent = activeReceiptInvNo;
 
-            const matchingItems = expenses.filter(i => (i.invNo || '').trim().toLowerCase() === matchedKey.toLowerCase());
+            const matchingItems = expenses.filter(i => (i.invNo || '').trim().toLowerCase() === activeReceiptInvNo.toLowerCase());
             const totalSum = matchingItems.reduce((acc, curr) => acc + (parseFloat(curr.total) || 0), 0);
             if (sumEl) sumEl.textContent = formatBaht(totalSum);
 
@@ -2766,7 +2792,7 @@
 
             if (downloadLink) {
                 downloadLink.href = receiptUrl;
-                downloadLink.download = `Receipt_${matchedKey.replace(/[^a-zA-Z0-9_-]/g, '_')}.jpg`;
+                downloadLink.download = `Receipt_${activeReceiptInvNo.replace(/[^a-zA-Z0-9_-]/g, '_')}.jpg`;
             }
 
             if (modal) modal.classList.add('active');
@@ -3224,15 +3250,16 @@
                 });
                 
                 const invText = (item.invNo || '').trim();
-                const matchedKey = invText ? Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === invText.toLowerCase()) : null;
-                const hasReceipt = Boolean(matchedKey && receiptsMap[matchedKey]);
+                const matchedKey = invText 
+                    ? Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === invText.toLowerCase()) 
+                    : Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === ("inv-" + item.id).toLowerCase());
                 
+                const hasReceipt = Boolean(matchedKey && receiptsMap[matchedKey]);
                 const safeInvText = invText.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                const receiptBadgeHtml = invText 
-                    ? (hasReceipt 
-                        ? `<button class="receipt-badge attached" onclick="event.stopPropagation(); viewReceiptByInvNo('${safeInvText}')" title="คลิกเพื่อดูรูปใบเสร็จแนบ">🧾 ดูใบเสร็จ</button>` 
-                        : `<button class="receipt-badge add-receipt" onclick="event.stopPropagation(); openAttachReceiptModal('${safeInvText}', '${item.id}')" title="คลิกเพื่อแนบรูปใบเสร็จ">+ แนบใบเสร็จ</button>`)
-                    : `<button class="receipt-badge add-receipt" onclick="event.stopPropagation(); openAttachReceiptModal('', '${item.id}')" title="คลิกเพื่อแนบใบเสร็จ">+ แนบใบเสร็จ</button>`;
+
+                const receiptBadgeHtml = hasReceipt
+                    ? `<button class="receipt-badge attached" onclick="event.stopPropagation(); viewReceiptByInvNo('${safeInvText}', '${item.id}')" title="คลิกเพื่อดูรูปใบเสร็จแนบ">🧾 ดูใบเสร็จ</button>`
+                    : `<button class="receipt-badge add-receipt" onclick="event.stopPropagation(); openAttachReceiptModal('${safeInvText}', '${item.id}')" title="คลิกเพื่อแนบรูปใบเสร็จ">+ แนบใบเสร็จ</button>`;
                 
                 tr.innerHTML = `
                     <td data-label="ID" class="bold" style="color: var(--primary); font-family: var(--font-display);">${item.id || ''}</td>
@@ -3948,16 +3975,20 @@
             badgesDiv.innerHTML += budgetBadge;
 
             const invText = (item.invNo || '').trim();
-            const matchedKey = invText ? Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === invText.toLowerCase()) : null;
+            const matchedKey = invText 
+                ? Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === invText.toLowerCase()) 
+                : Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === ("inv-" + item.id).toLowerCase());
+            
             const hasReceipt = Boolean(matchedKey && receiptsMap[matchedKey]);
+            const safeInvText = invText.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            
             const invEl = document.getElementById('detailInvNo');
             const receiptBtnContainer = document.getElementById('detailReceiptBtnContainer');
 
-            const safeInvText = invText.replace(/'/g, "\\'").replace(/"/g, '&quot;');
             if (invEl) invEl.textContent = invText || 'ไม่ได้ระบุเลขที่บิล';
             if (receiptBtnContainer) {
                 if (hasReceipt) {
-                    receiptBtnContainer.innerHTML = `<button class="receipt-badge attached" onclick="closeDetailsModal(); viewReceiptByInvNo('${safeInvText}')">🧾 ดูรูปใบเสร็จแนบ</button>`;
+                    receiptBtnContainer.innerHTML = `<button class="receipt-badge attached" onclick="closeDetailsModal(); viewReceiptByInvNo('${safeInvText}', '${item.id}')">🧾 ดูรูปใบเสร็จแนบ</button>`;
                 } else {
                     receiptBtnContainer.innerHTML = `<button class="receipt-badge add-receipt" onclick="closeDetailsModal(); openAttachReceiptModal('${safeInvText}', '${item.id}')">+ แนบรูปใบเสร็จ</button>`;
                 }
