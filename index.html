@@ -1942,11 +1942,8 @@
                     <!-- Expense Type -->
                     <div class="form-group">
                         <label class="form-label" for="formType">Expense Type *</label>
-                        <select class="form-input" id="formType" required>
-                            <option value="ค่าวัสดุ/อุปกรณ์">ค่าวัสดุ/อุปกรณ์ (Materials)</option>
-                            <option value="ค่าแรง">ค่าแรง (Labor)</option>
-                            <option value="ค่าขนส่ง">ค่าขนส่ง (Transportation)</option>
-                        </select>
+                        <input type="text" class="form-input" id="formType" required list="typeSuggestions" placeholder="พิมพ์ หรือเลือกประเภท เช่น ค่าวัสดุ/อุปกรณ์, ค่าแรง, ค่าธรรมเนียม">
+                        <datalist id="typeSuggestions"></datalist>
                     </div>
                 </div>
 
@@ -2918,13 +2915,17 @@
             const pics = getUnique('pic');
             const units = getUnique('unit');
 
+            const types = [...new Set([...['ค่าวัสดุ/อุปกรณ์', 'ค่าแรง', 'ค่าขนส่ง'], ...expenses.map(item => item.type).filter(Boolean)])].sort();
+
             fillDatalist('locationSuggestions', locations);
             fillDatalist('categorySuggestions', categories);
             fillDatalist('picSuggestions', pics);
             fillDatalist('unitSuggestions', units);
+            fillDatalist('typeSuggestions', types);
 
             fillFilter('filterLocation', locations, 'All Locations');
             fillFilter('filterCategory', categories, 'All Categories');
+            fillFilter('filterType', types, 'All Types');
         }
 
         // Apply filters, sorting, and redraw UI elements
@@ -3810,8 +3811,10 @@
                 typeBadge = `<span class="badge badge-type-labor">ค่าแรง</span>`;
             } else if (item.type === 'ค่าขนส่ง') {
                 typeBadge = `<span class="badge badge-type-trans">ค่าขนส่ง</span>`;
-            } else {
+            } else if (item.type === 'ค่าวัสดุ/อุปกรณ์' || item.type === 'ค่าวัสดุ') {
                 typeBadge = `<span class="badge badge-type-mat">ค่าวัสดุ</span>`;
+            } else {
+                typeBadge = `<span class="badge badge-type-mat">${item.type || 'ทั่วไป'}</span>`;
             }
             badgesDiv.innerHTML += typeBadge;
 
@@ -4159,16 +4162,8 @@
                     if (result.total) document.getElementById('formTotal').value = result.total;
                     
                     if (result.type) {
-                        const typeSelect = document.getElementById('formType');
-                        if (['ค่าวัสดุ/อุปกรณ์', 'ค่าแรง', 'ค่าขนส่ง'].includes(result.type)) {
-                            typeSelect.value = result.type;
-                        } else if (result.type.includes('วัสดุ')) {
-                            typeSelect.value = 'ค่าวัสดุ/อุปกรณ์';
-                        } else if (result.type.includes('แรง')) {
-                            typeSelect.value = 'ค่าแรง';
-                        } else if (result.type.includes('ขนส่ง')) {
-                            typeSelect.value = 'ค่าขนส่ง';
-                        }
+                        const typeInput = document.getElementById('formType');
+                        if (typeInput) typeInput.value = result.type;
                     }
 
                     // Re-calculate form total
