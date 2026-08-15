@@ -2534,8 +2534,11 @@
             const budgetsToSave = [];
             
             // Gather overall limits
-            const overallDadVal = parseFloat(document.getElementById('inputOverallDadLimit').value) || 0;
-            const overallBonusVal = parseFloat(document.getElementById('inputOverallBonusLimit').value) || 0;
+            const dadEl = document.getElementById('inputOverallDadLimit');
+            const bonusEl = document.getElementById('inputOverallBonusLimit');
+
+            const overallDadVal = dadEl ? parseFloat(dadEl.value) : 0;
+            const overallBonusVal = bonusEl ? parseFloat(bonusEl.value) : 0;
             
             if (overallDadVal > 0) BUDGET_LIMITS.Dad = overallDadVal;
             if (overallBonusVal > 0) BUDGET_LIMITS.Bonus = overallBonusVal;
@@ -2546,10 +2549,23 @@
                 bonus_budget: BUDGET_LIMITS.Bonus
             });
 
+            // Update in-memory locationBudgets array
+            let overallObj = locationBudgets.find(b => b.location === '__overall__');
+            if (overallObj) {
+                overallObj.dad_budget = BUDGET_LIMITS.Dad;
+                overallObj.bonus_budget = BUDGET_LIMITS.Bonus;
+            } else {
+                locationBudgets.push({
+                    location: '__overall__',
+                    dad_budget: BUDGET_LIMITS.Dad,
+                    bonus_budget: BUDGET_LIMITS.Bonus
+                });
+            }
+
             // Gather location budgets
             document.querySelectorAll('.budget-row').forEach(tr => {
                 const loc = tr.getAttribute('data-location');
-                if (loc === '__overall__') return;
+                if (!loc || loc === '__overall__') return;
                 const dadLimit = parseFloat(tr.querySelector('.input-dad-limit').value) || 0;
                 const bonusLimit = parseFloat(tr.querySelector('.input-bonus-limit').value) || 0;
                 budgetsToSave.push({
@@ -2557,10 +2573,22 @@
                     dad_budget: dadLimit,
                     bonus_budget: bonusLimit
                 });
+
+                let existing = locationBudgets.find(b => b.location === loc);
+                if (existing) {
+                    existing.dad_budget = dadLimit;
+                    existing.bonus_budget = bonusLimit;
+                } else {
+                    locationBudgets.push({
+                        location: loc,
+                        dad_budget: dadLimit,
+                        bonus_budget: bonusLimit
+                    });
+                }
             });
 
             // Update local memory and UI instantly (0ms response time!)
-            localStorage.setItem('camping_location_budgets', JSON.stringify(budgetsToSave));
+            localStorage.setItem('camping_location_budgets', JSON.stringify(locationBudgets));
             updateKPIs();
 
             const success = await saveExpenseToCloud("save-budgets", null, budgetsToSave);
@@ -2631,13 +2659,27 @@
                 if (bonusInput) bonusInput.value = newLimit;
             }
 
+            // Sync with locationBudgets in-memory array instantly
+            let overallObj = locationBudgets.find(b => b.location === '__overall__');
+            if (overallObj) {
+                overallObj.dad_budget = BUDGET_LIMITS.Dad;
+                overallObj.bonus_budget = BUDGET_LIMITS.Bonus;
+            } else {
+                locationBudgets.push({
+                    location: '__overall__',
+                    dad_budget: BUDGET_LIMITS.Dad,
+                    bonus_budget: BUDGET_LIMITS.Bonus
+                });
+            }
+
+            localStorage.setItem('camping_location_budgets', JSON.stringify(locationBudgets));
             updateKPIs();
             closeQuickBudgetModal();
             showToast(`ปรับอัปเดตวงเงินงบประมาณเป็น ${formatBaht(newLimit)} สำเร็จเรียบร้อยแล้ว!`, "success");
 
             try {
                 if (typeof window.saveLocationBudgets === 'function') {
-                    window.saveLocationBudgets();
+                    await window.saveLocationBudgets();
                 }
             } catch(e) {}
         };
