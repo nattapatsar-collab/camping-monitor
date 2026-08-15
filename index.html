@@ -897,6 +897,21 @@
         }
 
         .dropzone.scanning {
+            pointer-events: none;
+            border-color: var(--dad);
+            background: var(--dad-glow);
+        }
+
+        .dropzone.scanning svg {
+            fill: var(--dad);
+            animation: pulse-scanning 1.5s infinite;
+        }
+
+        @keyframes pulse-scanning {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.6; }
+            100% { transform: scale(1); opacity: 1; }
+        }
 
         .form-grid {
             display: grid;
@@ -1331,6 +1346,16 @@
             }
             .controls-panel {
                 padding: 12px !important;
+            }
+            .dropzone {
+                padding: 12px !important;
+            }
+            .dropzone svg {
+                width: 24px !important;
+                height: 24px !important;
+            }
+            .dropzone-text {
+                font-size: 11px !important;
             }
             .details-actions {
                 flex-direction: column !important;
@@ -1796,7 +1821,19 @@
             <form id="expenseForm">
                 <input type="hidden" id="formRowId">
                 <div class="form-grid">
-
+                    <!-- AI Receipt Upload Zone -->
+                    <div class="form-group form-group-full" style="margin-bottom: 4px;">
+                        <label class="form-label">AI Receipt Scanner (อัปโหลดใบเสร็จเพื่อสแกนกรอกช่องอัตโนมัติ)</label>
+                        <div class="dropzone" id="receiptDropzone">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <span class="dropzone-text" id="dropzoneText">ลากวางรูปใบเสร็จ หรือคลิกเพื่อถ่ายภาพ / อัปโหลด</span>
+                            <input type="file" id="receiptFileInput" accept="image/*" style="display: none;">
+                        </div>
+                    </div>
 
                     <!-- Item -->
                     <div class="form-group form-group-full">
@@ -3699,7 +3736,157 @@
             }
         });
 
+        // AI RECEIPT SCANNER & AUTOFILL LOGIC
+        const dropzone = document.getElementById('receiptDropzone');
+        const fileInput = document.getElementById('receiptFileInput');
+        const dropzoneText = document.getElementById('dropzoneText');
 
+        if (dropzone && fileInput) {
+            dropzone.addEventListener('click', () => fileInput.click());
+            
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleReceiptFile(e.target.files[0]);
+                }
+            });
+
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }, false);
+            });
+
+            // Add/remove dragover indicator
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, () => dropzone.classList.add('dragover'), false);
+            });
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, () => dropzone.classList.remove('dragover'), false);
+            });
+
+            // Handle dropped files
+            dropzone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0) {
+                    handleReceiptFile(files[0]);
+                }
+            });
+        }
+
+        function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Limit maximum dimensions to 1200px
+                        const MAX_WIDTH = 1200;
+                        const MAX_HEIGHT = 1200;
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Compress to 80% quality JPEG
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        const base64 = dataUrl.split(',')[1];
+                        resolve({ base64, mimeType: 'image/jpeg' });
+                    };
+                    img.onerror = (err) => reject(new Error("Failed to load image file: " + err.message));
+                };
+                reader.onerror = (err) => reject(new Error("Failed to read image file: " + err.message));
+            });
+        }
+
+        async function scanReceipt(base64Data, mimeType) {
+            try {
+                const res = await fetch("/api/scan-receipt", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ image: base64Data, mimeType })
+                });
+                
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.error || `HTTP error ${res.status}`);
+                }
+                
+                return await res.json();
+            } catch (err) {
+                console.error("OCR scan error:", err);
+                throw err;
+            }
+        }
+
+        async function handleReceiptFile(file) {
+            if (!file.type.startsWith('image/')) {
+                showToast("กรุณาอัปโหลดไฟล์รูปภาพใบเสร็จเท่านั้น", "error");
+                return;
+            }
+
+            try {
+                dropzone.classList.add('scanning');
+                dropzoneText.textContent = "กำลังบีบอัดรูปภาพ...";
+                
+                const compressed = await compressImage(file);
+                
+                dropzoneText.textContent = "AI กำลังวิเคราะห์ใบเสร็จ...";
+                const result = await scanReceipt(compressed.base64, compressed.mimeType);
+                
+                if (result) {
+                    // Autofill Form inputs
+                    if (result.item) document.getElementById('formItemName').value = result.item;
+                    if (result.description) document.getElementById('formDesc').value = result.description;
+                    if (result.date) document.getElementById('formDate').value = result.date;
+                    if (result.location) document.getElementById('formLocation').value = result.location;
+                    if (result.category) document.getElementById('formCategory').value = result.category;
+                    if (result.pic) document.getElementById('formPic').value = result.pic;
+                    if (result.number) document.getElementById('formQty').value = result.number;
+                    if (result.unit) document.getElementById('formUnit').value = result.unit;
+                    if (result.priceUnit) document.getElementById('formPriceUnit').value = result.priceUnit;
+                    if (result.total) document.getElementById('formTotal').value = result.total;
+                    
+                    if (result.type) {
+                        const typeInput = document.getElementById('formType');
+                        if (typeInput) typeInput.value = result.type;
+                    }
+
+                    // Re-calculate form total
+                    calcFormTotal();
+                    
+                    showToast("AI วิเคราะห์และกรอกข้อมูลสำเร็จ!", "success");
+                }
+            } catch (err) {
+                console.error("Receipt process failed:", err);
+                showToast(err.message || "การสแกนใบเสร็จล้มเหลว", "error");
+            } finally {
+                dropzone.classList.remove('scanning');
+                dropzoneText.textContent = "ลากวางรูปใบเสร็จ หรือคลิกเพื่อถ่ายภาพ / อัปโหลด";
+                if (fileInput) fileInput.value = '';
+            }
+        }
 
         // EXCEL TEMPLATE DOWNLOAD & EXCEL DATA IMPORT LOGIC
         window.downloadExcelTemplate = function() {
