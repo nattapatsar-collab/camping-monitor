@@ -757,6 +757,29 @@
         .pagination-btn:hover:not(:disabled) {
             background: rgba(255, 255, 255, 0.08);
             border-color: rgba(255, 255, 255, 0.2);
+        /* Receipt Badges & Attachment styling */
+        .receipt-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 980px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            margin-top: 4px;
+        }
+        .receipt-badge.attached {
+            background-color: var(--primary-glow);
+            color: var(--primary);
+            border: 1px solid var(--panel-border);
+        }
+        .receipt-badge.attached:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
 
@@ -1883,6 +1906,19 @@
                         <input type="text" class="form-input" id="formType" required list="typeSuggestions" placeholder="พิมพ์ หรือเลือกประเภท เช่น ค่าวัสดุ/อุปกรณ์, ค่าแรง, ค่าธรรมเนียม">
                         <datalist id="typeSuggestions"></datalist>
                     </div>
+
+                    <!-- Slip / Receipt Photo Attachment -->
+                    <div class="form-group form-group-full" style="margin-top: 10px; background: rgba(0,0,0,0.03); padding: 14px; border-radius: 12px; border: 1px dashed var(--panel-border);">
+                        <label class="form-label" style="font-weight: 600; color: var(--primary);">📸 แนบรูปสลิป / ใบเสร็จรับเงิน (ผูกกับ INV. No. หรือรายการนี้):</label>
+                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                            <input type="file" id="formReceiptFileInput" accept="image/*,application/pdf" class="form-input" style="flex: 1; font-size: 13px;">
+                            <button type="button" class="btn" id="formReceiptClearBtn" style="display: none; background: var(--danger-glow); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); padding: 6px 12px; font-size: 12px;" onclick="clearFormReceiptPhoto()">❌ ลบรูปภาพ</button>
+                        </div>
+                        <div id="formReceiptPreviewBox" style="margin-top: 10px; display: none; text-align: center;">
+                            <img id="formReceiptPreviewThumb" src="" style="max-height: 140px; border-radius: 8px; border: 1px solid var(--panel-border); box-shadow: 0 4px 10px rgba(0,0,0,0.12);">
+                            <div id="formReceiptPreviewStatus" style="font-size: 11px; color: var(--primary); margin-top: 4px; font-weight: 600;">มีรูปภาพแนบอยู่แล้วในรายการนี้</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-actions">
@@ -2014,6 +2050,50 @@
     </div>
 
 
+
+    <!-- RECEIPT VIEWER MODAL -->
+    <div class="modal-overlay" id="receiptViewerModal">
+        <div class="glass-panel modal-container" style="max-width: 650px; padding: 28px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="receiptViewerTitle" style="color: var(--text-main); font-weight: 700;">🧾 ใบเสร็จแนบ</h3>
+                <button class="modal-close" onclick="closeReceiptViewerModal()">&times;</button>
+            </div>
+            
+            <div style="background: rgba(0,0,0,0.04); border: 1px solid var(--panel-border); padding: 14px 18px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div>
+                    <div style="font-size: 12px; color: var(--text-muted); font-weight: 500;">เลขที่ใบเสนอราคา / เลขที่ใบเสร็จ:</div>
+                    <div style="font-size: 18px; font-weight: 700; color: var(--primary);" id="receiptViewerInvNo">INV-XXXX</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 12px; color: var(--text-muted); font-weight: 500;">ยอดรวมรายการที่เชื่อมโยง:</div>
+                    <div style="font-size: 18px; font-weight: 700; color: var(--text-main);" id="receiptViewerTotalSum">฿0.00</div>
+                </div>
+            </div>
+
+            <!-- Receipt Image Container -->
+            <div style="width: 100%; max-height: 440px; overflow: auto; background: rgba(0,0,0,0.05); border-radius: 12px; border: 1px solid var(--panel-border); display: flex; align-items: center; justify-content: center; padding: 12px; margin-bottom: 16px;">
+                <a id="receiptImgLink" href="#" target="_blank" title="คลิกเพื่อเปิดดูรูปขนาดเต็มในแท็บใหม่" style="display: flex; justify-content: center; align-items: center; width: 100%;">
+                    <img id="receiptViewerImg" src="" alt="Receipt Image" style="max-width: 100%; max-height: 410px; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); cursor: zoom-in;">
+                </a>
+                <iframe id="receiptViewerPdf" src="" style="width: 100%; height: 410px; border: none; display: none;"></iframe>
+            </div>
+
+            <!-- Linked Items Summary List -->
+            <div style="margin-bottom: 20px; max-height: 120px; overflow-y: auto; font-size: 12px; background: rgba(0,0,0,0.02); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--panel-border);">
+                <div style="font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">รายการค่าใช้จ่ายในใบเสร็จนี้:</div>
+                <div id="receiptViewerItemsList"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <button class="btn" style="background: var(--danger-glow); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); padding: 8px 14px; font-size: 12px;" onclick="deleteCurrentReceipt()">🗑️ ลบรูปใบเสร็จนี้</button>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <a id="receiptDownloadLink" href="#" download="receipt.jpg" class="btn btn-primary" style="padding: 8px 16px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center;">📥 ดาวน์โหลดไฟล์</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- PASSCODE CONFIRMATION MODAL -->
     <div class="modal-overlay" id="passcodeConfirmModal">
@@ -2173,6 +2253,7 @@
                 }
 
                 updateSyncStatus("connected");
+                await fetchReceipts();
                 populateSuggestions();
                 renderLocationBudgets();
                 applyFilters();
@@ -2790,6 +2871,16 @@
                 });
                 
                 const invText = (item.invNo || '').trim();
+                const matchedKey = invText 
+                    ? Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === invText.toLowerCase()) 
+                    : Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === ("inv-" + item.id).toLowerCase());
+                
+                const hasReceipt = Boolean(matchedKey && receiptsMap[matchedKey]);
+                const safeInvText = invText.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+                const receiptBadgeHtml = hasReceipt
+                    ? `<button class="receipt-badge attached" onclick="viewReceiptByInvNo('${safeInvText}', '${item.id}')" title="คลิกเพื่อดูรูปใบเสร็จแนบ">🧾 ดูสลิป</button>`
+                    : '';
                 
                 tr.innerHTML = `
                     <td data-label="ID" class="bold" style="color: var(--primary); font-family: var(--font-display);">${item.id || ''}</td>
@@ -2803,6 +2894,7 @@
                     <td data-label="PIC">${item.pic || ''}</td>
                     <td data-label="Invoice">
                         <div style="font-size: 12px; font-weight: 600; color: var(--text-main);">${invText || '-'}</div>
+                        ${receiptBadgeHtml}
                     </td>
                     <td data-label="Qty" class="text-right" style="white-space: nowrap;">
                         <span class="bold">${item.number || 0}</span> ${item.unit || ''} 
@@ -3504,8 +3596,21 @@
             badgesDiv.innerHTML += budgetBadge;
 
             const invText = (item.invNo || '').trim();
+            const matchedKey = invText 
+                ? Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === invText.toLowerCase()) 
+                : Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === ("inv-" + item.id).toLowerCase());
+            
+            const hasReceipt = Boolean(matchedKey && receiptsMap[matchedKey]);
+            const safeInvText = invText.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
             const invEl = document.getElementById('detailInvNo');
-            if (invEl) invEl.textContent = invText || 'ไม่ได้ระบุเลขที่บิล';
+            if (invEl) {
+                if (hasReceipt) {
+                    invEl.innerHTML = `${invText || 'ไม่ได้ระบุเลขที่บิล'} <button class="receipt-badge attached" style="margin-left:8px;" onclick="closeDetailsModal(); viewReceiptByInvNo('${safeInvText}', '${item.id}')">🧾 ดูรูปสลิป/ใบเสร็จ</button>`;
+                } else {
+                    invEl.textContent = invText || 'ไม่ได้ระบุเลขที่บิล';
+                }
+            }
 
             document.getElementById('detailEditBtn').onclick = () => {
                 closeDetailsModal();
@@ -3570,12 +3675,45 @@
         // Modal triggers
         const modal = document.getElementById('expenseModal');
         
+        window.clearFormReceiptPhoto = function() {
+            pendingFormReceiptBase64 = '';
+            const fileInput = document.getElementById('formReceiptFileInput');
+            const previewBox = document.getElementById('formReceiptPreviewBox');
+            const clearBtn = document.getElementById('formReceiptClearBtn');
+            if (fileInput) fileInput.value = '';
+            if (previewBox) previewBox.style.display = 'none';
+            if (clearBtn) clearBtn.style.display = 'none';
+        };
+
         function openModal(isEdit = false, id = null) {
             modal.classList.add('active');
             document.getElementById('formItemName').focus();
 
             // Clear datalists / update datalists suggestion
             populateSuggestions();
+            clearFormReceiptPhoto();
+
+            const fileInput = document.getElementById('formReceiptFileInput');
+            if (fileInput) {
+                fileInput.onchange = async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    try {
+                        const compressedBase64 = await compressImage(file);
+                        pendingFormReceiptBase64 = compressedBase64;
+                        const previewBox = document.getElementById('formReceiptPreviewBox');
+                        const previewThumb = document.getElementById('formReceiptPreviewThumb');
+                        const previewStatus = document.getElementById('formReceiptPreviewStatus');
+                        const clearBtn = document.getElementById('formReceiptClearBtn');
+                        if (previewThumb) previewThumb.src = compressedBase64;
+                        if (previewStatus) previewStatus.textContent = `ไฟล์พร้อมแนบ: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                        if (previewBox) previewBox.style.display = 'block';
+                        if (clearBtn) clearBtn.style.display = 'inline-flex';
+                    } catch(err) {
+                        showToast("อ่านไฟล์รูปภาพไม่สำเร็จ: " + err.message, "error");
+                    }
+                };
+            }
 
             if (isEdit && id) {
                 document.getElementById('modalTitle').textContent = "Edit Expense Details";
@@ -3595,6 +3733,22 @@
                     document.getElementById('formPriceUnit').value = row.priceUnit || 0;
                     document.getElementById('formTotal').value = row.total || 0;
                     document.getElementById('formType').value = row.type || 'ค่าวัสดุ/อุปกรณ์';
+
+                    const cleanInvNo = (row.invNo || '').trim();
+                    const matchedKey = cleanInvNo
+                        ? Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === cleanInvNo.toLowerCase())
+                        : Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === ("inv-" + row.id).toLowerCase());
+                    const existingUrl = matchedKey ? receiptsMap[matchedKey] : '';
+                    if (existingUrl) {
+                        const previewBox = document.getElementById('formReceiptPreviewBox');
+                        const previewThumb = document.getElementById('formReceiptPreviewThumb');
+                        const previewStatus = document.getElementById('formReceiptPreviewStatus');
+                        const clearBtn = document.getElementById('formReceiptClearBtn');
+                        if (previewThumb) previewThumb.src = existingUrl;
+                        if (previewStatus) previewStatus.textContent = "มีรูปภาพสลิปแนบอยู่แล้วในรายการนี้ (เลือกไฟล์ใหม่เพื่อเปลี่ยนภาพ)";
+                        if (previewBox) previewBox.style.display = 'block';
+                        if (clearBtn) clearBtn.style.display = 'inline-flex';
+                    }
                 }
             } else {
                 document.getElementById('modalTitle').textContent = "Add New Expense";
@@ -3695,6 +3849,32 @@
             }
 
             if (success) {
+                // If a slip image was attached, save it mapped to invNo / itemId
+                if (pendingFormReceiptBase64) {
+                    const receiptKey = invVal || ("INV-" + expenseObj.id);
+                    receiptsMap[receiptKey] = pendingFormReceiptBase64;
+                    receiptsMap[receiptKey.toLowerCase()] = pendingFormReceiptBase64;
+                    saveReceiptToDB(receiptKey, pendingFormReceiptBase64);
+                    
+                    try {
+                        localStorage.setItem('camping_receipts', JSON.stringify(receiptsMap));
+                    } catch(e) {}
+
+                    try {
+                        await fetch("/api/expenses", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": "Bearer 20147"
+                            },
+                            body: JSON.stringify({
+                                action: "save-receipt",
+                                invNo: receiptKey,
+                                receiptUrl: pendingFormReceiptBase64
+                            })
+                        });
+                    } catch(e) {}
+                }
                 closeModal();
             }
         });
