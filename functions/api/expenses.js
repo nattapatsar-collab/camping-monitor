@@ -33,8 +33,7 @@ export async function onRequestGet(context) {
                 await db.prepare(`
                     INSERT INTO location_budgets (location, dad_budget, bonus_budget)
                     VALUES ('__overall__', 100000, 500000)
-                    ON CONFLICT(location) DO UPDATE SET bonus_budget = 500000
-                    WHERE bonus_budget < 500000
+                    ON CONFLICT(location) DO NOTHING
                 `).run();
             } catch (e) {}
 

@@ -2050,13 +2050,24 @@
                 <div style="font-size: 26px; font-weight: 700; color: var(--primary);" id="quickBudgetOriginalLimitDisplay">฿500,000.00</div>
             </div>
 
-            <div class="form-group" style="margin-bottom: 18px;">
-                <label class="form-label" style="color: var(--text-main); font-weight: 600;">กดปุ่มเพิ่มวงเงินงบประจำเดือนด่วน (+ Top-up):</label>
+            <div class="form-group" style="margin-bottom: 14px;">
+                <label class="form-label" style="color: var(--text-main); font-weight: 600;">ปรับเพิ่ม / ลดวงเงินงบด่วน (+ / -):</label>
                 <div class="date-presets" style="gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                    <button class="preset-btn" style="color: #ef4444;" onclick="addQuickBudgetAmount(-100000)">- ฿100,000</button>
+                    <button class="preset-btn" style="color: #ef4444;" onclick="addQuickBudgetAmount(-50000)">- ฿50,000</button>
                     <button class="preset-btn" onclick="addQuickBudgetAmount(50000)">+ ฿50,000</button>
                     <button class="preset-btn" onclick="addQuickBudgetAmount(100000)">+ ฿100,000</button>
                     <button class="preset-btn" onclick="addQuickBudgetAmount(200000)">+ ฿200,000</button>
-                    <button class="preset-btn" onclick="addQuickBudgetAmount(500000)">+ ฿500,000</button>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 18px;">
+                <label class="form-label" style="color: var(--text-main); font-weight: 600;">หรือเลือกกำหนดเป็นจำนวนเงินสม่ำเสมอ:</label>
+                <div class="date-presets" style="gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                    <button class="preset-btn" onclick="setQuickBudgetAmount(100000)">฿100,000</button>
+                    <button class="preset-btn" onclick="setQuickBudgetAmount(300000)">฿300,000</button>
+                    <button class="preset-btn" onclick="setQuickBudgetAmount(500000)">฿500,000</button>
+                    <button class="preset-btn" onclick="setQuickBudgetAmount(1000000)">฿1,000,000</button>
                 </div>
             </div>
 
@@ -2623,7 +2634,15 @@
             const inputEl = document.getElementById('quickBudgetNewLimitInput');
             if (inputEl) {
                 const currentVal = parseFloat(inputEl.value) || 0;
-                inputEl.value = (currentVal + amount).toFixed(2);
+                const newVal = Math.max(0, currentVal + amount);
+                inputEl.value = newVal;
+            }
+        };
+
+        window.setQuickBudgetAmount = function(amount) {
+            const inputEl = document.getElementById('quickBudgetNewLimitInput');
+            if (inputEl) {
+                inputEl.value = amount;
             }
         };
 
