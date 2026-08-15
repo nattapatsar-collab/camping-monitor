@@ -759,40 +759,7 @@
             border-color: rgba(255, 255, 255, 0.2);
         }
 
-        /* Receipt Badges & Attachment styling */
-        .receipt-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 3px 10px;
-            border-radius: 980px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s ease;
-            margin-top: 4px;
-        }
-        .receipt-badge.attached {
-            background-color: var(--primary-glow);
-            color: var(--primary);
-            border: 1px solid var(--panel-border);
-        }
-        .receipt-badge.attached:hover {
-            transform: scale(1.05);
-            filter: brightness(1.1);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .receipt-badge.add-receipt {
-            background-color: rgba(148, 163, 184, 0.12);
-            color: var(--text-muted);
-            border: 1px dashed rgba(148, 163, 184, 0.3);
-        }
-        .receipt-badge.add-receipt:hover {
-            background-color: var(--primary-glow);
-            color: var(--primary);
-            border-style: solid;
-        }
+
 
         /* Modal styling */
         .modal-overlay {
@@ -820,9 +787,7 @@
             z-index: 200 !important;
         }
 
-        #receiptViewerModal.active, #attachReceiptModal.active {
-            z-index: 350 !important;
-        }
+
 
         #passcodeConfirmModal.active {
             z-index: 450 !important;
@@ -2013,11 +1978,8 @@
                         <div id="detailPic" class="bold" style="font-size: 14px; color: var(--text-main); margin-top: 2px;"></div>
                     </div>
                     <div style="grid-column: span 2; margin-top: 6px; padding-top: 10px; border-top: 1px dashed var(--panel-border);">
-                        <div class="form-label" style="font-size: 11px; color: var(--text-muted); font-weight: 600;">INV. No. & Receipt Status / เลขที่ใบเสร็จ</div>
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; flex-wrap: wrap; gap: 8px;">
-                            <div id="detailInvNo" class="bold" style="font-size: 14px; color: var(--text-main);"></div>
-                            <div id="detailReceiptBtnContainer"></div>
-                        </div>
+                        <div class="form-label" style="font-size: 11px; color: var(--text-muted); font-weight: 600;">INV. No. / เลขที่ใบเสนอราคา</div>
+                        <div id="detailInvNo" class="bold" style="font-size: 14px; color: var(--text-main); margin-top: 4px;"></div>
                     </div>
                 </div>
 
@@ -2070,6 +2032,7 @@
                 <div class="date-presets" style="gap: 8px; margin-top: 8px; flex-wrap: wrap;">
                     <button class="preset-btn" onclick="setQuickBudgetAmount(100000)">฿100,000</button>
                     <button class="preset-btn" onclick="setQuickBudgetAmount(300000)">฿300,000</button>
+                    <button class="preset-btn" onclick="setQuickBudgetAmount(400000)">฿400,000</button>
                     <button class="preset-btn" onclick="setQuickBudgetAmount(500000)">฿500,000</button>
                     <button class="preset-btn" onclick="setQuickBudgetAmount(1000000)">฿1,000,000</button>
                 </div>
@@ -2087,92 +2050,7 @@
         </div>
     </div>
 
-    <!-- RECEIPT VIEWER MODAL -->
-    <div class="modal-overlay" id="receiptViewerModal">
-        <div class="glass-panel modal-container" style="max-width: 650px; padding: 28px;">
-            <div class="modal-header">
-                <h3 class="modal-title" id="receiptViewerTitle" style="color: var(--text-main); font-weight: 700;">🧾 ใบเสร็จแนบ</h3>
-                <button class="modal-close" onclick="closeReceiptViewerModal()">&times;</button>
-            </div>
-            
-            <div style="background: rgba(0,0,0,0.04); border: 1px solid var(--panel-border); padding: 14px 18px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                <div>
-                    <div style="font-size: 12px; color: var(--text-muted); font-weight: 500;">เลขที่ใบเสนอราคา / เลขที่ใบเสร็จ:</div>
-                    <div style="font-size: 18px; font-weight: 700; color: var(--primary);" id="receiptViewerInvNo">INV-XXXX</div>
-                </div>
-                <div style="text-align: right;">
-                    <div style="font-size: 12px; color: var(--text-muted); font-weight: 500;">ยอดรวมรายการที่เชื่อมโยง:</div>
-                    <div style="font-size: 18px; font-weight: 700; color: var(--text-main);" id="receiptViewerTotalSum">฿0.00</div>
-                </div>
-            </div>
 
-            <!-- Receipt Image Container -->
-            <div style="width: 100%; max-height: 440px; overflow: auto; background: rgba(0,0,0,0.05); border-radius: 12px; border: 1px solid var(--panel-border); display: flex; align-items: center; justify-content: center; padding: 12px; margin-bottom: 16px;">
-                <a id="receiptImgLink" href="#" target="_blank" title="คลิกเพื่อเปิดดูรูปขนาดเต็มในแท็บใหม่" style="display: flex; justify-content: center; align-items: center; width: 100%;">
-                    <img id="receiptViewerImg" src="" alt="Receipt Image" style="max-width: 100%; max-height: 410px; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); cursor: zoom-in;">
-                </a>
-                <iframe id="receiptViewerPdf" src="" style="width: 100%; height: 410px; border: none; display: none;"></iframe>
-            </div>
-
-            <!-- Linked Items Summary List -->
-            <div style="margin-bottom: 20px; max-height: 120px; overflow-y: auto; font-size: 12px; background: rgba(0,0,0,0.02); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--panel-border);">
-                <div style="font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">รายการค่าใช้จ่ายในใบเสร็จนี้:</div>
-                <div id="receiptViewerItemsList"></div>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <div>
-                    <button class="btn" style="background: var(--danger-glow); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); padding: 8px 14px; font-size: 12px;" onclick="deleteCurrentReceipt()">🗑️ ลบรูปใบเสร็จนี้</button>
-                </div>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-secondary" onclick="openAttachReceiptModal(activeReceiptInvNo)" style="padding: 8px 14px; font-size: 12px;">🔄 เปลี่ยนรูปไฟล์</button>
-                    <a id="receiptDownloadLink" href="#" download="receipt.jpg" class="btn btn-primary" style="padding: 8px 16px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center;">📥 ดาวน์โหลดไฟล์</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ATTACH RECEIPT MODAL -->
-    <div class="modal-overlay" id="attachReceiptModal">
-        <div class="glass-panel modal-container" style="max-width: 500px; padding: 28px;">
-            <div class="modal-header">
-                <h3 class="modal-title" style="color: var(--text-main); font-weight: 700;">📎 แนบไฟล์ใบเสร็จ / ใบเสนอราคา</h3>
-                <button class="modal-close" onclick="closeAttachReceiptModal()">&times;</button>
-            </div>
-
-            <div class="form-group" style="margin-bottom: 16px;">
-                <label class="form-label" style="font-weight: 600; color: var(--text-main);">เลขที่ใบเสร็จ / ใบเสนอราคา (INV. No.):</label>
-                <input type="text" class="form-input" id="attachReceiptInvNoInput" placeholder="ระบุเลขที่บิล หรือเลือกจากรายการ">
-            </div>
-
-            <div class="form-group" style="margin-bottom: 18px;">
-                <label class="form-label" style="font-weight: 600; color: var(--text-main);">อัปโหลดรูปภาพ / ไฟล์ใบเสร็จ (JPG, PNG, PDF):</label>
-                <div id="receiptDropZone" style="border: 2px dashed var(--panel-border); border-radius: 12px; padding: 24px; text-align: center; background: rgba(0,0,0,0.02); cursor: pointer; transition: all 0.2s ease;">
-                    <div style="font-size: 32px; margin-bottom: 6px;">📸</div>
-                    <div style="font-size: 14px; font-weight: 600; color: var(--primary);">คลิกเลือกไฟล์, ถ่ายรูป หรือ กด Ctrl+V วางรูปสลิป</div>
-                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">รองรับก๊อปปี้วางรูปสลิปจาก Clipboard (Ctrl+V / Copy-Paste), JPG, PNG และ PDF</div>
-                    <input type="file" id="receiptFileInput" accept="image/*,application/pdf" style="display: none;">
-                </div>
-                <div id="receiptFilePreview" style="margin-top: 12px; display: none; text-align: center;">
-                    <img id="receiptPreviewThumb" src="" style="max-height: 130px; border-radius: 8px; border: 1px solid var(--panel-border); box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                    <div style="font-size: 12px; color: var(--primary); margin-top: 6px; font-weight: 600;" id="receiptFilePreviewName">พร้อมอัปโหลด</div>
-                </div>
-            </div>
-
-            <div class="form-group" style="margin-bottom: 24px;">
-                <label class="form-label" style="font-weight: 500; font-size: 12px; color: var(--text-muted);">หรือ วางลิงก์รูปภาพใบเสร็จ (URL):</label>
-                <input type="url" class="form-input" id="attachReceiptUrlInput" placeholder="https://example.com/receipt.jpg" style="font-size: 13px;">
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px;">
-                <button class="btn" id="attachReceiptDeleteBtn" style="background: var(--danger-glow); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); padding: 8px 14px; font-size: 12px; display: none;" onclick="deleteCurrentReceipt()">🗑️ ลบรูปใบเสร็จนี้</button>
-                <div style="display: flex; gap: 12px; margin-left: auto;">
-                    <button class="btn btn-secondary" onclick="closeAttachReceiptModal()">ยกเลิก</button>
-                    <button class="btn btn-primary" onclick="saveAttachedReceipt()">💾 บันทึกแนบใบเสร็จ</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- PASSCODE CONFIRMATION MODAL -->
     <div class="modal-overlay" id="passcodeConfirmModal">
@@ -2295,7 +2173,7 @@
             if (overall) {
                 BUDGET_LIMITS.Dad = parseFloat(overall.dad_budget) || 100000.00;
                 let bVal = parseFloat(overall.bonus_budget);
-                if (!bVal || bVal < 500000) {
+                if (isNaN(bVal) || bVal <= 0) {
                     bVal = 500000.00;
                 }
                 BUDGET_LIMITS.Bonus = bVal;
@@ -2329,13 +2207,6 @@
                     }
                 } catch (bErr) {
                     console.error("Failed to fetch location budgets:", bErr);
-                }
-                
-                // Fetch receipts from D1 & LocalStorage
-                try {
-                    await fetchReceipts();
-                } catch (rErr) {
-                    console.error("Failed to fetch receipts:", rErr);
                 }
 
                 updateSyncStatus("connected");
@@ -2702,466 +2573,7 @@
 
         let activeAttachItemId = '';
 
-        // Helper: Canvas Image Compression for Receipts (Optimized ~80KB high resolution)
-        function compressImage(file, maxWidth = 1000, quality = 0.75) {
-            return new Promise((resolve, reject) => {
-                if (!file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = e => resolve(e.target.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                    return;
-                }
-                const img = new Image();
-                img.onload = () => {
-                    let width = img.width;
-                    let height = img.height;
-                    if (width > maxWidth) {
-                        height = Math.round((height * maxWidth) / width);
-                        width = maxWidth;
-                    }
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', quality));
-                };
-                img.onerror = reject;
-                img.src = URL.createObjectURL(file);
-            });
-        }
 
-        // IndexedDB Receipts Storage (Unlimited capacity, bypasses 5MB LocalStorage limit)
-        function getReceiptsDB() {
-            return new Promise((resolve, reject) => {
-                const req = indexedDB.open("CampingReceiptsDB", 1);
-                req.onupgradeneeded = e => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains("receipts")) {
-                        db.createObjectStore("receipts");
-                    }
-                };
-                req.onsuccess = e => resolve(e.target.result);
-                req.onerror = e => reject(e.target.error);
-            });
-        }
-
-        async function saveReceiptToDB(invNo, dataUrl) {
-            if (!invNo) return;
-            try {
-                const db = await getReceiptsDB();
-                const tx = db.transaction("receipts", "readwrite");
-                const store = tx.objectStore("receipts");
-                const key = invNo.trim().toLowerCase();
-                if (dataUrl) {
-                    store.put(dataUrl, key);
-                } else {
-                    store.delete(key);
-                }
-            } catch(e) {
-                console.warn("IndexedDB Save error:", e);
-            }
-        }
-
-        async function loadReceiptsFromDB() {
-            try {
-                const db = await getReceiptsDB();
-                const tx = db.transaction("receipts", "readonly");
-                const store = tx.objectStore("receipts");
-                return new Promise((resolve) => {
-                    const req = store.openCursor();
-                    const map = {};
-                    req.onsuccess = e => {
-                        const cursor = e.target.result;
-                        if (cursor) {
-                            map[cursor.key] = cursor.value;
-                            cursor.continue();
-                        } else {
-                            resolve(map);
-                        }
-                    };
-                    req.onerror = () => resolve({});
-                });
-            } catch(e) {
-                return {};
-            }
-        }
-
-        // Fetch receipts mapping from IndexedDB, D1 & LocalStorage
-        async function fetchReceipts() {
-            try {
-                // 1. Load from IndexedDB
-                const idbData = await loadReceiptsFromDB();
-                Object.assign(receiptsMap, idbData);
-
-                // 2. Load from LocalStorage
-                const localData = localStorage.getItem('camping_receipts');
-                if (localData) {
-                    const parsed = JSON.parse(localData) || {};
-                    Object.assign(receiptsMap, parsed);
-                }
-
-                // 3. Load from Cloud D1 API
-                const res = await fetch("/api/expenses?type=receipts");
-                if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data)) {
-                        data.forEach(item => {
-                            if (item.invNo && item.receipt_url) {
-                                receiptsMap[item.invNo.trim()] = item.receipt_url;
-                                receiptsMap[item.invNo.trim().toLowerCase()] = item.receipt_url;
-                                saveReceiptToDB(item.invNo, item.receipt_url);
-                            }
-                        });
-                    }
-                }
-            } catch(e) {
-                console.warn("Fetch receipts info:", e);
-            }
-        }
-
-        window.viewReceiptByInvNo = function(invNo = '', itemId = '') {
-            let cleanInvNo = (invNo || '').trim();
-            
-            if (!cleanInvNo && itemId) {
-                const foundItem = expenses.find(x => x.id === itemId);
-                if (foundItem && foundItem.invNo) {
-                    cleanInvNo = foundItem.invNo.trim();
-                } else {
-                    cleanInvNo = "INV-" + itemId;
-                }
-            }
-
-            // Flexible key lookup in receiptsMap
-            let matchedKey = Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === cleanInvNo.toLowerCase());
-            
-            if (!matchedKey && itemId) {
-                matchedKey = Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === ("inv-" + itemId).toLowerCase());
-            }
-
-            let receiptUrl = matchedKey ? receiptsMap[matchedKey] : null;
-
-            // Fallback: check localStorage directly
-            if (!receiptUrl) {
-                try {
-                    const localData = JSON.parse(localStorage.getItem('camping_receipts') || '{}');
-                    matchedKey = Object.keys(localData).find(k => k.trim().toLowerCase() === cleanInvNo.toLowerCase());
-                    if (!matchedKey && itemId) {
-                        matchedKey = Object.keys(localData).find(k => k.trim().toLowerCase() === ("inv-" + itemId).toLowerCase());
-                    }
-                    if (matchedKey) {
-                        receiptUrl = localData[matchedKey];
-                        receiptsMap[matchedKey] = receiptUrl;
-                    }
-                } catch(e) {}
-            }
-
-            if (!receiptUrl) {
-                showToast(`ไม่พบไฟล์ใบเสร็จสำหรับรายการนี้ (ระบบเปิดหน้าต่างแนบไฟล์ให้คุณ)`, "warning");
-                openAttachReceiptModal(cleanInvNo, itemId);
-                return;
-            }
-
-            activeReceiptInvNo = matchedKey || cleanInvNo;
-
-            const detailsModal = document.getElementById('detailsModal');
-            if (detailsModal) {
-                detailsModal.classList.remove('active');
-                detailsModal.style.display = 'none';
-            }
-
-            const modal = document.getElementById('receiptViewerModal');
-            const titleEl = document.getElementById('receiptViewerTitle');
-            const invEl = document.getElementById('receiptViewerInvNo');
-            const sumEl = document.getElementById('receiptViewerTotalSum');
-            const imgEl = document.getElementById('receiptViewerImg');
-            const imgLink = document.getElementById('receiptImgLink');
-            const pdfEl = document.getElementById('receiptViewerPdf');
-            const itemsListEl = document.getElementById('receiptViewerItemsList');
-            const downloadLink = document.getElementById('receiptDownloadLink');
-
-            if (titleEl) titleEl.textContent = `🧾 ใบเสร็จแนบ: ${activeReceiptInvNo}`;
-            if (invEl) invEl.textContent = activeReceiptInvNo;
-
-            const matchingItems = expenses.filter(i => (i.invNo || '').trim().toLowerCase() === activeReceiptInvNo.toLowerCase() || i.id === itemId);
-            const totalSum = matchingItems.reduce((acc, curr) => acc + (parseFloat(curr.total) || 0), 0);
-            if (sumEl) sumEl.textContent = formatBaht(totalSum);
-
-            if (itemsListEl) {
-                itemsListEl.innerHTML = matchingItems.map(i => `
-                    <div style="display:flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed rgba(0,0,0,0.06);">
-                        <span>• <b>[${i.id}]</b> ${i.item} (${i.location})</span>
-                        <span style="font-weight:600; color: var(--primary);">${formatBaht(i.total)}</span>
-                    </div>
-                `).join('') || '<div style="color: var(--text-muted);">ไม่มีรายการค่าใช้จ่ายที่ผูกกับบิลนี้</div>';
-            }
-
-            if (receiptUrl.startsWith('data:application/pdf') || receiptUrl.toLowerCase().endsWith('.pdf')) {
-                if (imgEl) imgEl.style.display = 'none';
-                if (pdfEl) {
-                    pdfEl.style.display = 'block';
-                    pdfEl.src = receiptUrl;
-                }
-            } else {
-                if (pdfEl) pdfEl.style.display = 'none';
-                if (imgEl) {
-                    imgEl.style.display = 'block';
-                    imgEl.src = receiptUrl;
-                }
-                if (imgLink) {
-                    imgLink.href = receiptUrl;
-                }
-            }
-
-            if (downloadLink) {
-                downloadLink.href = receiptUrl;
-                downloadLink.download = `Receipt_${activeReceiptInvNo.replace(/[^a-zA-Z0-9_-]/g, '_')}.jpg`;
-            }
-
-            if (modal) {
-                modal.style.display = 'flex';
-                modal.classList.add('active');
-            }
-        };
-
-        window.closeReceiptViewerModal = function() {
-            const modal = document.getElementById('receiptViewerModal');
-            if (modal) {
-                modal.classList.remove('active');
-                modal.style.display = 'none';
-            }
-        };
-
-        let pendingDeleteInvNo = '';
-
-        window.closePasscodeModal = function() {
-            const modal = document.getElementById('passcodeConfirmModal');
-            if (modal) {
-                modal.classList.remove('active');
-                modal.style.display = 'none';
-            }
-        };
-
-        window.deleteCurrentReceipt = function(invNoParam = '') {
-            const targetInvNo = (invNoParam || activeReceiptInvNo || '').trim();
-            if (!targetInvNo) {
-                showToast("ไม่ได้ระบุเลขที่ใบเสร็จที่จะลบ", "error");
-                return;
-            }
-
-            const matchedKey = Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === targetInvNo.toLowerCase()) || targetInvNo;
-            pendingDeleteInvNo = matchedKey;
-
-            const promptText = document.getElementById('passcodePromptText');
-            const passInput = document.getElementById('passcodeConfirmInput');
-            const submitBtn = document.getElementById('passcodeConfirmSubmitBtn');
-            const modal = document.getElementById('passcodeConfirmModal');
-
-            if (promptText) promptText.textContent = `กรุณากรอกรหัสผ่านเพื่อยืนยันการลบใบเสร็จ [${matchedKey}]:`;
-            if (passInput) passInput.value = '';
-            
-            if (submitBtn) {
-                submitBtn.onclick = () => executeReceiptDeletion();
-            }
-
-            if (modal) {
-                modal.style.display = 'flex';
-                modal.classList.add('active');
-                if (passInput) setTimeout(() => passInput.focus(), 100);
-            }
-        };
-
-        async function executeReceiptDeletion() {
-            const passInput = document.getElementById('passcodeConfirmInput');
-            const entered = (passInput ? passInput.value : '').trim();
-
-            if (entered !== '20147') {
-                showToast("รหัสผ่านไม่ถูกต้อง! ไม่สามารถลบไฟล์ใบเสร็จได้ (ต้องใช้รหัส 20147)", "error");
-                return;
-            }
-
-            localStorage.setItem('edit_passcode', '20147');
-            closePasscodeModal();
-
-            const matchedKey = pendingDeleteInvNo;
-            if (!matchedKey) return;
-
-            // Delete from JS state
-            delete receiptsMap[matchedKey];
-            Object.keys(receiptsMap).forEach(k => {
-                if (k.trim().toLowerCase() === matchedKey.toLowerCase()) {
-                    delete receiptsMap[k];
-                }
-            });
-
-            // Delete from IndexedDB & LocalStorage
-            await saveReceiptToDB(matchedKey, "");
-            try {
-                localStorage.setItem('camping_receipts', JSON.stringify(receiptsMap));
-            } catch(e) {}
-
-            closeReceiptViewerModal();
-            closeAttachReceiptModal();
-            renderTable();
-            showToast(`🗑️ ลบไฟล์ใบเสร็จ ${matchedKey} เรียบร้อยแล้ว!`, "success");
-
-            // Sync deletion to Cloud D1 Database
-            try {
-                await fetch("/api/expenses", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": "Bearer 20147"
-                    },
-                    body: JSON.stringify({
-                        action: "save-receipt",
-                        invNo: matchedKey,
-                        receiptUrl: ""
-                    })
-                });
-            } catch(e) {
-                console.error("Failed to sync receipt delete:", e);
-            }
-        }
-
-        window.openAttachReceiptModal = function(invNo = '', itemId = '') {
-            activeReceiptInvNo = (invNo || '').trim();
-            activeAttachItemId = itemId || '';
-            pendingReceiptBase64 = '';
-            
-            const modal = document.getElementById('attachReceiptModal');
-            const invInput = document.getElementById('attachReceiptInvNoInput');
-            const urlInput = document.getElementById('attachReceiptUrlInput');
-            const previewBox = document.getElementById('receiptFilePreview');
-            const previewThumb = document.getElementById('receiptPreviewThumb');
-            const deleteBtn = document.getElementById('attachReceiptDeleteBtn');
-
-            // Auto suggest item's invNo if available
-            if (!activeReceiptInvNo && activeAttachItemId) {
-                const foundItem = expenses.find(x => x.id === activeAttachItemId);
-                if (foundItem && foundItem.invNo) {
-                    activeReceiptInvNo = foundItem.invNo.trim();
-                }
-            }
-
-            if (invInput) invInput.value = activeReceiptInvNo;
-
-            const matchedKey = Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === activeReceiptInvNo.toLowerCase());
-            const existingUrl = matchedKey ? receiptsMap[matchedKey] : '';
-
-            if (urlInput) urlInput.value = (existingUrl && !existingUrl.startsWith('data:')) ? existingUrl : '';
-            
-            if (previewBox) {
-                if (existingUrl) {
-                    previewBox.style.display = 'block';
-                    if (previewThumb) previewThumb.src = existingUrl;
-                    const previewName = document.getElementById('receiptFilePreviewName');
-                    if (previewName) previewName.textContent = 'มีไฟล์ใบเสร็จแนบอยู่แล้วในระบบ (คลิกเลือกใหม่เพื่อเปลี่ยนภาพ)';
-                    if (deleteBtn) deleteBtn.style.display = 'inline-flex';
-                } else {
-                    previewBox.style.display = 'none';
-                    if (previewThumb) previewThumb.src = '';
-                    if (deleteBtn) deleteBtn.style.display = 'none';
-                }
-            }
-
-            if (modal) {
-                modal.style.display = 'flex';
-                modal.classList.add('active');
-            }
-        };
-
-        window.closeAttachReceiptModal = function() {
-            const modal = document.getElementById('attachReceiptModal');
-            if (modal) {
-                modal.classList.remove('active');
-                modal.style.display = 'none';
-            }
-        };
-
-        window.saveAttachedReceipt = async function() {
-            const invInput = document.getElementById('attachReceiptInvNoInput');
-            const urlInput = document.getElementById('attachReceiptUrlInput');
-            
-            let targetInvNo = (invInput ? invInput.value : '').trim();
-
-            if (!targetInvNo && activeAttachItemId) {
-                targetInvNo = "INV-" + activeAttachItemId;
-            }
-
-            if (!targetInvNo) {
-                showToast("กรุณาระบุเลขที่ใบเสร็จ / ใบเสนอราคา (INV. No.)", "error");
-                return;
-            }
-
-            let finalReceiptData = pendingReceiptBase64 || (urlInput ? urlInput.value : '').trim();
-            const matchedKey = Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === targetInvNo.toLowerCase());
-            
-            if (!finalReceiptData && matchedKey) {
-                finalReceiptData = receiptsMap[matchedKey];
-            }
-
-            if (!finalReceiptData) {
-                showToast("กรุณาเลือกไฟล์ภาพถ่ายใบเสร็จ หรือวาง URL ของใบเสร็จ", "error");
-                return;
-            }
-
-            // Save to JS state
-            receiptsMap[targetInvNo] = finalReceiptData;
-            receiptsMap[targetInvNo.toLowerCase()] = finalReceiptData;
-
-            // Save to IndexedDB (Unlimited capacity)
-            await saveReceiptToDB(targetInvNo, finalReceiptData);
-
-            // Safe LocalStorage backup
-            try {
-                localStorage.setItem('camping_receipts', JSON.stringify(receiptsMap));
-            } catch(e) {
-                console.warn("LocalStorage full, saved in IndexedDB instead:", e);
-            }
-
-            // Update item.invNo if attached to an item without invNo
-            if (activeAttachItemId) {
-                const itemToUpdate = expenses.find(x => x.id === activeAttachItemId);
-                if (itemToUpdate && (!itemToUpdate.invNo || itemToUpdate.invNo.trim() !== targetInvNo)) {
-                    itemToUpdate.invNo = targetInvNo;
-                    saveToLocalStorage(expenses);
-                    
-                    try {
-                        const passcode = localStorage.getItem('edit_passcode') || '20147';
-                        await fetch("/api/expenses", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json",
-                                "Authorization": "Bearer " + passcode
-                            },
-                            body: JSON.stringify({ action: "update", expense: itemToUpdate })
-                        });
-                    } catch(e) {}
-                }
-            }
-
-            closeAttachReceiptModal();
-            renderTable();
-            showToast(`บันทึกแนบไฟล์ใบเสร็จสำหรับ ${targetInvNo} สำเร็จเรียบร้อยแล้ว!`, "success");
-
-            try {
-                const passcode = localStorage.getItem('edit_passcode') || '20147';
-                await fetch("/api/expenses", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": "Bearer " + passcode
-                    },
-                    body: JSON.stringify({
-                        action: "save-receipt",
-                        invNo: targetInvNo,
-                        receiptUrl: finalReceiptData
-                    })
-                });
-            } catch(e) {}
-        };
 
         // Load startup data
         async function initApp() {
@@ -3173,68 +2585,7 @@
             }
             updateThemeIcon();
             
-            // Attach dropzone file upload listeners
-            const dropZone = document.getElementById('receiptDropZone');
-            const fileInput = document.getElementById('receiptFileInput');
-            if (dropZone && fileInput) {
-                dropZone.onclick = () => fileInput.click();
-                fileInput.onchange = async (e) => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    try {
-                        const compressedBase64 = await compressImage(file);
-                        pendingReceiptBase64 = compressedBase64;
-                        const previewBox = document.getElementById('receiptFilePreview');
-                        const previewThumb = document.getElementById('receiptPreviewThumb');
-                        const previewName = document.getElementById('receiptFilePreviewName');
 
-                        if (previewThumb) previewThumb.src = compressedBase64;
-                        if (previewName) previewName.textContent = `ไฟล์พร้อมแนบ: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-                        if (previewBox) previewBox.style.display = 'block';
-                    } catch(err) {
-                        showToast("อ่านไฟล์รูปภาพไม่สำเร็จ: " + err.message, "error");
-                    }
-                };
-            }
-
-            // Attach global Clipboard Paste listener for receipt images (Ctrl+V / Cmd+V)
-            window.addEventListener('paste', async (e) => {
-                const attachModal = document.getElementById('attachReceiptModal');
-                const isAttachOpen = attachModal && attachModal.classList.contains('active');
-
-                const items = (e.clipboardData || e.originalEvent.clipboardData)?.items;
-                if (!items) return;
-
-                for (const item of items) {
-                    if (item.type && item.type.indexOf('image') !== -1) {
-                        e.preventDefault();
-                        const file = item.getAsFile();
-                        if (!file) continue;
-
-                        try {
-                            const compressedBase64 = await compressImage(file);
-                            pendingReceiptBase64 = compressedBase64;
-
-                            if (!isAttachOpen) {
-                                openAttachReceiptModal('');
-                            }
-
-                            const previewBox = document.getElementById('receiptFilePreview');
-                            const previewThumb = document.getElementById('receiptPreviewThumb');
-                            const previewName = document.getElementById('receiptFilePreviewName');
-
-                            if (previewThumb) previewThumb.src = compressedBase64;
-                            if (previewName) previewName.textContent = `📋 วางรูปสลิปจาก Clipboard สำเร็จ! (${(file.size / 1024).toFixed(1)} KB)`;
-                            if (previewBox) previewBox.style.display = 'block';
-
-                            showToast("วางภาพสลิปใบเสร็จจาก Clipboard เรียบร้อยแล้ว!", "success");
-                        } catch(err) {
-                            showToast("อ่านไฟล์รูปภาพจาก Clipboard ไม่สำเร็จ: " + err.message, "error");
-                        }
-                        break;
-                    }
-                }
-            });
 
             // Close modal when backdrop clicked
             document.querySelectorAll('.modal-overlay').forEach(overlay => {
@@ -3471,22 +2822,11 @@
                 tr.setAttribute('data-id', item.id);
                 tr.classList.add('clickable-row');
                 tr.addEventListener('click', (e) => {
-                    // Ignore clicks on edit/delete action buttons or receipt badges
-                    if (e.target.closest('.icon-btn') || e.target.closest('.receipt-badge')) return;
+                    if (e.target.closest('.icon-btn')) return;
                     openDetailsModal(item);
                 });
                 
                 const invText = (item.invNo || '').trim();
-                const matchedKey = invText 
-                    ? Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === invText.toLowerCase()) 
-                    : Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === ("inv-" + item.id).toLowerCase());
-                
-                const hasReceipt = Boolean(matchedKey && receiptsMap[matchedKey]);
-                const safeInvText = invText.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-
-                const receiptBadgeHtml = hasReceipt
-                    ? `<button class="receipt-badge attached" onclick="viewReceiptByInvNo('${safeInvText}', '${item.id}')" title="คลิกเพื่อดูรูปใบเสร็จแนบ">🧾 ดูใบเสร็จ</button>`
-                    : `<button class="receipt-badge add-receipt" onclick="openAttachReceiptModal('${safeInvText}', '${item.id}')" title="คลิกเพื่อแนบรูปใบเสร็จ">+ แนบใบเสร็จ</button>`;
                 
                 tr.innerHTML = `
                     <td data-label="ID" class="bold" style="color: var(--primary); font-family: var(--font-display);">${item.id || ''}</td>
@@ -3500,7 +2840,6 @@
                     <td data-label="PIC">${item.pic || ''}</td>
                     <td data-label="Invoice">
                         <div style="font-size: 12px; font-weight: 600; color: var(--text-main);">${invText || '-'}</div>
-                        ${receiptBadgeHtml}
                     </td>
                     <td data-label="Qty" class="text-right" style="white-space: nowrap;">
                         <span class="bold">${item.number || 0}</span> ${item.unit || ''} 
@@ -4202,24 +3541,8 @@
             badgesDiv.innerHTML += budgetBadge;
 
             const invText = (item.invNo || '').trim();
-            const matchedKey = invText 
-                ? Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === invText.toLowerCase()) 
-                : Object.keys(receiptsMap).find(k => k.trim().toLowerCase() === ("inv-" + item.id).toLowerCase());
-            
-            const hasReceipt = Boolean(matchedKey && receiptsMap[matchedKey]);
-            const safeInvText = invText.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-            
             const invEl = document.getElementById('detailInvNo');
-            const receiptBtnContainer = document.getElementById('detailReceiptBtnContainer');
-
             if (invEl) invEl.textContent = invText || 'ไม่ได้ระบุเลขที่บิล';
-            if (receiptBtnContainer) {
-                if (hasReceipt) {
-                    receiptBtnContainer.innerHTML = `<button class="receipt-badge attached" onclick="closeDetailsModal(); viewReceiptByInvNo('${safeInvText}', '${item.id}')">🧾 ดูรูปใบเสร็จแนบ</button>`;
-                } else {
-                    receiptBtnContainer.innerHTML = `<button class="receipt-badge add-receipt" onclick="closeDetailsModal(); openAttachReceiptModal('${safeInvText}', '${item.id}')">+ แนบรูปใบเสร็จ</button>`;
-                }
-            }
 
             document.getElementById('detailEditBtn').onclick = () => {
                 closeDetailsModal();
