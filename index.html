@@ -2123,6 +2123,74 @@
 
 
 
+        <!-- EXCEL IMPORT PREVIEW & CONFIRM MODAL -->
+        <div class="modal-overlay" id="excelPreviewModal">
+            <div class="glass-panel modal-container" style="max-width: 850px; width: 95%; max-height: 90vh; display: flex; flex-direction: column; padding: 24px;">
+                <div class="modal-header" style="margin-bottom: 12px;">
+                    <div>
+                        <h3 class="modal-title" style="color: var(--text-main); font-weight: 700;">📊 ตรวจสอบข้อมูลก่อนนำเข้า Excel (Import Preview)</h3>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;" id="excelPreviewSubtitle">
+                            โปรดตรวจสอบความถูกต้องของรายการก่อนกดยืนยันบันทึกเข้าระบบ
+                        </p>
+                    </div>
+                    <button class="modal-close" onclick="closeExcelPreviewModal()">&times;</button>
+                </div>
+
+                <!-- Summary Badges -->
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
+                    <div style="background: rgba(0, 113, 227, 0.08); border: 1px solid rgba(0, 113, 227, 0.2); border-radius: 10px; padding: 10px 14px; flex: 1; min-width: 140px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">รายการทั้งหมด</div>
+                        <div id="previewTotalCount" style="font-size: 20px; font-weight: 700; color: var(--primary); margin-top: 2px;">0 รายการ</div>
+                    </div>
+                    <div style="background: rgba(52, 199, 89, 0.08); border: 1px solid rgba(52, 199, 89, 0.2); border-radius: 10px; padding: 10px 14px; flex: 1; min-width: 140px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">เพิ่มรายการใหม่</div>
+                        <div id="previewNewCount" style="font-size: 20px; font-weight: 700; color: #34c759; margin-top: 2px;">0 รายการ</div>
+                    </div>
+                    <div style="background: rgba(255, 149, 0, 0.08); border: 1px solid rgba(255, 149, 0, 0.2); border-radius: 10px; padding: 10px 14px; flex: 1; min-width: 140px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">แก้ไขรายการเดิม (ID ตรงกัน)</div>
+                        <div id="previewUpdateCount" style="font-size: 20px; font-weight: 700; color: #ff9500; margin-top: 2px;">0 รายการ</div>
+                    </div>
+                    <div style="background: rgba(175, 82, 222, 0.08); border: 1px solid rgba(175, 82, 222, 0.2); border-radius: 10px; padding: 10px 14px; flex: 1; min-width: 140px;">
+                        <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">ยอดเงินรวมทั้งสิ้น</div>
+                        <div id="previewTotalAmount" style="font-size: 20px; font-weight: 700; color: var(--bonus); margin-top: 2px;">฿0.00</div>
+                    </div>
+                </div>
+
+                <!-- Preview Table Scroll Area -->
+                <div style="flex: 1; overflow-y: auto; overflow-x: auto; border: 1px solid var(--panel-border); border-radius: 12px; margin-bottom: 18px; max-height: 420px; background: rgba(0, 0, 0, 0.02);">
+                    <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+                        <thead style="position: sticky; top: 0; background: var(--bg-color); z-index: 2;">
+                            <tr>
+                                <th style="padding: 10px; border-bottom: 1px solid var(--panel-border);">สถานะ</th>
+                                <th style="padding: 10px; border-bottom: 1px solid var(--panel-border);">ID</th>
+                                <th style="padding: 10px; border-bottom: 1px solid var(--panel-border);">วันที่</th>
+                                <th style="padding: 10px; border-bottom: 1px solid var(--panel-border);">รายการ</th>
+                                <th style="padding: 10px; border-bottom: 1px solid var(--panel-border);">สถานที่</th>
+                                <th style="padding: 10px; border-bottom: 1px solid var(--panel-border);">ร้านค้า/ช่าง</th>
+                                <th style="padding: 10px; border-bottom: 1px solid var(--panel-border); text-align: right;">จำนวน</th>
+                                <th style="padding: 10px; border-bottom: 1px solid var(--panel-border); text-align: right;">ราคา/หน่วย</th>
+                                <th style="padding: 10px; border-bottom: 1px solid var(--panel-border); text-align: right;">รวมเงิน</th>
+                                <th style="padding: 10px; border-bottom: 1px solid var(--panel-border);">งบ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="excelPreviewTableBody">
+                            <!-- Injected rows -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        💡 รายการที่มี ID ตรงกับในฐานข้อมูลจะถูก <b style="color: #ff9500;">แก้ไขทับรายการเดิม</b> ส่วนรายการที่ไม่มี ID หรือเป็น ID ใหม่จะถูก <b style="color: #34c759;">เพิ่มใหม่</b>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" onclick="closeExcelPreviewModal()">ยกเลิก (Cancel)</button>
+                        <button class="btn btn-primary" id="confirmExcelImportBtn" onclick="confirmExcelImport()">✅ ยืนยันนำเข้าข้อมูล</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     <!-- PASSCODE CONFIRMATION MODAL -->
     <div class="modal-overlay" id="passcodeConfirmModal">
         <div class="glass-panel modal-container" style="max-width: 420px; padding: 24px;">
@@ -4303,10 +4371,8 @@
                             return;
                         }
 
-                        const success = await saveExpenseToCloud("batch-create", null, parsedExpenses);
-                        if (success) {
-                            showToast(`นำเข้าข้อมูลจาก Excel สำเร็จ ${parsedExpenses.length} รายการ!`, "success");
-                        }
+                        // Open Confirmation & Preview Modal before importing
+                        openExcelPreviewModal(parsedExpenses);
                     } catch (err) {
                         console.error("Excel parse processing failed:", err);
                         showToast("เกิดข้อผิดพลาดในการประมวลผลข้อมูล Excel: " + err.message, "error");
@@ -4322,6 +4388,108 @@
                 document.getElementById('excelFileInput').value = '';
             }
         }
+
+        // Excel Import Preview Modal State & Handlers
+        let pendingExcelExpenses = [];
+
+        window.openExcelPreviewModal = function(items) {
+            pendingExcelExpenses = items;
+            const modal = document.getElementById('excelPreviewModal');
+            const tbody = document.getElementById('excelPreviewTableBody');
+            const totalCountEl = document.getElementById('previewTotalCount');
+            const newCountEl = document.getElementById('previewNewCount');
+            const updateCountEl = document.getElementById('previewUpdateCount');
+            const totalAmountEl = document.getElementById('previewTotalAmount');
+            const confirmBtn = document.getElementById('confirmExcelImportBtn');
+
+            if (!modal || !tbody) return;
+
+            let newCount = 0;
+            let updateCount = 0;
+            let totalAmount = 0;
+
+            const rowsHtml = items.map(item => {
+                const isExisting = expenses.some(e => e.id === item.id);
+                if (isExisting) {
+                    updateCount++;
+                } else {
+                    newCount++;
+                }
+                totalAmount += (item.total || 0);
+
+                const statusBadge = isExisting
+                    ? `<span style="background: rgba(255, 149, 0, 0.15); color: #ff9500; padding: 2px 8px; border-radius: 980px; font-weight: 600; font-size: 11px; white-space: nowrap;">✏️ แก้ไขเดิม</span>`
+                    : `<span style="background: rgba(52, 199, 89, 0.15); color: #34c759; padding: 2px 8px; border-radius: 980px; font-weight: 600; font-size: 11px; white-space: nowrap;">✨ เพิ่มใหม่</span>`;
+
+                const budgetBadge = item.budget === 'Dad'
+                    ? `<span style="background: var(--dad-glow); color: var(--dad); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">Dad</span>`
+                    : `<span style="background: var(--bonus-glow); color: var(--bonus); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">Bonus</span>`;
+
+                return `
+                    <tr style="border-bottom: 1px solid var(--panel-border);">
+                        <td style="padding: 8px 10px;">${statusBadge}</td>
+                        <td style="padding: 8px 10px; font-weight: 600; font-family: var(--font-display); color: var(--primary);">${item.id}</td>
+                        <td style="padding: 8px 10px; white-space: nowrap;">${item.date || '-'}</td>
+                        <td style="padding: 8px 10px; font-weight: 600; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${item.item || ''}">${item.item || ''}</td>
+                        <td style="padding: 8px 10px; white-space: nowrap;">${item.location || '-'}</td>
+                        <td style="padding: 8px 10px; white-space: nowrap;">${item.pic || '-'}</td>
+                        <td style="padding: 8px 10px; text-align: right; white-space: nowrap;">${item.number || 0} ${item.unit || ''}</td>
+                        <td style="padding: 8px 10px; text-align: right; white-space: nowrap;">฿${Number(item.priceUnit || 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</td>
+                        <td style="padding: 8px 10px; text-align: right; font-weight: 700; white-space: nowrap;">฿${Number(item.total || 0).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</td>
+                        <td style="padding: 8px 10px; text-align: center;">${budgetBadge}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            tbody.innerHTML = rowsHtml;
+            if (totalCountEl) totalCountEl.textContent = `${items.length} รายการ`;
+            if (newCountEl) newCountEl.textContent = `${newCount} รายการ`;
+            if (updateCountEl) updateCountEl.textContent = `${updateCount} รายการ`;
+            if (totalAmountEl) totalAmountEl.textContent = '฿' + Number(totalAmount).toLocaleString('th-TH', { minimumFractionDigits: 2 });
+
+            if (confirmBtn) {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = `✅ ยืนยันนำเข้าข้อมูล (${items.length} รายการ)`;
+            }
+
+            modal.style.display = 'flex';
+            modal.classList.add('active');
+        };
+
+        window.closeExcelPreviewModal = function() {
+            const modal = document.getElementById('excelPreviewModal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            }
+            pendingExcelExpenses = [];
+        };
+
+        window.confirmExcelImport = async function() {
+            if (!pendingExcelExpenses || pendingExcelExpenses.length === 0) {
+                showToast("ไม่มีข้อมูลสำหรับนำเข้า", "warning");
+                return;
+            }
+
+            const confirmBtn = document.getElementById('confirmExcelImportBtn');
+            if (confirmBtn) {
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = "⏳ กำลังบันทึกข้อมูลเข้าระบบ...";
+            }
+
+            const itemsToSave = pendingExcelExpenses;
+            const success = await saveExpenseToCloud("batch-create", null, itemsToSave);
+            
+            if (success) {
+                closeExcelPreviewModal();
+                showToast(`นำเข้าและอัปเดตข้อมูลจาก Excel สำเร็จทั้งหมด ${itemsToSave.length} รายการ!`, "success");
+            } else {
+                if (confirmBtn) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = `✅ ยืนยันนำเข้าข้อมูล (${itemsToSave.length} รายการ)`;
+                }
+            }
+        };
 
         // Copy summary in LINE friendly format
         window.copyLineSummary = function() {
