@@ -4572,12 +4572,27 @@
             const remainingBonus = limitBonus - bonusSpent;
             const remainingTotal = limitTotal - total;
 
-            const formatVal = (v) => Number(v).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+            const formatVal = (v) => Number(v).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
-            const summaryText = `💵 ค่าใช้จ่ายลานกางเต็นท์\n` +
-                `รวมทั้งหมดที่เบิกมา: ฿${formatVal(total)}/฿${formatVal(limitTotal)} (คงเหลือ ฿${formatVal(remainingTotal)})\n` +
-                `🔵 งบโบนัส: ฿${formatVal(bonusSpent)}/฿${formatVal(limitBonus)} คงเหลือ ฿${formatVal(remainingBonus)}\n` +
-                `🟡 งบพ่อ: ฿${formatVal(dadSpent)}/฿${formatVal(limitDad)} คงเหลือ ฿${formatVal(remainingDad)}\n\n` +
+            // Helper to format remaining/over budget line
+            const getStatusLine = (remaining, isIndented = false) => {
+                const prefix = isIndented ? '   └ ' : '';
+                if (remaining < 0) {
+                    return `${prefix}🚨 เกินงบ: ฿${formatVal(Math.abs(remaining))}`;
+                } else {
+                    return `${prefix}✅ คงเหลือ: ฿${formatVal(remaining)}`;
+                }
+            };
+
+            const summaryText = `⛺ สรุปงบประมาณลานกางเต็นท์\n` +
+                `━━━━━━━━━━━━━━━━━━\n` +
+                `💰 ยอดใช้จ่ายรวม: ฿${formatVal(total)} / ฿${formatVal(limitTotal)}\n` +
+                `${getStatusLine(remainingTotal, false)}\n\n` +
+                `🔵 งบโบนัส: ฿${formatVal(bonusSpent)} / ฿${formatVal(limitBonus)}\n` +
+                `${getStatusLine(remainingBonus, true)}\n\n` +
+                `🟡 งบพ่อ: ฿${formatVal(dadSpent)} / ฿${formatVal(limitDad)}\n` +
+                `${getStatusLine(remainingDad, true)}\n\n` +
+                `━━━━━━━━━━━━━━━━━━\n` +
                 `แยกตามงานแต่ละส่วน:\n` +
                 locsText.trim();
 
